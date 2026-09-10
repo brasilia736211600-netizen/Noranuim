@@ -1,0 +1,2 @@
+- Improve drag and drop animation
+- Prevent blank screen crash after open/close tabs a few times

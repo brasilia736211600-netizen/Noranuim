@@ -1,0 +1,6 @@
+- Improve empty pane and tab switcher styles
+- Add recently closed menu
+- Support Ctrl/Cmd + T to open new tab
+- Support injecting cookie and editing URL
+- Support dark/light theme
+- Support downloading TikTok video

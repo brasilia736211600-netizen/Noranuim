@@ -1,0 +1,89 @@
+import { observable } from '@legendapp/state'
+
+interface Store {
+  urlModalMode: 'open' | 'editTab'
+  urlModalTargetTabId: string | null
+  url: string
+  title: string
+
+  // header
+  headerHeight: number
+  headerShown: boolean
+
+  // modals
+  bookmarkModalOpen: boolean
+  cookieModalOpen: boolean
+  downloadVideoModalUrl: string
+  navModalOpen: boolean
+  profileLinkUrl: string
+  autoProfilesModalOpen: boolean
+  profileModalOpen: boolean
+  editingProfileId: string | null
+  createdProfileId: string | null
+  lastSelectedProfileId: string
+  renameGroupModalTargetGroupId: string | null
+  renameViewModalTargetViewId: string | null
+  settingsModalOpen: boolean
+  tabModalOpen: boolean
+  toolsModalOpen: boolean
+  zoomModalOpen: boolean
+  urlModalOpen: boolean
+  userStyleModalOpen: boolean
+  editingUserStyleId: string | null
+  userScriptModalOpen: boolean
+  editingUserScriptId: string | null
+  previewBuiltinId: string | null
+
+  // webview
+  activeCanGoBack: boolean
+  webview: any
+  hoverLinkUrl: string
+  translation: {
+    id: string
+    text: string
+    targetLanguage: string
+    x: number
+    y: number
+  } | null
+}
+
+export const ui$ = observable<Store>({
+  urlModalMode: 'open',
+  urlModalTargetTabId: null,
+  url: '',
+  title: '',
+
+  // header
+  headerHeight: 0,
+  headerShown: true,
+
+  // modals
+  bookmarkModalOpen: false,
+  cookieModalOpen: false,
+  downloadVideoModalUrl: '',
+  navModalOpen: false,
+  profileLinkUrl: '',
+  autoProfilesModalOpen: false,
+  profileModalOpen: false,
+  editingProfileId: null,
+  createdProfileId: null,
+  renameGroupModalTargetGroupId: null,
+  renameViewModalTargetViewId: null,
+  settingsModalOpen: false,
+  tabModalOpen: false,
+  toolsModalOpen: false,
+  zoomModalOpen: false,
+  urlModalOpen: false,
+  userStyleModalOpen: false,
+  editingUserStyleId: null,
+  userScriptModalOpen: false,
+  editingUserScriptId: null,
+  previewBuiltinId: null,
+  lastSelectedProfileId: 'default',
+
+  // webview
+  activeCanGoBack: false,
+  webview: undefined,
+  hoverLinkUrl: '',
+  translation: null,
+})

@@ -1,0 +1,510 @@
+{
+  "about": {
+    "label": "关于",
+    "code": "源代码",
+    "donate": "捐赠",
+    "hint": "版本信息、源代码和支持链接。"
+  },
+  "bookmarks": {
+    "label": "书签"
+  },
+  "buttons": {
+    "cancel": "取消",
+    "closeAll": "全部关闭",
+    "download": "下载",
+    "openUrl": "打开网址",
+    "open": "打开",
+    "confirm": "确认",
+    "continue": "继续",
+    "save": "保存",
+    "restoreTabs": "最近关闭的标签页",
+    "toggleSidebar": "切换侧边栏",
+    "reopenLastClosedTab": "重新打开上次关闭的标签页"
+  },
+  "menus": {
+    "close": "关闭",
+    "delete": "删除",
+    "desktopOff": "关",
+    "addBookmark": "添加书签",
+    "pin": "固定到新标签页",
+    "reload": "重新加载",
+    "scroll": "滚动到顶部",
+    "share": "分享",
+    "tools": "工具",
+    "desktop": "桌面版网站",
+    "desktopOn": "开",
+    "signOut": "退出登录",
+    "duplicate": "复制标签页",
+    "editUrl": "编辑标签页网址",
+    "viewInSplitView": "在分屏视图中查看",
+    "more": "更多",
+    "openInProfile": "在配置文件中打开",
+    "clearSiteData": "清除网站数据",
+    "clearSiteDataConfirm": "清除“{{host}}”的所有 Cookie 和网站数据？这会让您退出登录此网站。",
+    "pause": "暂停标签页",
+    "resume": "恢复标签页",
+    "zoom": "缩放",
+    "blockAds": "屏蔽此网站上的广告",
+    "addToHomeScreen": "添加到主屏幕"
+  },
+  "modals": {
+    "downloadVideo": "下载视频",
+    "downloadOnCobalt": "在 cobalt.tools 下载视频",
+    "downloadTab": "下载",
+    "cookiesTab": "网站数据",
+    "exportCookies": "导出当前网站 Cookie",
+    "exportCookiesHint": "将当前网站的 Cookie 保存为 cookies.txt 文件。",
+    "exportCookiesButton": "导出 cookies.txt",
+    "clearSiteDataHint": "清除当前网站及其配置文件的 Cookie 和浏览数据。"
+  },
+  "native": {
+    "menu_saveImage": "保存图片",
+    "menu_copyImageLink": "复制图片链接",
+    "menu_copyLink": "复制链接",
+    "toast_downloadStarted": "下载已开始，请查看系统消息",
+    "toast_downloadSucceeded": "已保存到下载文件夹",
+    "toast_downloadFailed": "无法下载",
+    "httpBlocked_title": "HTTP 网站被屏蔽",
+    "httpBlocked_body": "此网站使用不安全的 HTTP 连接。要允许加载 HTTP 网站，请在“设置”中启用“允许 HTTP 网站”。",
+    "menu_openInNewTab": "在新标签页中打开",
+    "menu_openImageInNewTab": "在新标签页中打开图片",
+    "menu_openInProfile": "在配置文件中打开"
+  },
+  "settings": {
+    "label": "设置",
+    "openExternalLink": "在系统浏览器中打开外部链接",
+    "hideHeader": "随滚动方向隐藏和显示工具栏",
+    "headerPosition": {
+      "label": "工具栏位置",
+      "top": "顶部",
+      "bottom": "底部"
+    },
+    "showNewTabButton": "显示新标签页按钮",
+    "showBackButton": "显示后退按钮",
+    "showScrollButton": "显示滚动到顶部按钮",
+    "oneHandMode": "单手模式",
+    "theme": {
+      "label": "主题",
+      "system": "系统",
+      "dark": "深色",
+      "light": "浅色",
+      "hint": "应用和 WebView 主题。如果页面未立即更新，请重新加载标签页。"
+    },
+    "injectCookie": "注入 Cookie",
+    "redirectToOldReddit": "重定向到旧版 Reddit",
+    "allowHttpWebsite": "允许 HTTP 网站",
+    "inspectable": "使 WebView 可检查",
+    "showForwardButton": "显示前进按钮",
+    "oneTabPerSite": "打开共享链接时每个网站仅打开一个标签页",
+    "services": {
+      "title": "内置服务",
+      "description": "管理内置服务。"
+    },
+    "videoEdgeLongPressTo2x": "长按边缘即可 2 倍速播放",
+    "doubleBackToExitApp": "点按两次返回即可退出应用",
+    "hideToolbarWhenScrolled": "页面不在顶部时隐藏工具栏",
+    "xHomeTimeline": {
+      "label": "默认首页时间线",
+      "forYou": "为你推荐",
+      "following": "关注"
+    },
+    "sections": {
+      "general": "常规",
+      "accounts": "账号和数据",
+      "bookmarksSearch": "书签和搜索",
+      "advanced": "高级",
+      "about": "关于",
+      "notifications": "通知"
+    },
+    "pages": {
+      "browsing": "偏好设置",
+      "appearance": "外观",
+      "services": "服务",
+      "profiles": "配置文件和会话",
+      "bookmarks": "书签",
+      "search": "搜索",
+      "backup": "备份"
+    },
+    "browsing": {
+      "descriptionNative": "功能开关。",
+      "descriptionWeb": "网络屏蔽和高级浏览控制。",
+      "features": "功能"
+    },
+    "appearance": {
+      "description": "主题和工具栏设置。",
+      "theme": "主题",
+      "toolbar": "工具栏",
+      "deckTabWidth": "卡片标签页宽度",
+      "deckTabWidthHint": "当前：{{value}}px",
+      "desktopLayout": "桌面布局",
+      "desktopLayoutHint": "在大屏幕上显示标签页分组和卡片/分屏/网格视图，类似于桌面模式。",
+      "desktopLayoutAuto": "自动",
+      "desktopLayoutOn": "始终",
+      "desktopLayoutOff": "从不"
+    },
+    "profiles": {
+      "description": "支持多账号，各自拥有独立的 Cookie 和浏览状态。",
+      "injectCookie": "注入 Cookie",
+      "injectCookieHint": "粘贴来自其他浏览器的 Cookie 标头，以手动恢复会话。",
+      "sessionMode": "会话模式"
+    },
+    "bookmarks": {
+      "description": "管理已固定的网站。",
+      "saved": "已保存书签",
+      "empty": "尚无书签。"
+    },
+    "search": {
+      "description": "管理搜索提供商。",
+      "builtin": "内置搜索提供商",
+      "builtinHint": "启用要在新标签页搜索菜单中显示的提供商。",
+      "custom": "自定义搜索提供商",
+      "empty": "尚无自定义搜索提供商。",
+      "urlHint": "始终支持直接输入网址。",
+      "addTitle": "添加自定义搜索",
+      "editTitle": "编辑自定义搜索",
+      "addAction": "添加搜索",
+      "templateHint": "在需要插入查询的位置使用 `%s`。",
+      "fields": {
+        "name": "名称",
+        "namePlaceholder": "示例搜索",
+        "template": "搜索网址模板",
+        "templatePlaceholder": "https://example.com/search?q=%s"
+      },
+      "validation": {
+        "name": "添加搜索提供商名称",
+        "template": "请使用包含 `%s` 的有效 http(s) 模板网址",
+        "duplicateName": "具有此名称的自定义搜索提供商已存在"
+      },
+      "deleteConfirm": "确定要删除此自定义搜索吗？"
+    },
+    "userStyles": {
+      "label": "用户样式和脚本",
+      "hint": "切换内置 CSS 调整并添加您自己的基于主机的样式和脚本。",
+      "customHint": "使用 CSS 或 JavaScript 自定义任何网站。",
+      "copyCss": "复制 CSS",
+      "cssCopied": "CSS 已复制",
+      "copyFailed": "无法复制 CSS",
+      "importCss": "导入 CSS",
+      "importFailed": "无法导入 CSS",
+      "add": "添加样式",
+      "addTitle": "添加自定义样式",
+      "editTitle": "编辑自定义样式",
+      "deleteConfirm": "确定要删除此自定义样式吗？",
+      "nameLabel": "名称",
+      "namePlaceholder": "样式名称",
+      "custom": {
+        "label": "自定义样式",
+        "empty": "尚无自定义样式。添加一个以在匹配的主机上注入您自己的 CSS。"
+      },
+      "hostGlobs": {
+        "label": "主机通配符",
+        "placeholder": "*.reddit.com, x.com（英文逗号分隔）"
+      },
+      "validation": {
+        "hostGlobs": "请至少添加一个有效的主机通配符",
+        "css": "请在保存前添加 CSS"
+      },
+      "builtin": {
+        "label": "内置样式",
+        "hideRedditGame": {
+          "label": "隐藏 Reddit 游戏帖子"
+        },
+        "compactTiktokLayout": {
+          "label": "使用紧凑型 TikTok 布局"
+        },
+        "hideXBottomNav": {
+          "label": "滚动时隐藏 X 底部导航栏"
+        },
+        "hideXHomeTabs": {
+          "label": "隐藏 X 首页时间线标签页"
+        },
+        "hideFacebookFeed": {
+          "label": "隐藏 Facebook 订阅源"
+        }
+      },
+      "preview": "预览",
+      "previewApplied": "预览已应用",
+      "noActiveTab": "无活动标签页",
+      "scripts": {
+        "label": "自定义脚本",
+        "add": "添加脚本",
+        "addTitle": "添加自定义脚本",
+        "editTitle": "编辑自定义脚本",
+        "deleteConfirm": "确定要删除此自定义脚本吗？",
+        "empty": "尚无自定义脚本。添加一个以在匹配的主机上运行您自己的 JavaScript。",
+        "namePlaceholder": "脚本名称",
+        "import": "导入",
+        "importFailed": "无法导入脚本",
+        "run": "运行",
+        "runComplete": "脚本已运行",
+        "runFailed": "脚本运行失败",
+        "validation": {
+          "js": "请在保存前添加 JavaScript"
+        },
+        "pinToHeader": "固定到工具栏",
+        "pinToHeaderHint": "在匹配的网站上将此脚本显示为工具栏操作。",
+        "pinnedScripts": "已固定脚本"
+      }
+    },
+    "showReloadButton": "显示重新加载按钮",
+    "language": {
+      "label": "语言",
+      "system": "系统",
+      "hint": "选择一种语言或使用系统语言。"
+    },
+    "mentionNotifications": "社交通知",
+    "mentionNotificationsHint": "由于操作系统后台限制，通知送达可能会延迟且无法保证。",
+    "oneProfilePerSite": "每个网站一个配置文件",
+    "oneProfilePerSiteHint": "为每个网站使用独立的自动会话。从某个网站打开的链接将保留该网站的配置文件。",
+    "enterInsertsNewline": "Enter 插入新行（Shift+Enter）",
+    "zoom": {
+      "label": "页面缩放",
+      "defaultLabel": "默认缩放",
+      "defaultHint": "为所有网页设置默认缩放级别。",
+      "siteZoomLabel": "按网站缩放",
+      "usingDefault": "使用默认缩放"
+    },
+    "proxy": {
+      "label": "代理",
+      "enabled": "启用代理",
+      "type": "代理类型",
+      "host": "代理主机",
+      "port": "代理端口",
+      "hostPlaceholder": "例如：127.0.0.1 或 proxy.example.com",
+      "portPlaceholder": "例如：1080"
+    },
+    "translation": {
+      "enable": "点按两次文本翻译",
+      "hint": "点按两次帖子、评论或段落即可在您的设备上进行翻译。",
+      "targetLanguage": "翻译为",
+      "appLanguage": "应用",
+      "systemLanguage": "系统",
+      "notSelected": "选择语言",
+      "chooseLanguage": "请先选择翻译语言",
+      "loading": "正在翻译…",
+      "copy": "复制翻译",
+      "copySource": "复制原文",
+      "pin": "固定翻译",
+      "unpin": "取消固定翻译",
+      "failed": "无法翻译此文本",
+      "unsupported": "此设备上不支持此语言对"
+    },
+    "doubleTapToToggleHeader": "点按两次页面即可隐藏或显示工具栏",
+    "backup": {
+      "description": "导出或恢复设置、书签和用户样式。",
+      "export": "导出设置",
+      "exportDescription": "将设置、书签、用户样式和自定义脚本保存为 JSON 文件",
+      "exportFailed": "导出失败：{{message}}",
+      "import": "导入设置",
+      "importDescription": "从 Nora 设置文件中恢复设置",
+      "importConfirm": "这将替换您当前的设置、书签、用户样式和自定义脚本。继续？",
+      "importWithScriptsConfirm": "此文件包含 {{count}} 个已启用的自定义脚本，这些脚本可以在网站内运行代码。请仅在您信任此文件时继续操作。您当前的设置、书签、用户样式和自定义脚本将被替换。",
+      "importDone": "已导入：{{sections}}",
+      "importFailed": "导入失败：{{message}}"
+    },
+    "webrtc": {
+      "label": "WebRTC",
+      "protectIp": "防止 WebRTC IP 泄漏",
+      "protectIpHint": "阻止网页通过 WebRTC 发现您的真实 IP 地址，WebRTC 会绕过代理和 VPN。使用中继服务器的通话仍可正常工作；如果视频或语音通话无法连接，请关闭此功能。此设置将在下次页面加载时生效。"
+    },
+    "pullToRefresh": "下拉以重新加载页面"
+  },
+  "tabs": {
+    "new": "新标签页",
+    "recentlyClosed": "最近关闭",
+    "noRecentlyClosed": "没有最近关闭的标签页",
+    "paused": "标签页已暂停",
+    "pausedHint": "其内容已被卸载以节省资源。",
+    "resume": "恢复",
+    "removeFromHistory": "从历史记录中移除",
+    "clearRecentlyClosed": "清除历史记录"
+  },
+  "toast": {
+    "pinned": "已固定到新标签页页面",
+    "blocklistUpdated": "屏蔽列表已更新",
+    "pressBackAgainToExit": "再次按返回退出",
+    "profileDataClearFailed": "无法清除配置文件数据",
+    "profileDataCleared": "配置文件数据已清除",
+    "siteDataClearFailed": "无法清除网站数据",
+    "siteDataCleared": "网站数据已清除",
+    "cookieExported": "已导出 cookies.txt",
+    "cookieExportEmpty": "未找到此网站的 Cookie",
+    "cookieExportFailed": "无法导出 cookies.txt",
+    "cookieExportOpenPage": "导出 Cookie 前请先打开页面",
+    "profileCookieExported": "已导出配置文件 cookies.txt",
+    "profileCookieExportEmpty": "此配置文件中未找到 Cookie",
+    "profileCookieExportFailed": "无法导出配置文件 cookies.txt",
+    "addToHomeScreenFailed": "此启动器不支持主屏幕快捷方式"
+  },
+  "profiles": {
+    "label": "配置文件",
+    "add": "添加",
+    "edit": "编辑",
+    "save": "保存",
+    "namePlaceholder": "配置文件名称",
+    "auto": "自动",
+    "autoProfiles": "自动配置文件",
+    "autoProfilesEmpty": "尚无自动配置文件。",
+    "openLinkInProfile": "在配置文件中打开链接",
+    "autoProfileLastUsed": "上次使用：{{value}}",
+    "autoProfileLastUsedLabel": "上次使用",
+    "manageAutoProfiles": "管理自动配置文件（{{count}}）",
+    "deleteAutoProfileConfirm": "删除 {{site}} 的自动配置文件？这将清除其存储的浏览数据并关闭使用该配置文件的标签页。",
+    "deleteAllAutoProfiles": "全部删除",
+    "deleteAllAutoProfilesConfirm": "删除所有 {{count}} 个自动配置文件？这将清除它们存储的浏览数据并关闭使用这些配置文件的标签页。",
+    "deleteStaleAutoProfiles": "删除 14 天内未使用的",
+    "deleteStaleAutoProfilesConfirm": "删除过去 14 天内未使用的 {{count}} 个自动配置文件？这将清除它们存储的浏览数据并关闭使用这些配置文件的标签页。",
+    "clearData": "清除数据",
+    "clearDataConfirm": "清除“{{name}}”的所有浏览数据？这将使您退出登录并关闭使用此配置文件的标签页。",
+    "deleteConfirm": "删除“{{name}}”？这将清除其存储的浏览数据，并关闭使用此配置文件的标签页。",
+    "exportCookies": "导出配置文件 Cookie",
+    "exportCookiesConfirm": "导出“{{name}}”的所有 Cookie？该文件可能包含此配置文件中所有网站的登录会话。请妥善保管。"
+  },
+  "sync": {
+    "label": "同步",
+    "hint": "书签和设置跨设备同步。",
+    "currentPlan": "当前套餐",
+    "managePlan": "管理套餐",
+    "privacyPolicy": "隐私政策",
+    "signOutSwitch": "退出登录并切换账号",
+    "upgradeHint": "升级即可跨设备同步书签和设置。",
+    "buy": "通过 App Store 订阅",
+    "restore": "恢复购买",
+    "manageIos": "在 App Store 中管理",
+    "purchaseTitle": "绑定订阅",
+    "purchaseConfirm": "此订阅将与 {{email}} 关联，登录此 Nora 账号即可在任意设备解锁同步功能。",
+    "priceLoading": "正在加载 App Store 价格…",
+    "activeViaIos": "通过 App Store 激活",
+    "freePlan": "免费",
+    "purchasePending": "购买待批准。",
+    "restoreConflict": "此 App Store 订阅已与 {{email}} 关联。",
+    "signedInAs": "已登录为 {{email}}",
+    "productUnavailable": "此 App Store 产品尚未推出。",
+    "expiresAt": "续订或到期时间：{{value}}",
+    "legalNotice": "订阅会自动续订，除非取消。订阅即表示您同意使用条款（最终用户许可协议）和隐私政策。",
+    "termsOfUse": "使用条款（最终用户许可协议）",
+    "deleteAccount": "删除账号",
+    "signInRequired": "登录以继续。"
+  },
+  "changelog": {
+    "label": "更新日志",
+    "hint": "GitHub 上的最新版本和修复。",
+    "loading": "正在加载发行说明…",
+    "error": "无法加载发行说明。",
+    "retry": "重试",
+    "empty": "未找到发行说明。",
+    "current": "当前",
+    "noNotes": "此版本未提供发行说明。"
+  },
+  "common": {
+    "about": "关于",
+    "edit": "编辑",
+    "off": "已关闭",
+    "on": "已开启",
+    "reset": "重置",
+    "save": "保存",
+    "theme": "主题"
+  },
+  "views": {
+    "rename": "重命名视图",
+    "namePlaceholder": "视图名称",
+    "desktop": {
+      "blankTab": "空白标签页",
+      "newBlankTab": "新空白标签页",
+      "newGridView": "新网格视图",
+      "newSplitView": "新分屏视图",
+      "chooseTabToAdd": "选择要添加到 {{layout}} 的标签页",
+      "createBlankTabInSlot": "在此位置创建一个新的空白标签页",
+      "layout": {
+        "split": "分屏视图",
+        "grid": "网格视图",
+        "gridFour": "四标签页网格",
+        "deck": "卡片视图"
+      },
+      "deck": "卡片",
+      "groupNamePlaceholder": "分组名称",
+      "newGroupFromTab": "从标签页新建分组",
+      "renameGroup": "重命名分组",
+      "tabCount": "{{count}} 个标签页",
+      "tabCount_plural": "{{count}} 个标签页",
+      "ungrouped": "未分组",
+      "newDeckView": "新卡片视图",
+      "closeGroup": "关闭分组和标签页",
+      "ungroup": "取消分组",
+      "newGroup": "新建分组",
+      "moveToGroup": "移动到 {{name}}",
+      "moveToUngrouped": "移出分组"
+    }
+  },
+  "blocklist": {
+    "label": "网络屏蔽列表",
+    "description": "使用 EasyList 和 EasyPrivacy 主机规则屏蔽广告和追踪器。",
+    "enable": "启用网络屏蔽列表",
+    "statusFetching": "正在获取屏蔽列表",
+    "lastUpdated": "上次更新：{{value}}",
+    "refreshNow": "更新屏蔽列表"
+  },
+  "newTab": {
+    "search": {
+      "urlPlaceholder": "输入网址",
+      "searchPlaceholder": "搜索网络"
+    },
+    "presets": {
+      "open": "添加预设书签",
+      "title": "预设书签"
+    }
+  },
+  "usageLimits": {
+    "label": "使用限制",
+    "description": "为选定服务或整个应用设置每日时间限制。",
+    "limits": "限制",
+    "empty": "尚未设置使用限制。",
+    "usageLine": "今日：{{used}} / {{limit}}",
+    "deleteConfirm": "删除此使用限制？",
+    "scope": {
+      "all": "整个应用",
+      "none": "未选择任何服务"
+    },
+    "editor": {
+      "addTitle": "添加使用限制",
+      "editTitle": "编辑使用限制",
+      "name": "名称",
+      "namePlaceholder": "例如：社交媒体",
+      "defaultName": "限制",
+      "dailyLimit": "每日限制",
+      "hours": "小时",
+      "minutes": "分钟",
+      "scope": "应用于",
+      "add": "添加",
+      "errorMinutes": "请设置至少 1 分钟的每日限制",
+      "errorScope": "请至少选择一项服务或应用于整个应用"
+    },
+    "pin": {
+      "label": "PIN",
+      "hint": "管理限制及达到限制时解锁均需输入 PIN 码。本地时间午夜重置。",
+      "set": "PIN 码已设置",
+      "notSet": "未设置 PIN 码",
+      "setAction": "设置 PIN 码",
+      "change": "更改",
+      "remove": "移除",
+      "currentPlaceholder": "当前 PIN 码",
+      "newPlaceholder": "新 PIN 码",
+      "confirmPlaceholder": "确认新 PIN 码",
+      "errorEmpty": "PIN 码不能为空",
+      "errorMismatch": "PIN 码不匹配",
+      "errorIncorrect": "PIN 码错误",
+      "requiredFirst": "请先设置 PIN 码",
+      "confirmEdit": "输入 PIN 码以编辑",
+      "confirmDelete": "输入 PIN 码以删除"
+    },
+    "lockout": {
+      "title": "今日时长已用完",
+      "body": "您在 {{name}} 的每日限制为 {{limit}}，已使用 {{used}}。",
+      "pinPlaceholder": "输入 PIN 码以解锁",
+      "pinIncorrect": "PIN 码错误",
+      "unlock": "今日解锁",
+      "noPinHint": "在“设置”→“使用限制”中设置 PIN 码以提前解锁。"
+    },
+    "emptyHint": "添加限制以开始跟踪每日浏览时间。"
+  }
+}

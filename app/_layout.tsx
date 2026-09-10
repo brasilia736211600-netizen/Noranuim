@@ -1,0 +1,41 @@
+import '@/lib/i18n'
+import '@/lib/mention-notifications'
+import './global.css'
+
+import { StatusBar } from 'expo-status-bar'
+import { Appearance, View, useColorScheme } from 'react-native'
+import { useObserveEffect } from '@legendapp/state/react'
+import { Slot } from 'expo-router';
+import { AppObserver } from '@/components/AppObserver';
+import { FloatingSwitcher } from '@/components/FloatingSwitcher'
+import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context'
+import { settings$ } from '@/states/settings'
+
+function RootLayoutContent() {
+  useObserveEffect(settings$.theme, ({ value }) => {
+    Appearance.setColorScheme(value ?? 'unspecified')
+  })
+
+  const insets = useSafeAreaInsets()
+  const colorScheme = useColorScheme()
+  const isDark = colorScheme !== 'light'
+
+  return (
+    <>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <View className={isDark ? 'bg-zinc-800' : 'bg-zinc-100'} style={{ height: insets.top, zIndex: 10 }} />
+      <Slot />
+      <AppObserver />
+      <FloatingSwitcher />
+      <View className={isDark ? 'bg-zinc-800' : 'bg-zinc-100'} style={{ height: insets.bottom }} />
+    </>
+  )
+}
+
+export default function RootLayout() {
+  return (
+    <SafeAreaProvider>
+      <RootLayoutContent />
+    </SafeAreaProvider>
+  )
+}

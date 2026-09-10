@@ -1,0 +1,3 @@
+<h2>Recursos</h2><ul><li>Múltiplas contas com armazenamento de cookies separado</li><li>Lista de bloqueio (EasyList e EasyPrivacy)</li><li>Baixar imagem</li><li>Baixar reel do fb/ig</li><li>Selecionar texto</li><li>Zoom</li><li>Remover parâmetros de rastreamento de URL</li></ul>
+<h2>Redes sociais suportadas</h2><ul><li>Bluesky</li><li>Facebook</li><li>Instagram</li><li>LinkedIn</li><li>Reddit</li><li>Threads</li><li>TikTok</li><li>Tumblr</li><li>VK</li><li>X (Twitter)</li></ul>
+<h2>Como funciona</h2><ul><li>Envolve os sites das redes sociais no webview do Android</li><li>Injeta código para bloquear anúncios</li></ul>

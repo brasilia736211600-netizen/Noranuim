@@ -1,0 +1,6 @@
+- Add in-app language setting
+- Re-organize settings page
+- Support light mode
+- Support double back to exit app
+- Add setting to hide toolbar when scrolling
+- Support downloading TikTok video

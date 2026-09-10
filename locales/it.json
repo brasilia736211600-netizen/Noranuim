@@ -1,0 +1,481 @@
+{
+  "about": {
+    "label": "Info",
+    "code": "Codice sorgente",
+    "donate": "Dona",
+    "hint": "Info versione, codice sorgente e link assistenza."
+  },
+  "bookmarks": {
+    "label": "Segnalibri"
+  },
+  "buttons": {
+    "cancel": "Annulla",
+    "closeAll": "Chiudi Tutto",
+    "download": "Scarica",
+    "openUrl": "Apri URL",
+    "open": "Apri",
+    "confirm": "Conferma",
+    "continue": "Continua",
+    "save": "Salva",
+    "reopenLastClosedTab": "Riapri ultima scheda chiusa",
+    "restoreTabs": "Screde chiuse di recente",
+    "toggleSidebar": "Attiva/disattiva barra laterale"
+  },
+  "menus": {
+    "close": "Chiudi",
+    "delete": "Cancella",
+    "desktop": "Sito desktop",
+    "desktopOn": "Sì",
+    "desktopOff": "No",
+    "addBookmark": "Aggiungi segnalibro",
+    "pin": "Aggiungi alla pagina nuova scheda",
+    "reload": "Ricarica",
+    "scroll": "Torna all'inizio",
+    "share": "Condividi",
+    "signOut": "Disconnetti",
+    "tools": "Strumenti",
+    "editUrl": "Modifica URL della scheda",
+    "duplicate": "Scheda duplicata",
+    "viewInSplitView": "Visualizza in modalità schermo diviso",
+    "openInProfile": "Apri nel profilo",
+    "more": "Altro",
+    "clearSiteData": "Cancella dati del sito",
+    "clearSiteDataConfirm": "Vuoi cancellare tutti i cookie e i dati del sito “{{host}}”? In questo modo verrai disconnesso da questo sito.",
+    "pause": "Scheda Pausa",
+    "resume": "Scheda Ripresa",
+    "zoom": "Zoom"
+  },
+  "modals": {
+    "downloadVideo": "Scarica video",
+    "downloadOnCobalt": "Scarica il video su cobalt.tools",
+    "downloadTab": "Scarica",
+    "cookiesTab": "Dati sito",
+    "exportCookies": "Esporta i cookie dell'attuale sito",
+    "exportCookiesHint": "Salva i cookie dell'attuale sito sul file cookies.txt.",
+    "exportCookiesButton": "Esporta il file cookies.txt",
+    "clearSiteDataHint": "Elimina i cookie e i dati di navigazione relativi al sito e al profilo attuale."
+  },
+  "native": {
+    "menu_saveImage": "Salva immagine",
+    "menu_copyImageLink": "Copia collegamento immagine",
+    "menu_copyLink": "Copia collegamento",
+    "toast_downloadStarted": "Download avviato, controlla le notifiche",
+    "toast_downloadSucceeded": "Salvato nella cartella Download",
+    "toast_downloadFailed": "Download non riuscito",
+    "httpBlocked_title": "Sito web HTTP bloccato",
+    "httpBlocked_body": "Questo sito web utilizza una connessione HTTP non sicura. Per consentire il caricamento dei siti web HTTP, abilita l'opzione \"Consenti siti web HTTP\" nelle Impostazioni.",
+    "menu_openInNewTab": "Apri in nuova scheda",
+    "menu_openImageInNewTab": "Apri immagine in nuova scheda",
+    "menu_openInProfile": "Apri nel profilo"
+  },
+  "settings": {
+    "label": "Impostazioni",
+    "openExternalLink": "Apri collegamento esterno nel browser predefinito",
+    "hideHeader": "Nascondi o mostra barra strumenti in base a direzione di scorrimento",
+    "headerPosition": {
+      "label": "Posizione della toolbar",
+      "top": "In alto",
+      "bottom": "In basso"
+    },
+    "showNewTabButton": "Mostra pulsante nuova scheda",
+    "showBackButton": "Mostra pulsante indietro",
+    "showScrollButton": "Mostra pulsante Torna all'inizio",
+    "oneHandMode": "Modalità ad una mano",
+    "theme": {
+      "label": "Tema",
+      "system": "Sistema",
+      "dark": "Scuro",
+      "light": "Chiaro",
+      "hint": "Tema dell'app e della WebView. Se una pagina non si aggiorna immediatamente, ricaricare la scheda."
+    },
+    "injectCookie": "Inietta cookie",
+    "redirectToOldReddit": "Reindirizza su Old Reddit",
+    "services": {
+      "title": "Servizi integrati",
+      "description": "Gestisci servizi integrati."
+    },
+    "allowHttpWebsite": "Consenti siti web HTTP",
+    "inspectable": "Rendere WebView ispezionabile",
+    "oneTabPerSite": "Apri collegamento in scheda separata",
+    "videoEdgeLongPressTo2x": "Premi a lungo sul bordo per riprodurre a 2x",
+    "showForwardButton": "Mostra pulsante Avanti",
+    "showReloadButton": "Mostra pulsante Ricarica",
+    "xHomeTimeline": {
+      "label": "Cronologia iniziale predefinita",
+      "forYou": "Per te",
+      "following": "Seguiti"
+    },
+    "sections": {
+      "experience": "Esperienza",
+      "accounts": "Account e Dati",
+      "advanced": "Avanzato",
+      "about": "Informazioni",
+      "general": "Generale",
+      "bookmarksSearch": "Segnalibri e Ricerca",
+      "notifications": "Notifiche"
+    },
+    "pages": {
+      "browsing": "Preferenze",
+      "appearance": "Aspetto",
+      "profiles": "Profili e Sessioni",
+      "bookmarks": "Segnalibri",
+      "search": "Cerca",
+      "services": "Servizi"
+    },
+    "browsing": {
+      "descriptionNative": "Attivazione/disattivazione funzionalità.",
+      "descriptionWeb": "Blocco di rete e controlli avanzati navigazione.",
+      "features": "Caratteristiche"
+    },
+    "appearance": {
+      "description": "Impostazioni tema e barra strumenti.",
+      "theme": "Tema",
+      "toolbar": "Barra degli strumenti",
+      "deckTabWidth": "Larghezza gruppo scheda",
+      "deckTabWidthHint": "Attuale: {{value}}px"
+    },
+    "profiles": {
+      "description": "Account multipli con cookie e dati di navigazione separati.",
+      "injectCookie": "Inietta Cookie",
+      "injectCookieHint": "Incolla un Cookie header da un altro browser per ripristinare manualmente una sessione.",
+      "sessionMode": "Modalità sessione"
+    },
+    "bookmarks": {
+      "description": "Gestisci i siti web aggiunti ai preferiti.",
+      "builtin": "Servizi Integrati",
+      "saved": "Segnalibri Salvati",
+      "empty": "Non ci sono ancora segnalibri."
+    },
+    "search": {
+      "description": "Gestisci i motori di ricerca.",
+      "builtin": "Fornitori di Ricerca Integrati",
+      "builtinHint": "Seleziona i fornitori che desideri visualizzare nel menu di ricerca della nuova scheda.",
+      "custom": "Fornitori di Ricerca Personalizzati",
+      "empty": "Non ci sono ancora fornitori di ricerca personalizzati.",
+      "urlHint": "Sempre disponibile per l'inserimento diretto dell'URL.",
+      "addTitle": "Aggiungi Ricerca Personalizzata",
+      "editTitle": "Moifica Ricerca Personalizzata",
+      "addAction": "Aggiungi Ricerca",
+      "templateHint": "Inserisci `%s` nel punto in cui deve essere inserita la query.",
+      "fields": {
+        "name": "Nome",
+        "namePlaceholder": "Ricerca di Esempio",
+        "template": "Modello URL di Ricerca",
+        "templatePlaceholder": "https://example.com/search?q=%s"
+      },
+      "validation": {
+        "name": "Aggiungi nome di un fornitore di ricerca",
+        "template": "Utilizza un valido modello di URL http(s) contenente `%s`",
+        "duplicateName": "Esiste già un fornitore di ricerca personalizzato con questo nome"
+      },
+      "deleteConfirm": "Sei sicuro di voler eliminare questa ricerca personalizzata?"
+    },
+    "userStyles": {
+      "label": "Stili Utente e Script",
+      "hint": "Attiva /disattiva modifiche CSS integrate e aggiungi i tuoi stili e script specifici per l'host.",
+      "copyCss": "Copia CSS",
+      "cssCopied": "CSS copiato",
+      "copyFailed": "Impossibile copiare il CSS",
+      "importCss": "Importa CSS",
+      "importFailed": "Impossibile importare il CSS",
+      "add": "Aggiungi stile",
+      "addTitle": "Aggiungi stile personalizzato",
+      "editTitle": "Modifica stile personalizzato",
+      "deleteConfirm": "Sei sicuro di voler eliminare questo stile personalizzato?",
+      "nameLabel": "Nome",
+      "namePlaceholder": "Nome stile",
+      "hostGlobs": {
+        "placeholder": "*.reddit.com, x.com (separati da virgola)",
+        "label": "Glob di Host"
+      },
+      "validation": {
+        "hostGlobs": "Aggiungi almeno un valido glob di host",
+        "css": "Aggiungi CSS prima di salvare"
+      },
+      "builtin": {
+        "label": "Stili Integrati",
+        "hideRedditGame": {
+          "label": "Nascondi post di Giochi su Reddit"
+        },
+        "hideXBottomNav": {
+          "label": "Nascondi barra navigazione inferiore di X durante scorrimento"
+        },
+        "hideXHomeTabs": {
+          "label": "Nascondi schede cronologia dalla home di X"
+        },
+        "compactTiktokLayout": {
+          "label": "Usa layout compatto di TikTok"
+        }
+      },
+      "custom": {
+        "label": "Stili Personalizzati",
+        "empty": "Non ci sono ancora stili personalizzati. Aggiungine uno per inserire il tuo CSS sugli host corrispondenti."
+      },
+      "customHint": "Personalizza qualsiasi sito web con CSS o JavaScript.",
+      "preview": "Anteprima",
+      "previewApplied": "Anteprima applicata",
+      "noActiveTab": "Nessuna scheda attiva",
+      "scripts": {
+        "label": "Script Personalizzati",
+        "add": "Aggiungi script",
+        "addTitle": "Aggiungi script personalizzato",
+        "editTitle": "Modifica script personalizzato",
+        "deleteConfirm": "Sei sicuro di voler eliminare questo script personalizzato?",
+        "empty": "Non ci sono ancora script personalizzati. Aggiungine uno per eseguire il tuo codice JavaScript sugli host corrispondenti.",
+        "namePlaceholder": "Nome script",
+        "import": "Importa",
+        "importFailed": "Impossibile importare lo script",
+        "run": "Esegui",
+        "runComplete": "Script in esecuzione",
+        "runFailed": "Errore nell'esecuzione dello script",
+        "validation": {
+          "js": "Aggiungi il codice JavaScript prima di salvare"
+        },
+        "pinToHeader": "Aggiungi alla barra degli strumenti",
+        "pinToHeaderHint": "Mostra questo script come azione della barra degli strumenti sui siti corrispondenti.",
+        "pinnedScripts": "Script in evidenza"
+      }
+    },
+    "doubleBackToExitApp": "Doppio tocco indietro per uscire dall'app",
+    "hideToolbarWhenScrolled": "Nascondi barra strumenti quando la pagina non è in primo piano",
+    "language": {
+      "label": "Lingua",
+      "system": "Sistema",
+      "hint": "Scegli una lingua oppure utilizza la lingua di sistema."
+    },
+    "oneProfilePerSite": "Un profilo per sito",
+    "oneProfilePerSiteHint": "Utilizza una sessione automatica distinta per ogni sito. I link aperti da un sito mantengono il profilo di quel sito.",
+    "mentionNotifications": "Notifiche sui social",
+    "mentionNotificationsHint": "A causa dei limiti imposti dal sistema operativo, la consegna potrebbe subire ritardi e non è garantita.",
+    "zoom": {
+      "label": "Zoom della pagina",
+      "defaultLabel": "Zoom predefinito",
+      "defaultHint": "Imposta il livello di zoom predefinito per tutte la pagine web.",
+      "siteZoomLabel": "Zoom per sito",
+      "usingDefault": "Utilizzo dello zoom predefinito"
+    },
+    "proxy": {
+      "label": "Proxy",
+      "enabled": "Abilita proxy",
+      "type": "Tipo di proxy",
+      "host": "Host del proxy",
+      "port": "Porta del proxy",
+      "hostPlaceholder": "ad es. 127.0.0.1 o proxy.example.com",
+      "portPlaceholder": "ad es. 1080"
+    },
+    "translation": {
+      "enable": "Tocca due volte il testo per tradurlo",
+      "hint": "Tocca due volte un post, un commento o un paragrafo per tradurlo sul tuo dispositivo.",
+      "targetLanguage": "Traduci in",
+      "appLanguage": "App",
+      "systemLanguage": "Sistema",
+      "notSelected": "Scegli una lingua",
+      "chooseLanguage": "Scegli prima la lingua di traduzione",
+      "loading": "Traduzione in corso…",
+      "copy": "Copia traduzione",
+      "copySource": "Copia sorgente",
+      "pin": "Appunta traduzione",
+      "unpin": "Rimuovi traduzione",
+      "failed": "Non è stato possibile tradurre questo testo",
+      "unsupported": "Questa combinazione linguistica non è disponibile su questo dispositivo"
+    },
+    "enterInsertsNewline": "Il tasto Invio inserisce una nuova riga (Shift+Invio)",
+    "doubleTapToToggleHeader": "Tocca due volte la pagina per nascondere o visualizzare la barra degli strumenti"
+  },
+  "sync": {
+    "label": "Sincronizza",
+    "hint": "I segnalibri e le impostazioni vengono sincronizzati su tutti i dispositivi.",
+    "currentPlan": "Piano attuale",
+    "managePlan": "Gestisci piano",
+    "upgradeHint": "Esegui l'aggiornamento per sincronizzare i segnalibri e le impostazioni su tutti i dispositivi.",
+    "buy": "Iscriviti tramite l'App Store",
+    "restore": "Ripristina gli acquisti",
+    "manageIos": "Gestisci su App Store",
+    "purchaseTitle": "Attiva un abbonamento",
+    "purchaseConfirm": "Questo abbonamento sarà associato all'indirizzo {{email}} e sbloccherà la sincronizzazione ovunque accedi a questo account Nora.",
+    "priceLoading": "Caricamento prezzo App Store...",
+    "activeViaIos": "Attiva tramite App Store",
+    "freePlan": "Gratuito",
+    "purchasePending": "Acquisto in attesa di approvazione.",
+    "restoreConflict": "Questo abbonamento sull'App Store è già associato all'indirizzo {{email}}.",
+    "signOutSwitch": "Esci e cambia account",
+    "signedInAs": "Hai effettuato l'accesso con {{email}}",
+    "productUnavailable": "Il prodotto sull'App Store non è ancora disponibile.",
+    "expiresAt": "Rinnovo o scadenza: {{value}}",
+    "legalNotice": "Gli abbonamenti si rinnovano automaticamente, salvo disdetta. Effettuando l'abbonamento, l'utente accetta i Termini di utilizzo (EULA) e l'Informativa sulla privacy.",
+    "termsOfUse": "Condizioni d'Uso (EULA)",
+    "privacyPolicy": "Informativa sulla privacy",
+    "deleteAccount": "Elimina account",
+    "signInRequired": "Accedi per continuare."
+  },
+  "tabs": {
+    "new": "Nuova scheda",
+    "recentlyClosed": "Chiuse di recente",
+    "noRecentlyClosed": "Nessuna scheda chiusa di recente",
+    "removeFromHistory": "Elimina dalla cronologia",
+    "clearRecentlyClosed": "Cancella la cronologia",
+    "paused": "La scheda è in pausa",
+    "pausedHint": "Il suo contenuto è stato scaricato per risparmiare risorse.",
+    "resume": "Riprendi"
+  },
+  "toast": {
+    "pinned": "Aggiunto alla pagina nuova scheda",
+    "blocklistUpdated": "Lista di blocco aggiornata",
+    "pressBackAgainToExit": "Premi nuovamente il tasto Indietro per uscire",
+    "profileDataCleared": "Dati del profilo cancellati",
+    "profileDataClearFailed": "Impossibile cancellare i dati del profilo",
+    "cookieExported": "File cookies.txt esportato",
+    "cookieExportEmpty": "Non sono stati trovati cookie per questo sito",
+    "cookieExportFailed": "Impossibile esportare il file cookies.txt",
+    "cookieExportOpenPage": "Apri una pagina prima di esportare i cookie",
+    "profileCookieExported": "File “cookies.txt” de profilo esportato",
+    "profileCookieExportEmpty": "In questo profilo non sono stati trovati cookie",
+    "profileCookieExportFailed": "Impossibile esportare il file cookies.txt del profilo",
+    "siteDataCleared": "Dati del sito cancellati",
+    "siteDataClearFailed": "Impossibile cancellare i dati del sito"
+  },
+  "profiles": {
+    "label": "Profili",
+    "add": "Aggiungi",
+    "edit": "Modifica",
+    "save": "Salva",
+    "namePlaceholder": "Nome profilo",
+    "auto": "Auto",
+    "autoProfiles": "Profili automatici",
+    "autoProfilesEmpty": "Non ci sono ancora profili automatici.",
+    "openLinkInProfile": "Apri il link nel profilo",
+    "autoProfileLastUsed": "Ultimo utilizzo: {{value}}",
+    "autoProfileLastUsedLabel": "Ultimo utilizzo",
+    "manageAutoProfiles": "Gestisci i profili automatici ({{count}})",
+    "deleteAutoProfileConfirm": "Eliminare il profilo automatico per {{site}}? Questa operazione cancella i dati di navigazione memorizzati e chiude le schede che lo utilizzano.",
+    "deleteAllAutoProfiles": "Elimina tutto",
+    "deleteAllAutoProfilesConfirm": "Eliminare tutti i {{count}} profili automatici? Questa operazione cancella i dati di navigazione memorizzati e chiude le schede che li utilizzano.",
+    "deleteStaleAutoProfiles": "Elimina non utilizzati da 14 giorni",
+    "deleteStaleAutoProfilesConfirm": "Eliminare {{count}} profili automatici non utilizzati negli ultimi 14 giorni? Questa operazione cancella i dati di navigazione memorizzati e chiude le schede che li utilizzano.",
+    "clearData": "Cancella dati",
+    "clearDataConfirm": "Cancellare tutti i dati di navigazione relativi a “{{name}}”? Questa operazione comporta la disconnessione e la chiusura delle schede associate a questo profilo.",
+    "deleteConfirm": "Elimina “{{name}}”? Questo cancella i dati di navigazione memorizzati e chiude le schede associate a questo profilo.",
+    "exportCookies": "Esporta i cookie del profilo",
+    "exportCookiesConfirm": "Esportare tutti i cookie da “{{name}}”? Il file potrebbe contenere sessioni di accesso per tutti i siti presenti in questo profilo. Mantenerlo privato."
+  },
+  "blocklist": {
+    "label": "Lista di blocco",
+    "description": "Blocca gli annunci e i tracker con le regole host di EasyList e EasyPrivacy.",
+    "enable": "Abilita lista di blocco",
+    "statusActive": "Attiva",
+    "statusInactive": "Scaricata, disattivata",
+    "statusFetching": "Recupero della lista di blocco",
+    "statusNotDownloaded": "Non scaricata",
+    "statusError": "Scaricata, ma ultimo aggiornamento fallito",
+    "lastUpdated": "Ultimo aggiornamento: {{value}}",
+    "refreshNow": "Aggiorna lista di blocco"
+  },
+  "changelog": {
+    "label": "Registro delle modifiche",
+    "hint": "Ultimi aggiornamenti e correzioni da GitHub.",
+    "loading": "Caricamento delle note di rilascio...",
+    "error": "Impossibile caricare le note di rilascio.",
+    "retry": "Riprova",
+    "empty": "Non sono state trovate note di rilascio.",
+    "current": "Attuale",
+    "noNotes": "Per questa versione non sono state fornite note di rilascio."
+  },
+  "common": {
+    "about": "Informazioni",
+    "edit": "Modifica",
+    "off": "No",
+    "on": "Sì",
+    "reset": "Reimposta",
+    "save": "Salva",
+    "theme": "Tema"
+  },
+  "newTab": {
+    "search": {
+      "urlPlaceholder": "Inserisci un URL",
+      "searchPlaceholder": "Cerca sul web"
+    },
+    "presets": {
+      "open": "Aggiungi segnalibri predefiniti",
+      "title": "Segnalibri predefiniti"
+    }
+  },
+  "views": {
+    "rename": "Rinomina vista",
+    "namePlaceholder": "Visualizza nome",
+    "desktop": {
+      "blankTab": "Scheda vuota",
+      "newBlankTab": "Nuova scheda vuota",
+      "newSplitView": "Nuova visualizzazione schermo diviso",
+      "newGridView": "Nuova visualizzazione a griglia",
+      "chooseTabToAdd": "Scegli una scheda da aggiungere a {{layout}}",
+      "createBlankTabInSlot": "Crea una nuova scheda vuota in questo slot",
+      "layout": {
+        "split": "Visualizzazione schermo diviso",
+        "grid": "Visualizzazione a griglia",
+        "gridFour": "griglia a 4 schede",
+        "deck": "Visualizzazione a mazzo"
+      },
+      "groupNamePlaceholder": "Nome gruppo",
+      "newGroupFromTab": "Nuovo gruppo da scheda",
+      "renameGroup": "Rinomina gruppo",
+      "tabCount": "{{count}} scheda",
+      "tabCount_plural": "{{count}} schede",
+      "ungrouped": "Non raggruppate",
+      "deck": "Mazzo",
+      "newDeckView": "Nuova visualizzazione a mazzo"
+    }
+  },
+  "usageLimits": {
+    "label": "Limiti di utilizzo",
+    "description": "Imposta limiti di tempo giornalieri per determinati servizi o per l'intera app.",
+    "limits": "Limiti",
+    "empty": "Non ci sono ancora limiti di utilizzo.",
+    "emptyHint": "Imposta un limite per iniziare a monitorare il tempo di navigazione giornaliero.",
+    "usageLine": "Oggi: {{used}} su {{limit}}",
+    "deleteConfirm": "Eliminare questo limite di utilizzo?",
+    "scope": {
+      "all": "L'intera app",
+      "none": "Nessun servizio selezionato"
+    },
+    "editor": {
+      "addTitle": "Aggiungi un limite di utilizzo",
+      "editTitle": "Modifica del limite di utilizzo",
+      "name": "Nome",
+      "namePlaceholder": "es. Social media",
+      "defaultName": "Limite",
+      "dailyLimit": "Limite giornaliero",
+      "hours": "Ore",
+      "minutes": "Minuti",
+      "scope": "Applicare a",
+      "add": "Aggiungi",
+      "errorMinutes": "Imposta un limite giornaliero di almeno 1 minuto",
+      "errorScope": "Seleziona almeno un servizio oppure applica l'impostazione all'intera app"
+    },
+    "pin": {
+      "label": "PIN",
+      "hint": "Per gestire i limiti e sbloccare l'account quando viene raggiunto un limite è necessario un PIN. Il conteggio si azzera alla mezzanotte.",
+      "set": "Il PIN è impostato",
+      "notSet": "Nessun PIN impostato",
+      "setAction": "Imposta PIN",
+      "change": "Sostituire",
+      "remove": "Rimuovi",
+      "currentPlaceholder": "PIN attuale",
+      "newPlaceholder": "Nuovo PIN",
+      "confirmPlaceholder": "Conferma nuovo PIN",
+      "errorEmpty": "Il PIN non può essere vuoto",
+      "errorMismatch": "I PIN non corrispondono",
+      "errorIncorrect": "PIN non corretto",
+      "requiredFirst": "Imposta prima un PIN",
+      "confirmEdit": "Inserisci il PIN per modificare",
+      "confirmDelete": "Inserisci il PIN per eliminare"
+    },
+    "lockout": {
+      "title": "Tempo scaduto per oggi",
+      "body": "Hai utilizzato {{used}} del tuo limite giornaliero di {{limit}} per {{name}}.",
+      "pinPlaceholder": "Inserisci il PIN per sbloccare",
+      "pinIncorrect": "PIN errato",
+      "unlock": "Sblocca per oggi",
+      "noPinHint": "Imposta un PIN in Impostazioni → Limiti di utilizzo per sbloccare il dispositivo in anticipo."
+    }
+  }
+}

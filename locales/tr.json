@@ -1,0 +1,512 @@
+{
+  "about": {
+    "label": "Hakkında",
+    "code": "Kaynak kodu",
+    "donate": "Bağış yap",
+    "hint": "Sürüm bilgileri, kaynak kodu ve destek bağlantıları."
+  },
+  "bookmarks": {
+    "label": "Yer imleri"
+  },
+  "buttons": {
+    "cancel": "İptal et",
+    "closeAll": "Hepsini kapat",
+    "download": "İndir",
+    "openUrl": "URL aç",
+    "open": "Aç",
+    "save": "Kaydet",
+    "confirm": "Onayla",
+    "continue": "Devam et",
+    "reopenLastClosedTab": "Son kapatılan sekmeyi yeniden aç",
+    "restoreTabs": "Yakın zamanda kapatılan sekmeler",
+    "toggleSidebar": "Kenar çubuğunu aç/kapat"
+  },
+  "menus": {
+    "close": "Kapat",
+    "delete": "Sil",
+    "desktop": "Masaüstü görünümü",
+    "desktopOn": "Açık",
+    "desktopOff": "Kapalı",
+    "addBookmark": "Yer imi ekle",
+    "pin": "Yeni sekme sayfasına sabitle",
+    "reload": "Yeniden yükle",
+    "scroll": "En üste kaydır",
+    "share": "Paylaş",
+    "signOut": "Çıkış yap",
+    "tools": "Araçlar",
+    "editUrl": "Sekme URL'sini düzenle",
+    "duplicate": "Yinelenen sekme",
+    "viewInSplitView": "Bölünmüş ekranda görüntüle",
+    "clearSiteData": "Site verilerini temizle",
+    "clearSiteDataConfirm": "\"{{host}}\" için tüm çerezler ve site verileri temizlensin mi? Bu işlem sizi bu siteden çıkış yaptıracaktır.",
+    "more": "Daha fazla",
+    "openInProfile": "Profilde aç",
+    "pause": "Sekmeyi duraklat",
+    "resume": "Sekmeyi devam ettir",
+    "zoom": "Yakınlaştır",
+    "blockAds": "Bu sitedeki reklamları engelle",
+    "addToHomeScreen": "Ana ekrana ekle"
+  },
+  "modals": {
+    "downloadVideo": "Video indir",
+    "downloadOnCobalt": "Videoyu cobalt.tools üzerinde indir",
+    "downloadTab": "İndir",
+    "cookiesTab": "Site Verileri",
+    "exportCookies": "Geçerli site çerezlerini dışa aktar",
+    "exportCookiesHint": "Geçerli siteye ait çerezleri txt dosyası olarak kaydedin.",
+    "exportCookiesButton": "Çerezleri Dışa Aktar",
+    "clearSiteDataHint": "Mevcut site ve profil için çerezleri ve tarama verilerini temizle."
+  },
+  "native": {
+    "menu_saveImage": "Görseli kaydet",
+    "menu_copyImageLink": "Görsel bağlantısını kopyala",
+    "menu_copyLink": "Bağlantıyı kopyala",
+    "toast_downloadStarted": "İndirme başladı, sistem bildirimlerini kontrol edin",
+    "toast_downloadSucceeded": "İndirilenler klasörüne kaydedildi",
+    "toast_downloadFailed": "İndirme başarısız oldu",
+    "httpBlocked_title": "HTTP internet sitesi engellendi",
+    "httpBlocked_body": "Bu web sitesi güvenli olmayan bir HTTP bağlantısı kullanmaktadır. HTTP web sitelerinin yüklenmesine izin vermek için Ayarlar'daki \"HTTP web sitelerine izin ver\" seçeneğini etkinleştirin.",
+    "menu_openInNewTab": "Yeni sekmede aç",
+    "menu_openImageInNewTab": "Görseli yeni sekmede aç",
+    "menu_openInProfile": "Profilde aç"
+  },
+  "profiles": {
+    "label": "Profiller",
+    "add": "Ekle",
+    "edit": "Düzenle",
+    "save": "Kaydet",
+    "namePlaceholder": "Profil adı",
+    "auto": "Otomatik",
+    "autoProfiles": "Otomatik profiller",
+    "autoProfilesEmpty": "Henüz otomatik profil yok.",
+    "openLinkInProfile": "Profildeki bağlantıyı aç",
+    "autoProfileLastUsed": "Son kullanım: {{value}}",
+    "autoProfileLastUsedLabel": "Son kullanım",
+    "manageAutoProfiles": "Otomatik profilleri yönet ({{count}})",
+    "deleteAutoProfileConfirm": "{{site}} için otomatik profili silmek istiyor musunuz? Bu işlem, sitenin saklanan tarama verilerini siler ve bu profili kullanan sekmeleri kapatır.",
+    "deleteAllAutoProfiles": "Hepsini sil",
+    "deleteAllAutoProfilesConfirm": "{{count}} otomatik profili silmek istiyor musunuz? Bu işlem, bu profillerde saklanan tarama verilerini siler ve bu profilleri kullanan sekmeleri kapatır.",
+    "deleteStaleAutoProfiles": "14 gün boyunca kullanılmayanları sil",
+    "deleteStaleAutoProfilesConfirm": "Son 14 gün içinde kullanılmayan {{count}} otomatik profili silmek ister misiniz? Bu işlem, bu profillerde saklanan tarama verilerini siler ve bu profilleri kullanan sekmeleri kapatır.",
+    "clearData": "Verileri sil",
+    "clearDataConfirm": "\"{{name}}\" için tüm tarama verilerini silmek istiyor musunuz? Bu işlem, oturumunuzu kapatır ve bu profili kullanan sekmeleri kapatır.",
+    "deleteConfirm": "\"{{name}}\" silinsin mi? Bu işlem depolanan tarama verilerini temizler ve bu profili kullanan sekmeleri kapatır.",
+    "exportCookies": "Profil çerezlerini dışa aktar",
+    "exportCookiesConfirm": "{{name}} adlı profildeki tüm sitelere ait çerezler dışa aktarılsın mı? Bu dosya her site için oturum bilgileri içerebilir. Gizli tutun."
+  },
+  "settings": {
+    "label": "Ayarlar",
+    "openExternalLink": "Sistem tarayıcısında harici bağlantıyı aç",
+    "redirectToOldReddit": "Old Reddit'e yönlendir",
+    "allowHttpWebsite": "HTTP web sitelerine izin ver",
+    "inspectable": "Web görünümünü incelenebilir yap",
+    "hideHeader": "Kaydırma yönüne göre araç çubuğunu gizle veya göster",
+    "headerPosition": {
+      "label": "Araç çubuğu konumu",
+      "top": "Üstte",
+      "bottom": "Altta"
+    },
+    "showNewTabButton": "Yeni sekme düğmesini göster",
+    "showBackButton": "Geri dön düğmesini göster",
+    "showScrollButton": "En üste kaydır düğmesini göster",
+    "oneHandMode": "Tek elle kullanım modu",
+    "oneTabPerSite": "Paylaşılan bağlantıyı açarken site başına bir sekme",
+    "services": {
+      "title": "Yerleşik Hizmetler",
+      "description": "Yerleşik hizmetleri yönetin."
+    },
+    "theme": {
+      "label": "Tema",
+      "system": "Sistem",
+      "dark": "Karanlık",
+      "light": "Aydınlık",
+      "hint": "Uygulamanın ve web görünümün temasıdır. Sayfa hemen güncellenmezse sekmeyi yeniden yükleyin."
+    },
+    "injectCookie": "Çerez yükle",
+    "videoEdgeLongPressTo2x": "Kenara uzun basarak 2x hızda oynat",
+    "sections": {
+      "experience": "Deneysel",
+      "accounts": "Hesaplar ve Veriler",
+      "advanced": "Gelişmiş",
+      "about": "Hakkında",
+      "general": "Genel",
+      "bookmarksSearch": "Yer imleri ve Arama",
+      "notifications": "Bildirimler"
+    },
+    "pages": {
+      "browsing": "Tercihler",
+      "appearance": "Görünüm",
+      "profiles": "Profiller ve Oturumlar",
+      "bookmarks": "Yer imleri",
+      "search": "Ara",
+      "services": "Uygulamalar",
+      "backup": "Yedekleme"
+    },
+    "browsing": {
+      "descriptionNative": "Özellik kontrolleri.",
+      "descriptionWeb": "Ağ engelleme ve gelişmiş gezinme ayarları.",
+      "features": "Özellikler"
+    },
+    "appearance": {
+      "description": "Tema ve araç çubuğu ayarları.",
+      "theme": "Tema",
+      "toolbar": "Araç çubuğu",
+      "deckTabWidth": "Sekme genişliği",
+      "deckTabWidthHint": "Mevcut: {{value}}px",
+      "desktopLayout": "Masaüstü düzeni",
+      "desktopLayoutHint": "Masaüstü modunda olduğu gibi, geniş ekranlarda sekme gruplarını ve deste/bölünmüş/ızgara görünümlerini göster.",
+      "desktopLayoutAuto": "Otomatik",
+      "desktopLayoutOn": "Her zaman",
+      "desktopLayoutOff": "Hiçbir zaman"
+    },
+    "profiles": {
+      "description": "Her hesap için ayrı çerez ve tarama durumu.",
+      "injectCookie": "Çerez ekle",
+      "injectCookieHint": "Bir oturumu manuel olarak geri yüklemek için başka bir tarayıcıdan bir çerez başlığı yapıştırın.",
+      "sessionMode": "Oturum modu"
+    },
+    "bookmarks": {
+      "description": "Sabitlenmiş web sitelerini yönet.",
+      "builtin": "Yerleşik Hizmetler",
+      "saved": "Kaydedilmiş Yer imleri",
+      "empty": "Henüz yer imi yok."
+    },
+    "userStyles": {
+      "label": "Kullanıcı Stilleri ve Betikleri",
+      "hint": "Dahili CSS ince ayarlarını değiştirin ve kendi sunucu tabanlı stillerinizi ve betiklerinizi ekleyin.",
+      "copyCss": "CSS'yi kopyala",
+      "cssCopied": "CSS kopyalandı",
+      "copyFailed": "CSS kopyalanamadı",
+      "importCss": "CSS'yi içe aktar",
+      "importFailed": "CSS içe aktarılamadı",
+      "add": "Stil ekle",
+      "addTitle": "Özel stil ekle",
+      "editTitle": "Özel stili düzenle",
+      "deleteConfirm": "Bu özel stili silmek istediğinizden emin misiniz?",
+      "nameLabel": "Ad",
+      "namePlaceholder": "Stil adı",
+      "hostGlobs": {
+        "label": "Mevcut siteler",
+        "placeholder": "*.reddit.com, x.com (virgülle ayrılmış)"
+      },
+      "validation": {
+        "hostGlobs": "En az bir geçerli site deseni ekleyin",
+        "css": "Kaydetmeden önce CSS ekle"
+      },
+      "builtin": {
+        "label": "Yerleşik Stiller",
+        "hideRedditGame": {
+          "label": "Reddit oyun paylaşımlarını gizle"
+        },
+        "hideXBottomNav": {
+          "label": "X (Twitter) alt gezinme çubuğunu kaydırırken gizle"
+        },
+        "hideXHomeTabs": {
+          "label": "X (Twitter) ana sayfa sekmelerini gizle"
+        },
+        "compactTiktokLayout": {
+          "label": "Kompakt Tiktok düzenini kullan"
+        },
+        "hideFacebookFeed": {
+          "label": "Facebook akışını gizle"
+        }
+      },
+      "custom": {
+        "label": "Özel Stiller",
+        "empty": "Henüz özel stil yok. Eşleşen sitelere kendi CSS’inizi eklemek için bir tane oluşturun."
+      },
+      "customHint": "Herhangi bir web sitesini CSS veya JavaScript ile özelleştirin.",
+      "preview": "Önizleme",
+      "previewApplied": "Önizleme uygulandı",
+      "noActiveTab": "Aktif sekme yok",
+      "scripts": {
+        "label": "Özel Betikler",
+        "add": "Betik ekle",
+        "addTitle": "Özel betik ekle",
+        "editTitle": "Özel betiği düzenle",
+        "deleteConfirm": "Bu özel betiği silmek istediğinizden emin misiniz?",
+        "empty": "Henüz özel betik yok. Eşleşen sunucularda kendi JavaScript'inizi çalıştırmak için bir tane ekleyin.",
+        "namePlaceholder": "Betik adı",
+        "import": "İçe aktar",
+        "importFailed": "Betik içe aktarılamadı",
+        "pinToHeader": "Araç çubuğuna sabitle",
+        "pinToHeaderHint": "Bu betiği eşleşen sitelerde bir araç çubuğu eylemi olarak göster.",
+        "pinnedScripts": "Sabitlenmiş betikler",
+        "run": "Çalıştır",
+        "runComplete": "Betik çalıştı",
+        "runFailed": "Betik başarısız oldu",
+        "validation": {
+          "js": "Kaydetmeden önce JavaScript ekleyin"
+        }
+      }
+    },
+    "showForwardButton": "İleriye git düğmesini göster",
+    "showReloadButton": "Yeniden yükle düğmesini göster",
+    "xHomeTimeline": {
+      "label": "Varsayılan ana akış",
+      "forYou": "Senin için",
+      "following": "Takip Edilenler"
+    },
+    "search": {
+      "description": "Arama motorlarını yönet.",
+      "builtin": "Yerleşik Arama Sağlayıcıları",
+      "builtinHint": "Yeni sekme arama menüsünde gösterilmesini istediğiniz sağlayıcıları etkinleştirin.",
+      "custom": "Özel Arama Sağlayıcıları",
+      "empty": "Henüz özel arama sağlayıcısı yok.",
+      "urlHint": "Doğrudan URL girişi için her zaman kullanılabilir.",
+      "addTitle": "Özel Arama Ekle",
+      "editTitle": "Özel Aramayı Düzenle",
+      "addAction": "Arama Ekle",
+      "templateHint": "Sorgunun ekleneceği yere `%s` kullanın.",
+      "fields": {
+        "name": "Ad",
+        "namePlaceholder": "Örnek Arama",
+        "template": "Arama URL Şablonu",
+        "templatePlaceholder": "https://ornek.com/search?q=%s"
+      },
+      "validation": {
+        "name": "Bir arama motoru ekleyin",
+        "template": "`%s` içeren geçerli bir http(s) şablon URL'si kullanın",
+        "duplicateName": "Bu isimde bir özel arama sağlayıcısı zaten mevcut"
+      },
+      "deleteConfirm": "Bu özel aramayı silmek istediğinizden emin misiniz?"
+    },
+    "doubleBackToExitApp": "Uygulamadan çıkmak için geri tuşuna iki kez basın",
+    "hideToolbarWhenScrolled": "Sayfa en üstte değilken araç çubuğunu gizle",
+    "language": {
+      "label": "Dil",
+      "system": "Sistem",
+      "hint": "Bir dil seçin veya sistem dilini kullanın."
+    },
+    "oneProfilePerSite": "Site başına bir profil",
+    "oneProfilePerSiteHint": "Her site için ayrı bir otomatik oturum kullanın. Bir siteden açılan bağlantılar, o sitenin profilini korur.",
+    "mentionNotifications": "Sosyal bildirimler",
+    "mentionNotificationsHint": "İşletim sisteminin arka plan sınırlamaları nedeniyle, bildirimler gecikebilir ve garanti edilemez.",
+    "enterInsertsNewline": "Enter yeni satıra geçer (Shift+Enter)",
+    "zoom": {
+      "label": "Sayfayı Yakınlaştır",
+      "defaultLabel": "Varsayılan Yakınlaştırma",
+      "defaultHint": "Tüm web sayfaları için varsayılan yakınlaştırma seviyesini ayarla.",
+      "siteZoomLabel": "Site bazlı yakınlaştırma",
+      "usingDefault": "Varsayılan yakınlaştırmayı kullan"
+    },
+    "proxy": {
+      "label": "Vekil sunucu",
+      "enabled": "Vekil sunucuyu etkinleştir",
+      "type": "Vekil sunucu türü",
+      "host": "Vekil sunucu ana bilgisayarı",
+      "port": "Vekil sunucu bağlantı noktası",
+      "hostPlaceholder": "Örn. 127.0.0.1 veya proxy.example.com",
+      "portPlaceholder": "Örn. 1080"
+    },
+    "translation": {
+      "enable": "Metne çift dokunarak çevirin",
+      "hint": "Bir gönderiyi, yorumu veya paragrafı cihazınızda çevirmek için çift dokunun.",
+      "targetLanguage": "Çevir",
+      "appLanguage": "Uygulama",
+      "systemLanguage": "Sistem",
+      "notSelected": "Bir dil seçin",
+      "chooseLanguage": "Öncelikle bir çeviri dili seçin",
+      "loading": "Çevriliyor…",
+      "copy": "Çeviriyi kopyala",
+      "copySource": "Kaynağı kopyala",
+      "pin": "Çeviriyi sabitle",
+      "unpin": "Çevirinin sabitlemesini kaldır",
+      "failed": "Bu metni çeviremedim",
+      "unsupported": "Bu dil çifti bu cihazda mevcut değildir"
+    },
+    "doubleTapToToggleHeader": "Araç çubuğunu gizlemek veya göstermek için sayfaya iki kez dokunun",
+    "backup": {
+      "description": "Ayarları, yer imlerini ve kullanıcı stillerini dışa aktarın veya geri yükleyin.",
+      "export": "Ayarları dışa aktar",
+      "exportDescription": "Ayarları, yer imlerini, kullanıcı stillerini ve özel komut dosyalarını bir JSON dosyası olarak kaydedin",
+      "exportFailed": "Dışa aktarma başarısız: {{message}}",
+      "import": "Ayarları içe aktar",
+      "importDescription": "Nora ayar dosyasından ayarları geri yükle",
+      "importConfirm": "Bu işlem, mevcut ayarlarınızı, yer imlerinizi, kullanıcı stillerinizi ve özel komut dosyalarınızı silecektir. Devam etmek istiyor musunuz?",
+      "importWithScriptsConfirm": "Bu dosya, web siteleri içinde kod çalıştırabilen {{count}} adet etkinleştirilmiş özel komut dosyası içermektedir. Yalnızca dosyaya güveniyorsanız devam edin. Mevcut ayarlarınız, yer imleriniz, kullanıcı stilleriniz ve özel komut dosyalarınız silinecektir.",
+      "importDone": "İçe aktarılan: {{sections}}",
+      "importFailed": "İçe aktarma başarısız: {{message}}"
+    },
+    "webrtc": {
+      "label": "WebRTC",
+      "protectIp": "WebRTC IP sızıntılarını önle",
+      "protectIpHint": "Vekil sunucu ve VPN'i atlayan WebRTC aracılığıyla sayfaların gerçek IP adresinizi tespit etmesini engeller. Aktarım sunucusu kullanan aramalar çalışmaya devam eder; bir video veya sesli arama bağlantısı kurulamıyorsa bu özelliği devre dışı bırakın. Bir sonraki sayfa yüklemesinde etkili olur."
+    },
+    "pullToRefresh": "Sayfayı yeniden yüklemek için aşağı kaydır"
+  },
+  "sync": {
+    "label": "Senkronize et",
+    "hint": "Yer imleri ve ayarlar tüm cihazlar arasında senkronize edilir.",
+    "currentPlan": "Mevcut plan",
+    "managePlan": "Planı yönet",
+    "buy": "App Store üzerinden abone olun",
+    "restore": "Satın alımları geri yükle",
+    "manageIos": "App Store'da yönet",
+    "purchaseTitle": "Aboneliği bağla",
+    "purchaseConfirm": "Bu abonelik {{email}} adresine bağlanacak ve bu Nora hesabına giriş yaptığınız her yerde senkronizasyon özelliği etkinleştirilecektir.",
+    "priceLoading": "App Store fiyatı yükleniyor...",
+    "activeViaIos": "App Store üzerinden kullanılabilir",
+    "freePlan": "Ücretsiz",
+    "purchasePending": "Satın alım işlemi onay bekliyor.",
+    "restoreConflict": "Bu App Store aboneliği zaten {{email}} adresine bağlı.",
+    "signOutSwitch": "Oturumu kapat ve hesap değiştir",
+    "signedInAs": "{{email}} olarak giriş yapıldı",
+    "productUnavailable": "App Store'daki ürün henüz kullanıma sunulmamıştır.",
+    "expiresAt": "Otomatik yenilenir veya süresi dolar: {{value}}",
+    "upgradeHint": "Yer imlerinizi ve ayarlarınızı tüm cihazlarınızda senkronize etmek için yükseltin.",
+    "legalNotice": "Abonelikler iptal edilmedikçe otomatik olarak yenilenir. Abone olarak, Kullanım Koşulları (EULA) ve Gizlilik Politikasını kabul etmiş olursunuz.",
+    "termsOfUse": "Kullanım Koşulları (EULA)",
+    "privacyPolicy": "Gizlilik Politikası",
+    "deleteAccount": "Hesabı sil",
+    "signInRequired": "Devam etmek için giriş yapın."
+  },
+  "tabs": {
+    "new": "Yeni sekme",
+    "recentlyClosed": "Kısa süre önce kapatılanlar",
+    "noRecentlyClosed": "Son kapatılan sekme yok",
+    "paused": "Sekme duraklatıldı",
+    "pausedHint": "Kaynakları korumak için içeriği boşaltıldı.",
+    "resume": "Devam et",
+    "removeFromHistory": "Geçmişten sil",
+    "clearRecentlyClosed": "Geçmişi temizle"
+  },
+  "toast": {
+    "pinned": "Yeni sekme sayfasına sabitlendi",
+    "blocklistUpdated": "Engelleme listesi güncellendi",
+    "pressBackAgainToExit": "Çıkmak için geri tuşuna tekrar basın",
+    "profileDataCleared": "Profil verileri temizlendi",
+    "profileDataClearFailed": "Profil verileri temizlenemedi",
+    "siteDataCleared": "Site verileri temizlendi",
+    "siteDataClearFailed": "Site verileri temizlenemedi",
+    "cookieExported": "Dışa aktarılan çerezler dosyası",
+    "cookieExportEmpty": "Bu site için çerez bulunamadı",
+    "cookieExportFailed": "Çerezleri dışa aktarma başarısız oldu",
+    "cookieExportOpenPage": "Çerezleri dışa aktarmadan önce bir sayfa açın",
+    "profileCookieExported": "Dışa aktarılan profil çerezleri",
+    "profileCookieExportEmpty": "Bu profilde hiçbir çerez bulunamadı",
+    "profileCookieExportFailed": "Profil çerezlerini dışa aktarma başarısız oldu",
+    "addToHomeScreenFailed": "Bu başlatıcı, ana ekran kısayollarını desteklemiyor"
+  },
+  "changelog": {
+    "label": "Değişiklik günlüğü",
+    "hint": "Github'taki son sürümler ve düzeltmeler.",
+    "loading": "Sürüm notları yükleniyor...",
+    "error": "Sürüm notları yüklenemedi.",
+    "retry": "Yeniden dene",
+    "empty": "Sürüm notları bulunamadı.",
+    "current": "Mevcut",
+    "noNotes": "Bu sürüm için sürüm notları yayımlanmamıştır."
+  },
+  "common": {
+    "about": "Hakkında",
+    "edit": "Düzenle",
+    "off": "Kapalı",
+    "on": "Açık",
+    "save": "Kaydet",
+    "theme": "Tema",
+    "reset": "Sıfırla"
+  },
+  "blocklist": {
+    "label": "Ağ engelleme listesi",
+    "description": "EasyList ve EasyPrivacy sunucu kurallarıyla reklamları ve izleyicileri engelleyin.",
+    "enable": "Ağ engelleme listesini etkinleştir",
+    "statusFetching": "Engelleme listesi alınıyor",
+    "lastUpdated": "En son güncellendi: {{value}}",
+    "refreshNow": "Engelleme listesini güncelle"
+  },
+  "views": {
+    "rename": "Görünümü yeniden adlandır",
+    "namePlaceholder": "Görünüm adı",
+    "desktop": {
+      "blankTab": "Boş sekme",
+      "newBlankTab": "Yeni boş sekme",
+      "newSplitView": "Yeni bölünmüş görünüm",
+      "newGridView": "Yeni ızgara görünümü",
+      "chooseTabToAdd": "{{layout}}'a eklemek için bir sekme seçin",
+      "createBlankTabInSlot": "Bu slotta yeni bir boş sekme oluştur",
+      "layout": {
+        "split": "Bölünmüş görünüm",
+        "grid": "Izgara görünümü",
+        "gridFour": "4 sekmeli ızgara",
+        "deck": "Deste görünümü"
+      },
+      "groupNamePlaceholder": "Grup adı",
+      "newDeckView": "Yeni deste görünümü",
+      "deck": "Deste",
+      "newGroupFromTab": "Sekmeden yeni grup",
+      "renameGroup": "Grubun adını değiştir",
+      "tabCount": "{{count}} sekmesi",
+      "tabCount_plural": "{{count}} sekme",
+      "ungrouped": "Gruplanmamış",
+      "newGroup": "Yeni grup",
+      "moveToGroup": "{{name}} grubuna taşı",
+      "moveToUngrouped": "Gruptan çıkar",
+      "closeGroup": "Grubu ve sekmeleri kapat",
+      "ungroup": "Grubu kaldır"
+    }
+  },
+  "newTab": {
+    "search": {
+      "urlPlaceholder": "Bir URL girin",
+      "searchPlaceholder": "İnternette ara"
+    },
+    "presets": {
+      "open": "Önceden ayarlanmış yer imlerini ekle",
+      "title": "Önceden ayarlanmış yer imleri"
+    }
+  },
+  "usageLimits": {
+    "label": "Kullanım sınırları",
+    "description": "Seçtiğiniz hizmetler veya uygulamanın tamamı için günlük zaman sınırları belirleyin.",
+    "limits": "Limitler",
+    "empty": "Henüz kullanım sınırı yok.",
+    "emptyHint": "Günlük tarama süresini takip etmeye başlamak için bir sınır belirleyin.",
+    "usageLine": "Bugün: {{used}} / {{limit}}",
+    "deleteConfirm": "Bu kullanım sınırını silmek ister misiniz?",
+    "scope": {
+      "all": "Uygulamanın tamamı",
+      "none": "Hiçbir hizmet seçilmedi"
+    },
+    "editor": {
+      "addTitle": "Kullanım süresi ekle",
+      "editTitle": "Kullanım sınırını düzenle",
+      "name": "Ad",
+      "namePlaceholder": "Örnek: Sosyal Medya",
+      "defaultName": "Sınır",
+      "dailyLimit": "Günlük sınır",
+      "hours": "Saat",
+      "minutes": "Dakika",
+      "scope": "Uygula",
+      "add": "Ekle",
+      "errorMinutes": "Günde en az 1 dakikalık bir sınır belirleyin",
+      "errorScope": "En az bir hizmet seçin veya tüm uygulamaya uygulayın"
+    },
+    "pin": {
+      "label": "PIN",
+      "hint": "Limitleri yönetmek ve limite ulaşıldığında kilidi açmak için bir PIN kodu gereklidir. Her gün yerel saatle gece yarısı sıfırlanır.",
+      "set": "PIN ayarlandı",
+      "notSet": "PIN kodu ayarlanmamış",
+      "setAction": "PIN ayarla",
+      "change": "Değiştir",
+      "remove": "Kaldır",
+      "currentPlaceholder": "Mevcut PIN",
+      "newPlaceholder": "Yeni PIN",
+      "confirmPlaceholder": "Yeni PIN'i onayla",
+      "errorEmpty": "PIN boş olamaz",
+      "errorMismatch": "PIN kodları uyuşmuyor",
+      "errorIncorrect": "Yanlış PIN kodu",
+      "requiredFirst": "Önce bir PIN kodu belirleyin",
+      "confirmEdit": "Düzenlemek için PIN kodunu girin",
+      "confirmDelete": "Silmek için PIN kodunu girin"
+    },
+    "lockout": {
+      "title": "Bugünlük zaman doldu",
+      "body": "{{name}} için günlük {{limit}} kullanım sürenizin {{used}}'sini kullandınız.",
+      "pinPlaceholder": "Kilidi açmak için PIN kodunu girin",
+      "pinIncorrect": "Yanlış PIN kodu",
+      "unlock": "Bugün için kilidi aç",
+      "noPinHint": "Ayarlar'dan bir PIN kodu belirleyin → Kullanım sınırlarını erken açmak için."
+    }
+  }
+}

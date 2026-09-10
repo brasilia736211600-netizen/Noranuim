@@ -1,0 +1,3 @@
+<h2>Özellikler</h2><ul><li>Ayrı çerez depolama alanına sahip birden fazla hesap</li><li>Engelleme listesi (EasyList ve EasyPrivacy)</li><li>Resim indir</li><li>fb/ig reel indir</li><li>Metin seç</li><li>Yakınlaştır</li><li>İzleme URL'si sorgu parametrelerini kaldır</li></ul>
+<h2>Desteklenen SNS'ler</h2><ul><li>Bluesky</li><li>Facebook</li><li>Instagram</li><li>LinkedIn</li><li>Reddit</li><li>Threads</li><li>TikTok</li><li>Tumblr</li><li>VK</li><li>X (Twitter)</li></ul>
+<h2>Nasıl çalışır</h2><ul><li>SNS web sitelerini Android webview içine sarar</li><li>Reklamları engellemek için kod ekler</li></ul>

@@ -1,0 +1,6 @@
+- support blocklist (EasyList and EasyPrivacy)
+- redesign settings and cookie modals
+- support injecting cookies.txt
+- long press video edge to 2x playback
+- improve syncing process
+- support Swedish language

@@ -1,0 +1,3 @@
+- Support opening LinkedIn URL
+- Fix ig reel interactions (heart and comment)
+- Fix downloading ig image

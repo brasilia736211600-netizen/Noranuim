@@ -1,0 +1,5 @@
+- support blocklist (EasyList and EasyPrivacy)
+- redesign settings and cookie modals
+- support injecting cookies.txt
+- improve syncing process
+- support Swedish language

@@ -1,0 +1,502 @@
+{
+  "about": {
+    "label": "About",
+    "code": "Source code",
+    "donate": "Donate",
+    "hint": "Version info, source code, and support links."
+  },
+  "changelog": {
+    "label": "Changelog",
+    "hint": "Recent releases and fixes from GitHub.",
+    "loading": "Loading release notes...",
+    "error": "Failed to load release notes.",
+    "retry": "Retry",
+    "empty": "No release notes found.",
+    "current": "Current",
+    "noNotes": "No release notes were provided for this version."
+  },
+  "common": {
+    "about": "About",
+    "edit": "Edit",
+    "off": "Off",
+    "on": "On",
+    "reset": "Reset",
+    "save": "Save",
+    "theme": "Theme"
+  },
+  "views": {
+    "rename": "Rename view",
+    "namePlaceholder": "View name",
+    "desktop": {
+      "blankTab": "Blank tab",
+      "deck": "Deck",
+      "groupNamePlaceholder": "Group name",
+      "newDeckView": "New deck view",
+      "newGroupFromTab": "New group from tab",
+      "newSplitView": "New split view",
+      "newGridView": "New grid view",
+      "closeGroup": "Close group and tabs",
+      "renameGroup": "Rename group",
+      "ungroup": "Ungroup",
+      "tabCount": "{{count}} tab",
+      "tabCount_plural": "{{count}} tabs",
+      "ungrouped": "Ungrouped",
+      "chooseTabToAdd": "Choose a tab to add to {{layout}}",
+      "createBlankTabInSlot": "Create a new blank tab in this slot",
+      "layout": {
+        "deck": "Deck view",
+        "split": "Split view",
+        "grid": "Grid view",
+        "gridFour": "4-tabs grid"
+      },
+      "newGroup": "New group",
+      "moveToGroup": "Move to {{name}}",
+      "moveToUngrouped": "Move out of group"
+    }
+  },
+  "blocklist": {
+    "label": "Network blocklist",
+    "description": "Block ads and trackers with EasyList and EasyPrivacy host rules.",
+    "enable": "Enable network blocklist",
+    "statusFetching": "Fetching blocklist",
+    "lastUpdated": "Last updated: {{value}}",
+    "refreshNow": "Update blocklist"
+  },
+  "buttons": {
+    "cancel": "Cancel",
+    "closeAll": "Close All",
+    "confirm": "Confirm",
+    "continue": "Continue",
+    "openUrl": "Open URL",
+    "open": "Open",
+    "reopenLastClosedTab": "Reopen last closed tab",
+    "restoreTabs": "Recently closed tabs",
+    "save": "Save",
+    "toggleSidebar": "Toggle sidebar"
+  },
+  "menus": {
+    "blockAds": "Block ads on this site",
+    "clearSiteData": "Clear site data",
+    "clearSiteDataConfirm": "Clear all cookies and site data for \"{{host}}\"? This signs you out of this site.",
+    "close": "Close",
+    "delete": "Delete",
+    "desktop": "Desktop site",
+    "duplicate": "Duplicate tab",
+    "addBookmark": "Add bookmark",
+  "addToHomeScreen": "Add to Home screen",
+    "editUrl": "Edit tab URL",
+    "more": "More",
+    "openInProfile": "Open in profile",
+    "pause": "Pause tab",
+    "resume": "Resume tab",
+    "reload": "Reload",
+    "scroll": "Scroll to top",
+    "share": "Share",
+    "signOut": "Sign out",
+    "tools": "Tools",
+    "zoom": "Zoom",
+    "viewInSplitView": "View in split view"
+  },
+  "modals": {
+    "downloadVideo": "Download video",
+    "downloadOnCobalt": "Download video on cobalt.tools",
+    "downloadTab": "Download",
+    "cookiesTab": "Site Data",
+    "exportCookies": "Export current site cookies",
+    "exportCookiesHint": "Save cookies for the current site as a cookies.txt file.",
+    "exportCookiesButton": "Export cookies.txt",
+    "clearSiteDataHint": "Clear cookies and browsing data for the current site and profile."
+  },
+  "native": {
+    "menu_saveImage": "Save image",
+    "menu_copyImageLink": "Copy image link",
+    "menu_copyLink": "Copy link",
+    "menu_openInProfile": "Open in profile",
+    "menu_openInNewTab": "Open in new tab",
+    "menu_openImageInNewTab": "Open image in new tab",
+    "toast_downloadStarted": "Download started, check the system notification",
+    "toast_downloadSucceeded": "Saved to the Downloads folder",
+    "toast_downloadFailed": "Failed to download",
+    "httpBlocked_title": "HTTP website blocked",
+    "httpBlocked_body": "This website uses an insecure HTTP connection. To allow loading HTTP websites, enable \"Allow HTTP websites\" in Settings."
+  },
+  "profiles": {
+    "label": "Profiles",
+    "auto": "Auto",
+    "autoProfiles": "Auto profiles",
+    "autoProfilesEmpty": "No auto profiles yet.",
+    "openLinkInProfile": "Open link in profile",
+    "autoProfileLastUsed": "Last used: {{value}}",
+    "autoProfileLastUsedLabel": "Last used",
+    "manageAutoProfiles": "Manage auto profiles ({{count}})",
+    "deleteAutoProfileConfirm": "Delete the auto profile for {{site}}? This clears its stored browsing data and closes tabs using it.",
+    "deleteAllAutoProfiles": "Delete all",
+    "deleteAllAutoProfilesConfirm": "Delete all {{count}} auto profiles? This clears their stored browsing data and closes tabs using them.",
+    "deleteStaleAutoProfiles": "Delete unused 14 days",
+    "deleteStaleAutoProfilesConfirm": "Delete {{count}} auto profiles not used in the last 14 days? This clears their stored browsing data and closes tabs using them.",
+    "add": "Add",
+    "edit": "Edit",
+    "save": "Save",
+    "namePlaceholder": "Profile name",
+    "clearData": "Clear data",
+    "clearDataConfirm": "Clear all browsing data for \"{{name}}\"? This signs you out and closes tabs using this profile.",
+    "exportCookies": "Export profile cookies",
+    "exportCookiesConfirm": "Export all cookies from \"{{name}}\"? The file may contain login sessions for every site in this profile. Keep it private.",
+    "deleteConfirm": "Delete \"{{name}}\"? This clears its stored browsing data and closes tabs using this profile."
+  },
+  "settings": {
+    "label": "Settings",
+    "zoom": {
+      "label": "Page zoom",
+      "defaultLabel": "Default zoom",
+      "defaultHint": "Set the default zoom level for all web pages.",
+      "siteZoomLabel": "Per-site zoom",
+      "usingDefault": "Using default zoom"
+    },
+    "openExternalLink": "Open external link in system browser",
+    "redirectToOldReddit": "Redirect to Old Reddit",
+    "allowHttpWebsite": "Allow HTTP websites",
+    "inspectable": "Make webview inspectable",
+    "webrtc": {
+      "label": "WebRTC",
+      "protectIp": "Prevent WebRTC IP leaks",
+      "protectIpHint": "Stops pages from discovering your real IP address through WebRTC, which bypasses the proxy and VPN. Calls that use a relay server keep working; turn this off if a video or voice call fails to connect. Takes effect on the next page load."
+    },
+    "proxy": {
+      "label": "Proxy",
+      "enabled": "Enable proxy",
+      "type": "Proxy type",
+      "host": "Proxy host",
+      "port": "Proxy port",
+      "hostPlaceholder": "e.g. 127.0.0.1 or proxy.example.com",
+      "portPlaceholder": "e.g. 1080"
+    },
+    "videoEdgeLongPressTo2x": "Long press on edge to 2x playback",
+    "pullToRefresh": "Pull down to reload page",
+    "translation": {
+      "enable": "Double-tap text to translate",
+      "hint": "Double-tap a post, comment, or paragraph to translate it on your device.",
+      "targetLanguage": "Translate to",
+      "appLanguage": "App",
+      "systemLanguage": "System",
+      "notSelected": "Choose a language",
+      "chooseLanguage": "Choose a translation language first",
+      "loading": "Translating…",
+      "copy": "Copy translation",
+      "copySource": "Copy source",
+      "pin": "Pin translation",
+      "unpin": "Unpin translation",
+      "failed": "Couldn’t translate this text",
+      "unsupported": "This language pair is unavailable on this device"
+    },
+    "enterInsertsNewline": "Enter inserts a new line (Shift+Enter)",
+    "doubleBackToExitApp": "Double back to exit app",
+    "oneProfilePerSite": "One profile per site",
+    "oneProfilePerSiteHint": "Use a separate automatic session for each site. Links opened from a site keep that site's profile.",
+    "hideHeader": "Hide and show toolbar on scroll direction",
+    "doubleTapToToggleHeader": "Double-tap page to hide or show toolbar",
+    "hideToolbarWhenScrolled": "Hide toolbar when page is not at top",
+    "xHomeTimeline": {
+      "label": "Default home timeline",
+      "forYou": "For you",
+      "following": "Following"
+    },
+    "mentionNotifications": "Social notifications",
+    "mentionNotificationsHint": "Due to OS background limits, delivery may be delayed and is not guaranteed.",
+    "sections": {
+      "general": "General",
+      "accounts": "Accounts & Data",
+      "bookmarksSearch": "Bookmarks & Search",
+      "notifications": "Notifications",
+      "advanced": "Advanced",
+      "about": "About"
+    },
+    "pages": {
+      "browsing": "Preferences",
+      "appearance": "Appearance",
+      "services": "Services",
+      "profiles": "Profiles & Sessions",
+      "bookmarks": "Bookmarks",
+      "search": "Search",
+      "backup": "Backup"
+    },
+    "browsing": {
+      "descriptionNative": "Feature toggles.",
+      "descriptionWeb": "Network blocking and advanced browsing controls.",
+      "features": "Features"
+    },
+    "appearance": {
+      "description": "Theme and toolbar settings.",
+      "theme": "Theme",
+      "toolbar": "Toolbar",
+      "deckTabWidth": "Deck tab width",
+      "deckTabWidthHint": "Current: {{value}}px",
+      "desktopLayout": "Desktop layout",
+      "desktopLayoutHint": "Show tab groups and deck/split/grid views on large screens, like desktop mode.",
+      "desktopLayoutAuto": "Auto",
+      "desktopLayoutOn": "Always",
+      "desktopLayoutOff": "Never"
+    },
+    "profiles": {
+      "description": "Multiple accounts with separate cookies and browsing state.",
+      "sessionMode": "Session mode",
+      "injectCookie": "Inject Cookie",
+      "injectCookieHint": "Paste a Cookie header from another browser to restore a session manually."
+    },
+    "bookmarks": {
+      "description": "Manage pinned websites.",
+      "saved": "Saved Bookmarks",
+      "empty": "No bookmarks yet."
+    },
+    "backup": {
+      "description": "Export or restore settings, bookmarks and user styles.",
+      "export": "Export settings",
+      "exportDescription": "Save settings, bookmarks, user styles and custom scripts as a JSON file",
+      "exportFailed": "Export failed: {{message}}",
+      "import": "Import settings",
+      "importDescription": "Restore settings from a Nora settings file",
+      "importConfirm": "This replaces your current settings, bookmarks, user styles and custom scripts. Continue?",
+      "importWithScriptsConfirm": "This file contains {{count}} enabled custom script(s), which can run code inside websites. Only continue if you trust the file. Your current settings, bookmarks, user styles and custom scripts will be replaced.",
+      "importDone": "Imported: {{sections}}",
+      "importFailed": "Import failed: {{message}}"
+    },
+    "services": {
+      "title": "Built-In Services",
+      "description": "Manage built-in services."
+    },
+    "search": {
+      "description": "Manage search providers.",
+      "builtin": "Built-In Search Providers",
+      "builtinHint": "Turn on the providers you want to show in the new tab search menu.",
+      "custom": "Custom Search Providers",
+      "empty": "No custom search providers yet.",
+      "urlHint": "Always available for direct URL entry.",
+      "addTitle": "Add Custom Search",
+      "editTitle": "Edit Custom Search",
+      "addAction": "Add Search",
+      "templateHint": "Use `%s` where the query should be inserted.",
+      "fields": {
+        "name": "Name",
+        "namePlaceholder": "Example Search",
+        "template": "Search URL Template",
+        "templatePlaceholder": "https://example.com/search?q=%s"
+      },
+      "validation": {
+        "name": "Add a search provider name",
+        "template": "Use a valid http(s) template URL containing `%s`",
+        "duplicateName": "A custom search provider with this name already exists"
+      },
+      "deleteConfirm": "Are you sure you want to delete this custom search?"
+    },
+    "userStyles": {
+      "label": "User Styles & Scripts",
+      "hint": "Toggle builtin CSS tweaks and add your own host-based styles and scripts.",
+      "customHint": "Customize any website with CSS or JavaScript.",
+      "copyCss": "Copy CSS",
+      "cssCopied": "CSS copied",
+      "copyFailed": "Failed to copy CSS",
+      "importCss": "Import CSS",
+      "importFailed": "Failed to import CSS",
+      "preview": "Preview",
+      "previewApplied": "Preview applied",
+      "noActiveTab": "No active tab",
+      "add": "Add style",
+      "addTitle": "Add custom style",
+      "editTitle": "Edit custom style",
+      "deleteConfirm": "Are you sure you want to delete this custom style?",
+      "nameLabel": "Name",
+      "namePlaceholder": "Style name",
+      "hostGlobs": {
+        "label": "Host globs",
+        "placeholder": "*.reddit.com, x.com (comma separated)"
+      },
+      "validation": {
+        "hostGlobs": "Add at least one valid host glob",
+        "css": "Add CSS before saving"
+      },
+      "builtin": {
+        "label": "Builtin Styles",
+        "hideFacebookFeed": {
+          "label": "Hide Facebook feed"
+        },
+        "hideRedditGame": {
+          "label": "Hide Reddit game posts"
+        },
+        "compactTiktokLayout": {
+          "label": "Use compact TikTok layout"
+        },
+        "hideXBottomNav": {
+          "label": "Hide X bottom nav bar on scroll"
+        },
+        "hideXHomeTabs": {
+          "label": "Hide X home timeline tabs"
+        }
+      },
+      "custom": {
+        "label": "Custom Styles",
+        "empty": "No custom styles yet. Add one to inject your own CSS on matching hosts."
+      },
+      "scripts": {
+        "label": "Custom Scripts",
+        "add": "Add script",
+        "addTitle": "Add custom script",
+        "editTitle": "Edit custom script",
+        "deleteConfirm": "Are you sure you want to delete this custom script?",
+        "empty": "No custom scripts yet. Add one to run your own JavaScript on matching hosts.",
+        "namePlaceholder": "Script name",
+        "import": "Import",
+        "importFailed": "Failed to import script",
+        "pinToHeader": "Pin to toolbar",
+        "pinToHeaderHint": "Show this script as a toolbar action on matching sites.",
+        "pinnedScripts": "Pinned scripts",
+        "run": "Run",
+        "runComplete": "Script ran",
+        "runFailed": "Script failed",
+        "validation": {
+          "js": "Add JavaScript before saving"
+        }
+      }
+    },
+    "headerPosition": {
+      "label": "Toolbar position",
+      "top": "Top",
+      "bottom": "Bottom"
+    },
+    "showNewTabButton": "Show new tab button",
+    "showBackButton": "Show back button",
+    "showForwardButton": "Show forward button",
+    "showReloadButton": "Show reload button",
+    "showScrollButton": "Show scroll to top button",
+    "oneHandMode": "One hand mode",
+    "oneTabPerSite": "One tab per site when opening shared link",
+    "theme": {
+      "label": "Theme",
+      "system": "System",
+      "dark": "Dark",
+      "light": "Light",
+      "hint": "App and webview theme. If a page does not update immediately, reload the tab."
+    },
+    "language": {
+      "label": "Language",
+      "system": "System",
+      "hint": "Choose a language or follow system language."
+    },
+    "injectCookie": "Inject cookie"
+  },
+  "sync": {
+    "label": "Sync",
+    "hint": "Bookmarks and settings sync across devices.",
+    "upgradeHint": "Upgrade to sync bookmarks and settings across devices.",
+    "currentPlan": "Current plan",
+    "managePlan": "Manage plan",
+    "deleteAccount": "Delete account",
+    "buy": "Subscribe with App Store",
+    "restore": "Restore purchases",
+    "manageIos": "Manage in App Store",
+    "purchaseTitle": "Bind subscription",
+    "purchaseConfirm": "This subscription will be linked to {{email}} and unlock sync anywhere you log into this Nora account.",
+    "priceLoading": "Loading App Store price...",
+    "activeViaIos": "Active via App Store",
+    "freePlan": "Free",
+    "purchasePending": "Purchase pending approval.",
+    "restoreConflict": "This App Store subscription is already linked to {{email}}.",
+    "signOutSwitch": "Sign out and switch account",
+    "signedInAs": "Signed in as {{email}}",
+    "productUnavailable": "The App Store product is not available yet.",
+    "expiresAt": "Renews or expires: {{value}}",
+    "legalNotice": "Subscriptions renew automatically unless canceled. By subscribing, you agree to the Terms of Use (EULA) and Privacy Policy.",
+    "termsOfUse": "Terms of Use (EULA)",
+    "privacyPolicy": "Privacy Policy",
+    "signInRequired": "Sign in to continue."
+  },
+  "tabs": {
+    "new": "New tab",
+    "recentlyClosed": "Recently closed",
+    "noRecentlyClosed": "No recently closed tabs",
+    "removeFromHistory": "Remove from history",
+    "clearRecentlyClosed": "Clear history",
+    "paused": "Tab is paused",
+    "pausedHint": "Its content was unloaded to save resources.",
+    "resume": "Resume"
+  },
+  "newTab": {
+    "presets": {
+      "open": "Add preset bookmarks",
+      "title": "Preset bookmarks"
+    },
+    "search": {
+      "urlPlaceholder": "Enter a URL",
+      "searchPlaceholder": "Search the web"
+    }
+  },
+  "toast": {
+    "pinned": "Pinned to new tab page",
+    "blocklistUpdated": "Blocklist updated",
+    "profileDataCleared": "Profile data cleared",
+    "profileDataClearFailed": "Failed to clear profile data",
+    "cookieExported": "Exported cookies.txt",
+    "cookieExportEmpty": "No cookies found for this site",
+    "cookieExportFailed": "Failed to export cookies.txt",
+    "cookieExportOpenPage": "Open a page before exporting cookies",
+    "profileCookieExported": "Exported profile cookies.txt",
+    "profileCookieExportEmpty": "No cookies found in this profile",
+    "profileCookieExportFailed": "Failed to export profile cookies.txt",
+    "siteDataCleared": "Site data cleared",
+    "siteDataClearFailed": "Failed to clear site data",
+  "addToHomeScreenFailed": "This launcher does not support home screen shortcuts",
+    "pressBackAgainToExit": "Press back again to exit"
+  },
+  "usageLimits": {
+    "label": "Usage limits",
+    "description": "Set daily time limits for selected services or the whole app.",
+    "limits": "Limits",
+    "empty": "No usage limits yet.",
+    "emptyHint": "Add a limit to start tracking daily browsing time.",
+    "usageLine": "Today: {{used}} of {{limit}}",
+    "deleteConfirm": "Delete this usage limit?",
+    "scope": {
+      "all": "Whole app",
+      "none": "No services selected"
+    },
+    "editor": {
+      "addTitle": "Add usage limit",
+      "editTitle": "Edit usage limit",
+      "name": "Name",
+      "namePlaceholder": "e.g. Social media",
+      "defaultName": "Limit",
+      "dailyLimit": "Daily limit",
+      "hours": "Hours",
+      "minutes": "Minutes",
+      "scope": "Apply to",
+      "add": "Add",
+      "errorMinutes": "Set a daily limit of at least 1 minute",
+      "errorScope": "Select at least one service or apply to the whole app"
+    },
+    "pin": {
+      "label": "PIN",
+      "hint": "A PIN is required to manage limits and to unlock when a limit is reached. Resets at local midnight.",
+      "set": "PIN is set",
+      "notSet": "No PIN set",
+      "setAction": "Set PIN",
+      "change": "Change",
+      "remove": "Remove",
+      "currentPlaceholder": "Current PIN",
+      "newPlaceholder": "New PIN",
+      "confirmPlaceholder": "Confirm new PIN",
+      "errorEmpty": "PIN cannot be empty",
+      "errorMismatch": "PINs do not match",
+      "errorIncorrect": "Incorrect PIN",
+      "requiredFirst": "Set a PIN first",
+      "confirmEdit": "Enter PIN to edit",
+      "confirmDelete": "Enter PIN to delete"
+    },
+    "lockout": {
+      "title": "Time's up for today",
+      "body": "You've used {{used}} of your {{limit}} daily limit for {{name}}.",
+      "pinPlaceholder": "Enter PIN to unlock",
+      "pinIncorrect": "Incorrect PIN",
+      "unlock": "Unlock for today",
+      "noPinHint": "Set a PIN in Settings → Usage limits to unlock early."
+    }
+  }
+}

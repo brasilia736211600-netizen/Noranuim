@@ -1,0 +1,171 @@
+{
+  "about": {
+    "label": "Sobre",
+    "code": "Código-fonte",
+    "donate": "Doar",
+    "hint": "Informação de Versão, Código-fonte, e links de suporte."
+  },
+  "changelog": {
+    "label": "Registro de alterações",
+    "hint": "Lançamentos e correções recentes do GitHub.",
+    "loading": "Carregando notas de lançamento...",
+    "error": "Falha em carregar notas de lançamento.",
+    "retry": "Repetir",
+    "empty": "Não encontrado notas de lançamento.",
+    "current": "Atual",
+    "noNotes": "Nenhuma nota de lançamento foi fornecida para esta versão."
+  },
+  "common": {
+    "about": "Sobre",
+    "edit": "Editar",
+    "off": "Desligar",
+    "on": "Ligar",
+    "reset": "Reiniciar",
+    "save": "Salvar",
+    "theme": "Tema"
+  },
+  "views": {
+    "rename": "Renomear visualização",
+    "namePlaceholder": "Ver nome",
+    "desktop": {
+      "blankTab": "Aba em branco",
+      "newBlankTab": "Nova aba em branco",
+      "newSplitView": "Nova visão dividida",
+      "newGridView": "Nova visão de grade",
+      "chooseTabToAdd": "Escolha uma guia para adicionar a {{layout}}",
+      "createBlankTabInSlot": "Crie uma nova guia em branco neste slot",
+      "layout": {
+        "split": "Visualização dividida",
+        "grid": "Visualização em grade",
+        "gridFour": "Grade de 4 abas",
+        "deck": "Visualização em Deck"
+      },
+      "deck": "Deck",
+      "groupNamePlaceholder": "Nome do grupo",
+      "newDeckView": "Nova visualização deck",
+      "newGroupFromTab": "Novo grupo a partir da aba",
+      "renameGroup": "Renomear grupo",
+      "tabCount": "{{count}} aba",
+      "tabCount_plural": "{{count}} abas",
+      "ungrouped": "Não agrupado"
+    }
+  },
+  "blocklist": {
+    "label": "Lista de bloqueio da rede",
+    "description": "Bloqueie anúncios e rastreadores com as regras de host do EasyList e EasyPrivacy.",
+    "enable": "Ativar a lista de bloqueio da rede",
+    "statusFetching": "Lista de bloqueio de busca",
+    "lastUpdated": "Última atualização: {{value}}",
+    "refreshNow": "Atualizar Lista de bloqueio"
+  },
+  "buttons": {
+    "cancel": "Cancelar",
+    "closeAll": "Fechar todos",
+    "confirm": "Confirmar",
+    "continue": "Continuar",
+    "openUrl": "Abrir URL",
+    "open": "Aberto",
+    "save": "Salvar",
+    "reopenLastClosedTab": "Reabrir última aba fechada",
+    "restoreTabs": "Abas recentemente fechadas",
+    "toggleSidebar": "Mostrar/ocultar barra lateral"
+  },
+  "menus": {
+    "close": "Fechar",
+    "delete": "Deletar",
+    "desktop": "Site em Modo desktop",
+    "addBookmark": "Adicionar marcador",
+    "editUrl": "URL da guia Editar",
+    "reload": "Recarregar",
+    "scroll": "Voltar ao topo",
+    "share": "Compartilhar",
+    "signOut": "Sair",
+    "tools": "Ferramentas",
+    "openInProfile": "Abrir no perfil",
+    "clearSiteData": "Excluir dados do site",
+    "clearSiteDataConfirm": "Deseja limpar todos os cookies e dados do site “{{host}}”? Isso fará com que você saia deste site.",
+    "duplicate": "Clonar aba",
+    "more": "Mais",
+    "pause": "Pausar aba",
+    "resume": "Retomar aba",
+    "zoom": "Zoom",
+    "viewInSplitView": "Ver na visualização dividida"
+  },
+  "modals": {
+    "downloadVideo": "Baixar vídeo",
+    "downloadOnCobalt": "Baixar vídeo em cobalt.tools",
+    "downloadTab": "Baixar",
+    "cookiesTab": "Dados do site",
+    "exportCookies": "Exportar cookies do site atual",
+    "exportCookiesHint": "Salvar os cookies do site atual como um arquivo cookies.txt.",
+    "exportCookiesButton": "Exportar cookies.txt",
+    "clearSiteDataHint": "Limpar cookies e dados de navegação do site e do perfil atuais."
+  },
+  "native": {
+    "menu_saveImage": "Salvar imagem",
+    "menu_copyImageLink": "Copiar link da imagem",
+    "menu_copyLink": "Copiar link",
+    "menu_openInNewTab": "Abrir em nova aba",
+    "menu_openImageInNewTab": "Abrir imagem em nova aba",
+    "toast_downloadStarted": "O Download foi iniciado, verificar o sistema de notificação",
+    "toast_downloadSucceeded": "Salvo na pasta Downloads",
+    "toast_downloadFailed": "Falha ao baixar",
+    "httpBlocked_title": "Site HTTP bloqueado",
+    "httpBlocked_body": "Este site utiliza uma conexão HTTP insegura. Para permitir o carregamento de sites HTTP, ative a opção \"Permitir sites HTTP\" nas Configurações.",
+    "menu_openInProfile": "Abrir no perfil"
+  },
+  "profiles": {
+    "label": "Perfis",
+    "add": "Adicionar",
+    "edit": "Editar",
+    "save": "Salvar",
+    "namePlaceholder": "Nome do Perfil",
+    "auto": "Automático",
+    "autoProfiles": "Perfis automáticos",
+    "autoProfilesEmpty": "Ainda não há perfis automáticos.",
+    "openLinkInProfile": "Abrir link no perfil",
+    "autoProfileLastUsed": "Última utilização: {{value}}",
+    "autoProfileLastUsedLabel": "Última utilização",
+    "manageAutoProfiles": "Gerenciar perfis automáticos ({{count}})",
+    "deleteAutoProfileConfirm": "Excluir o perfil automático de {{site}}? Isso limpará os dados de navegação armazenados e fechará as abas que o utilizam.",
+    "deleteAllAutoProfiles": "Apagar todos",
+    "deleteAllAutoProfilesConfirm": "Excluir todos os {{count}} perfis automáticos? Isso limpará os dados de navegação armazenados e fechará as abas que os utilizam.",
+    "deleteStaleAutoProfiles": "Excluir os não utilizados há 14 dias"
+  },
+  "settings": {
+    "label": "Configurações",
+    "openExternalLink": "Abrir link externo no navegador do sistema",
+    "redirectToOldReddit": "Redirecionar para o Reddit antigo",
+    "allowHttpWebsite": "Permitir sites HTTP",
+    "inspectable": "Tornar a visualização da web inspecionável",
+    "videoEdgeLongPressTo2x": "Pressione e segure a borda para reproduzir em 2x",
+    "doubleBackToExitApp": "Volte duas vezes para sair do aplicativo",
+    "hideHeader": "Ocultar e exibir a barra de ferramentas na direção da rolagem",
+    "hideToolbarWhenScrolled": "Ocultar a barra de ferramentas quando a página não estiver no topo",
+    "xHomeTimeline": {
+      "label": "Linha do tempo inicial padrão",
+      "forYou": "Para você",
+      "following": "Seguindo"
+    },
+    "sections": {
+      "general": "Geral",
+      "accounts": "Contas e dados",
+      "bookmarksSearch": "Favoritos e pesquisa",
+      "advanced": "Avançada",
+      "about": "Sobre"
+    },
+    "pages": {
+      "browsing": "Preferências",
+      "appearance": "Aparência",
+      "services": "Serviços",
+      "profiles": "Perfis e Sessões",
+      "bookmarks": "Favoritos",
+      "search": "Procurar"
+    },
+    "browsing": {
+      "descriptionNative": "Alternância de funcionalidades.",
+      "descriptionWeb": "Bloqueio de rede e controles de navegação avançados.",
+      "features": "Características"
+    }
+  }
+}

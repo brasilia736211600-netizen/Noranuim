@@ -1,0 +1,52 @@
+{
+  "name": "nora-desktop",
+  "productName": "Nora",
+  "version": "0.2.7",
+  "description": "Facebook, Instagram, Reddit, Threads and X in a single app",
+  "main": "./out/main/index.js",
+  "author": "Nonbili Inc.",
+  "homepage": "https://github.com/nonbili/Nora",
+  "scripts": {
+    "preinstall": "touch ../node_modules/nora",
+    "format": "prettier --write .",
+    "lint": "eslint --cache .",
+    "typecheck:node": "tsc --noEmit -p tsconfig.node.json --composite false -w",
+    "typecheck:web": "tsc --noEmit -p tsconfig.web.json --composite false -w",
+    "typecheck": "npm run typecheck:node & npm run typecheck:web",
+    "start": "electron-vite preview",
+    "dev": "electron-vite dev -w",
+    "build": "electron-vite build",
+    "postinstall0": "electron-builder install-app-deps",
+    "build:unpack": "npm run build && electron-builder --dir",
+    "build:win": "npm run build && electron-builder --win",
+    "build:mac": "electron-vite build && electron-builder --mac",
+    "build:linux": "electron-vite build && electron-builder --linux"
+  },
+  "dependencies": {
+    "@electron-toolkit/preload": "^3.0.2",
+    "@electron-toolkit/utils": "^4.0.0",
+    "electron-context-menu": "^4.1.1",
+    "electron-updater": "^6.6.2"
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-export-namespace-from": "^7.18.9",
+    "@dnd-kit/core": "^6.3.0",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@electron-toolkit/eslint-config-prettier": "^3.0.0",
+    "@electron-toolkit/eslint-config-ts": "^3.1.0",
+    "@radix-ui/themes": "^3.2.1",
+    "@types/node": "^24.1.0",
+    "@types/react-dom": "^19.1.7",
+    "@vitejs/plugin-react": "^4.7.0",
+    "electron": "43.2.0",
+    "electron-builder": "26.1.0",
+    "electron-vite": "^4.0.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "nora": "link:nora",
+    "react-hot-toast": "^2.5.2",
+    "vite": "^7.0.6",
+    "vite-plugin-react-native-web": "^2.5.0"
+  }
+}

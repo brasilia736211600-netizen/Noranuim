@@ -1,0 +1,5 @@
+- fb: Choose HD (video only) or SD (with audio) video download
+- fb: Fix image downloads in Messenger
+- twitter: Fix manual tab switching issue
+- ig: Fix ad blocking
+- tikTok: Improve styling

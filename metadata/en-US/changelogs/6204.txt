@@ -1,0 +1,6 @@
+- Support opening link in new tab
+- Support editing page URL
+- Add search bar to new tab page
+- Fix long press to 2x speed on Instagram Reels
+- Improve blocklist processing performance
+- Twitter: Support setting default homeline tab

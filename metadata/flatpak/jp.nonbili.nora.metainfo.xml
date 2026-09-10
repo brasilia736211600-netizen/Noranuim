@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>jp.nonbili.nora</id>
+
+  <name>Nora</name>
+  <summary>SNS browser</summary>
+
+  <developer id="jp.nonbili">
+    <name>Nonbili Inc.</name>
+  </developer>
+
+  <metadata_license>CC-BY-SA-4.0</metadata_license>
+  <project_license>AGPL-3.0-or-later</project_license>
+
+  <branding>
+    <color type="primary" scheme_preference="light">#99c1f1</color>
+    <color type="primary" scheme_preference="dark">#374151</color>
+  </branding>
+
+  <description>
+    <ul>
+      <li>Block ads and trackers</li>
+      <li>Vertical tabs</li>
+      <li>Deck/Split/Grid view to browse multiple timelines</li>
+      <li>Download fb/ig/tiktok/x video</li>
+      <li>Multiple accounts with separate cookie storage</li>
+      <li>Customize with CSS</li>
+    </ul>
+  </description>
+
+  <keywords>
+    <keyword>sns</keyword>
+    <keyword>browser</keyword>
+    <keyword>instagram</keyword>
+    <keyword>reddit</keyword>
+    <keyword>facebook</keyword>
+    <keyword>x</keyword>
+  </keywords>
+
+  <launchable type="desktop-id">jp.nonbili.nora.desktop</launchable>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/nonbili/Nora-Desktop/a1b6306c718d854e54455da898b98364038820e3/metadata/screenshots/1.png</image>
+      <caption>Start page</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/nonbili/Nora-Desktop/a1b6306c718d854e54455da898b98364038820e3/metadata/screenshots/2.png</image>
+      <caption>Deck view</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/nonbili/Nora-Desktop/a1b6306c718d854e54455da898b98364038820e3/metadata/screenshots/3.png</image>
+      <caption>Download video</caption>
+    </screenshot>
+  </screenshots>
+
+  <url type="homepage">https://github.com/nonbili/Nora-Desktop</url>
+  <url type="vcs-browser">https://github.com/nonbili/Nora</url>
+  <url type="bugtracker">https://github.com/nonbili/Nora/issues</url>
+
+  <content_rating type="oars-1.1" />
+
+  <releases>
+    <release version="0.2.7" date="2026-08-25">
+      <description>
+        <ul>
+          <li>Block YouTube ads, including embedded players in iframes</li>
+          <li>Fix Facebook Reels jumping back to the previous clip when an ad is hidden</li>
+          <li>Fix blocklist fetching stability</li>
+          <li>Translation updates and bug fixes</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.2.6" date="2026-08-18">
+      <description>
+        <ul>
+          <li>Auto update blocklists periodically</li>
+          <li>Add setting to prevent WebRTC IP leaks</li>
+          <li>Prioritize loading active tab on startup</li>
+          <li>Support creating a profile from the new tab screen</li>
+          <li>Add option to hide Facebook feed</li>
+          <li>Strip more tracking parameters from URLs</li>
+          <li>Fix Facebook freezing when scanning ads</li>
+          <li>UI fixes and translation updates</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.2.5" date="2026-08-03">
+      <description>
+        <ul>
+          <li>Support exporting and importing settings</li>
+          <li>Support exporting cookies</li>
+          <li>Fix uploading image to Reddit when blocklist is enabled</li>
+          <li>UI fixes and dependency updates</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.2.4" date="2026-06-26">
+      <description>
+        <ul>
+          <li>Support clearing history</li>
+          <li>UI and performance fixes</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.2.3" date="2026-06-09">
+      <description>
+        <ul>
+          <li>Block cosmetic ad elements</li>
+          <li>Support clearing site data for current tab's host</li>
+          <li>Pin user scripts to toolbar</li>
+          <li>Sync user styles and scripts</li>
+          <li>Support pausing a tab</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.2.2" date="2026-05-20">
+      <description>
+        <ul>
+          <li>Support user scripts</li>
+          <li>Add context menu to sidebar</li>
+          <li>Restore closed tab to original group</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.2.1" date="2026-05-19">
+      <description>
+        <ul>
+          <li>Support vertical tabs</li>
+          <li>Support drag/drop to reorder tabs in split and grid views</li>
+          <li>Support collapsing the sidebar</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.2.0" date="2026-05-17">
+      <description>
+        <ul>
+          <li>Render hovered link URL on bottom left</li>
+          <li>Add "Open in profile" to link context menu</li>
+          <li>Add preset bookmarks for easy toggling</li>
+          <li>Support clearing all webview data from profiles</li>
+          <li>Support one profile per site</li>
+          <li>Support usage limits with password unlock</li>
+          <li>Apply custom styles without reloading</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.1.12" date="2026-04-21">
+      <description>
+        <ul>
+          <li>Support downloading images via context menu</li>
+          <li>Show close button on each tab</li>
+          <li>Support duplicating a tab</li>
+          <li>Support web notifications</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.1.11" date="2026-04-11">
+      <description>
+        <ul>
+          <li>Improve view/tab switching performance and UI stability</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.1.10" date="2026-04-11">
+      <description>
+        <ul>
+          <li>Improve drag and drop animation</li>
+          <li>Prevent blank screen crash after open/close tabs a few times</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.1.9" date="2026-04-11">
+      <description>
+        <ul>
+          <li>Improve empty pane and tab switcher styles</li>
+          <li>Add recently closed menu</li>
+          <li>Support Ctrl/Cmd + T to open new tab</li>
+          <li>Support injecting cookie and editing URL</li>
+          <li>Support dark/light theme</li>
+          <li>Support downloading TikTok video</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.1.8" date="2026-03-25">
+      <description>
+        <ul>
+          <li>Support customizing tab width in deck view</li>
+          <li>Support split view and grid view</li>
+          <li>Support injecting user CSS into webview</li>
+          <li>Add in-app changelog</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.1.7" date="2026-03-20">
+      <description>
+        <ul>
+          <li>Support blocklist (EasyList and EasyPrivacy)</li>
+          <li>Redesign settings and cookie modals</li>
+          <li>Support injecting cookies.txt</li>
+          <li>Improve syncing process</li>
+          <li>Support Swedish language</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.1.6" date="2026-02-19">
+      <description>
+        <ul>
+          <li>Fix blank page</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.1.5" date="2026-02-18">
+      <description>
+        <ul>
+          <li>Support multiple profiles with independent cookie storage</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.1.4" date="2026-01-16">
+      <description>
+        <ul>
+          <li>Support downloading fb/ig/x video</li>
+        </ul>
+      </description>
+    </release>
+    <release version="0.1.3" date="2025-12-24">
+      <description>
+        <ul>
+          <li>Support drag/drop to reorder decks</li>
+          <li>Add context menu</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+</component>

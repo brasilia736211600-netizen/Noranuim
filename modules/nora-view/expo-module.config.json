@@ -1,0 +1,16 @@
+{
+  "platforms": [
+    "android",
+    "ios"
+  ],
+  "android": {
+    "modules": [
+      "expo.modules.noraview.NoraViewModule"
+    ]
+  },
+  "ios": {
+    "modules": [
+      "NoraViewModule"
+    ]
+  }
+}

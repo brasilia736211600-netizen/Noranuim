@@ -1,0 +1,3 @@
+<h2>Funkcje</h2><ul><li>Wiele kont z oddzielnym przechowywaniem plików cookie</li><li>Lista blokowania (EasyList i EasyPrivacy)</li><li>Pobieranie obrazów</li><li>Pobieranie rolek fb/ig</li><li>Zaznaczanie tekstu</li><li>Powiększenie</li><li>Usuwanie parametrów śledzenia z adresu URL</li></ul>
+<h2>Obsługiwane serwisy</h2><ul><li>Bluesky</li><li>Facebook</li><li>Instagram</li><li>LinkedIn</li><li>Reddit</li><li>Threads</li><li>TikTok</li><li>Tumblr</li><li>VK</li><li>X (Twitter)</li></ul>
+<h2>Jak to działa</h2><ul><li>Osadza strony SNS w Android webview</li><li>Wstrzykuje kod blokujący reklamy</li></ul>

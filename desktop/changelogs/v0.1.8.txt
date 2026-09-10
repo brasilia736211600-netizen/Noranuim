@@ -1,0 +1,4 @@
+- Support customizing tab width in deck view
+- Support split view and grid view
+- Support injecting user CSS into webview
+- Add in-app changelog

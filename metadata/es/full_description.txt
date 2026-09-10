@@ -1,0 +1,3 @@
+<h2>Características</h2><ul><li>Múltiples cuentas con almacenamiento de cookies independiente</li><li>Lista de bloqueo (EasyList y EasyPrivacy)</li><li>Descargar imagen</li><li>Descargar fb/ig reel</li><li>Seleccionar texto</li><li>Zoom</li><li>Eliminar parámetros de seguimiento de la URL</li></ul>
+<h2>SNS compatibles</h2><ul><li>Bluesky</li><li>Facebook</li><li>Instagram</li><li>LinkedIn</li><li>Reddit</li><li>Threads</li><li>TikTok</li><li>Tumblr</li><li>VK</li><li>X (Twitter)</li></ul>
+<h2>Cómo funciona</h2><ul><li>Envuelve los sitios web de SNS en un webview de Android</li><li>Inyecta código para bloquear anuncios</li></ul>

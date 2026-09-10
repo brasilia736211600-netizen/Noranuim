@@ -1,0 +1,4 @@
+- Support user styles with custom CSS injection
+- One click to close tab, support restoring closed tabs
+- Return to last active tab when closing a tab
+- Add in-app changelog
