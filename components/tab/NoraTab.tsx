@@ -30,7 +30,7 @@ import { resolveProfileUserAgent } from '@/lib/user-agents'
 import { useContentJs } from '@/lib/hooks/useContentJs'
 import { webRtcGuardScript$ } from '@/lib/webrtc'
 import { composeDocumentStartScript, youTubeGuardScript$ } from '@/lib/youtube-guard';
-import { getTimeSpoofScript } from '@/content/time' from '@/lib/youtube-guard'
+import { getTimeSpoofScript } from '@/content/time'
 import { parseJson } from '@/content/utils'
 import { NavModalContent } from '../modal/NavModal'
 import { useTabAnimation } from './tab-animation'
