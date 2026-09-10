@@ -2,46 +2,113 @@ name: Build APK
 
 on:
   push:
+    branches:
+      - main
     tags:
       - v*
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
+    name: Build full APK
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout
+        uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v6
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
           node-version: 24
 
-      - uses: oven-sh/setup-bun@v2
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
 
-      - name: install and prebuild
+      - name: Show tool versions
         run: |
-          bun link
-          bun install --frozen-lockfile
-          bun bundle:es
-          bun expo prebuild -p android --clean --no-install
+          set -eux
+          node --version
+          bun --version
+          java -version
 
-      - name: build apk
-        run: ./gradlew assembleFullRelease --stacktrace
+      - name: Link workspace
+        run: bun link
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Bundle web assets
+        run: bun bundle:es
+
+      - name: Generate Android project
+        run: bun expo prebuild -p android --clean --no-install
+
+      - name: Show Gradle environment
         working-directory: android
+        run: ./gradlew --version
 
-      # https://github.com/r0adkll/sign-android-release/issues/84#issuecomment-1889636075
-      - name: set build tool version
+      - name: Build full release APK
+        working-directory: android
+        run: ./gradlew assembleFullRelease --stacktrace --no-daemon
+
+      - name: Verify full APK output
+        run: |
+          set -eux
+          ls -lah android/app/build/outputs/apk/full/release
+          test -n "$(find android/app/build/outputs/apk/full/release -maxdepth 1 -name '*.apk' -print -quit)"
+
+      - name: Upload unsigned full APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nora-full-release-unsigned
+          path: android/app/build/outputs/apk/full/release/*-release-unsigned.apk
+          if-no-files-found: error
+
+      - name: Determine release version
+        id: version
+        run: echo "version_code=$(jq -r '.versionCode' package.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Check signing configuration
+        id: signing
+        shell: bash
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          ALIAS: ${{ secrets.ALIAS }}
+          KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          set -eu
+          if [[ -n "$SIGNING_KEY" && -n "$ALIAS" && -n "$KEY_STORE_PASSWORD" && -n "$KEY_PASSWORD" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "Android signing secrets are configured."
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "Android signing secrets are not fully configured; keeping the unsigned APK artifact."
+          fi
+
+      - name: Set Android build-tools version
+        if: steps.signing.outputs.enabled == 'true'
         shell: bash
         run: |
-          BUILD_TOOL_VERSION=$(ls /usr/local/lib/android/sdk/build-tools/ | tail -n 1)
-          echo "BUILD_TOOL_VERSION=$BUILD_TOOL_VERSION" >> $GITHUB_ENV
-          echo build tool version: $BUILD_TOOL_VERSION
-          echo "VERSION_CODE=$(jq -r '.versionCode' package.json)" >> $GITHUB_ENV
+          set -eu
+          BUILD_TOOL_VERSION=$(ls /usr/local/lib/android/sdk/build-tools/ | sort -V | tail -n 1)
+          echo "BUILD_TOOL_VERSION=$BUILD_TOOL_VERSION" >> "$GITHUB_ENV"
+          echo "build-tools version: $BUILD_TOOL_VERSION"
 
-      - uses: r0adkll/sign-android-release@v1
-        name: sign apk
-        id: sign_apk
+      - name: Sign full APK
+        if: steps.signing.outputs.enabled == 'true'
+        uses: r0adkll/sign-android-release@v1
         with:
           releaseDirectory: android/app/build/outputs/apk/full/release
           signingKeyBase64: ${{ secrets.SIGNING_KEY }}
@@ -51,50 +118,98 @@ jobs:
         env:
           BUILD_TOOLS_VERSION: ${{ env.BUILD_TOOL_VERSION }}
 
-      - name: rename apk
+      - name: Rename signed APK
+        if: steps.signing.outputs.enabled == 'true'
+        shell: bash
         run: |
-          sudo apt-get update && sudo apt-get install -y rename
-          rename 's/release-unsigned-signed/release/' *.apk
-        working-directory: android/app/build/outputs/apk/full/release
+          set -eu
+          shopt -s nullglob
+          for apk in android/app/build/outputs/apk/full/release/*-release-unsigned-signed.apk; do
+            mv "$apk" "${apk/-release-unsigned-signed.apk/-release.apk}"
+          done
 
-      - uses: softprops/action-gh-release@v2
-        name: upload apk
+      - name: Upload signed full APK artifact
+        if: steps.signing.outputs.enabled == 'true'
+        uses: actions/upload-artifact@v4
         with:
-          body_path: metadata/en-US/changelogs/${{ env.VERSION_CODE }}04.txt
+          name: nora-full-release-signed
+          path: android/app/build/outputs/apk/full/release/*-release.apk
+          if-no-files-found: error
+
+      - name: Publish GitHub release
+        if: startsWith(github.ref, 'refs/tags/v') && steps.signing.outputs.enabled == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: metadata/en-US/changelogs/${{ steps.version.outputs.version_code }}04.txt
           files: android/app/build/outputs/apk/full/release/*-release.apk
 
   build-foss:
     name: Build FOSS APKs
     runs-on: ubuntu-latest
-    continue-on-error: true
 
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout
+        uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v6
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
         with:
           node-version: 24
 
-      - uses: oven-sh/setup-bun@v2
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
 
-      - name: install and prebuild FOSS variant
+      - name: Show tool versions
         run: |
-          rm -rf modules/nora-view/android/src/full
-          bun link
-          bun install --frozen-lockfile
-          bun bundle:es
-          bun expo prebuild -p android --clean --no-install
-          echo "" >> android/gradle.properties
-          echo 'org.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=768m' >> android/gradle.properties
-          echo 'org.gradle.workers.max=2' >> android/gradle.properties
-          echo 'org.gradle.parallel=false' >> android/gradle.properties
+          set -eux
+          node --version
+          bun --version
+          java -version
 
-      - name: build FOSS APKs
-        run: ./gradlew assembleFossRelease --stacktrace
+      - name: Remove full-only native sources
+        run: rm -rf modules/nora-view/android/src/full
+
+      - name: Link workspace
+        run: bun link
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Bundle web assets
+        run: bun bundle:es
+
+      - name: Generate Android project
+        run: bun expo prebuild -p android --clean --no-install
+
+      - name: Apply FOSS Gradle limits
+        run: |
+          set -eu
+          {
+            echo ''
+            echo 'org.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=768m'
+            echo 'org.gradle.workers.max=2'
+            echo 'org.gradle.parallel=false'
+          } >> android/gradle.properties
+
+      - name: Show Gradle environment
         working-directory: android
+        run: ./gradlew --version
 
-      - name: verify FOSS APKs
+      - name: Build FOSS release APKs
+        working-directory: android
+        run: ./gradlew assembleFossRelease --stacktrace --no-daemon
+
+      - name: Verify FOSS APKs
+        working-directory: android/app/build/outputs/apk/foss/release
         run: |
+          set -eux
           test -f app-foss-armeabi-v7a-release-unsigned.apk
           test -f app-foss-arm64-v8a-release-unsigned.apk
           for apk in app-foss-*-release-unsigned.apk; do
@@ -103,4 +218,10 @@ jobs:
               exit 1
             fi
           done
-        working-directory: android/app/build/outputs/apk/foss/release
+
+      - name: Upload FOSS APK artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nora-foss-release-unsigned
+          path: android/app/build/outputs/apk/foss/release/*-release-unsigned.apk
+          if-no-files-found: error
