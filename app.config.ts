@@ -83,6 +83,7 @@ module.exports = ({ config }: { config: ExpoConfig }) => {
         },
       ],
       './plugins/withAndroidPlugin.ts',
+      './plugins/withR8OptionalClasses.ts',
       'expo-router',
       [
         'expo-splash-screen',
