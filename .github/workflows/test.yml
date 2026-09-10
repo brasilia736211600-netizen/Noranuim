@@ -21,4 +21,4 @@ jobs:
           bun install
 
       - name: test
-        run: bun test
+        run: bun test --preload ./test-preload.ts
