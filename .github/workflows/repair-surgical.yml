@@ -1,0 +1,56 @@
+name: Noranuim Surgical Repair
+
+on:
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  repair:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.head_ref }}
+          fetch-depth: 1
+
+      - name: Fix NoraTab import only when malformed
+        shell: bash
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          path = Path('components/tab/NoraTab.tsx')
+          text = path.read_text()
+          bad = "import { getTimeSpoofScript } from '@/content/time' from '@/lib/youtube-guard'"
+          good = "import { getTimeSpoofScript } from '@/content/time'"
+          if bad not in text:
+              print('NoraTab already corrected; nothing to change.')
+          else:
+              if text.count(bad) != 1:
+                  raise SystemExit(f'Expected exactly one malformed import, found {text.count(bad)}')
+              path.write_text(text.replace(bad, good, 1))
+              print('Corrected exactly one malformed NoraTab import.')
+          PY
+
+      - name: Commit and push surgical repair
+        shell: bash
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if git diff --quiet -- components/tab/NoraTab.tsx; then
+            echo 'No NoraTab change to commit.'
+            exit 0
+          fi
+          git add components/tab/NoraTab.tsx
+          git commit -m 'fix: correct NoraTab time spoof import'
+          git push origin "HEAD:${BRANCH}"
