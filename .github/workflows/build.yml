@@ -25,7 +25,6 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-          cache: gradle
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -156,7 +155,6 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-          cache: gradle
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
