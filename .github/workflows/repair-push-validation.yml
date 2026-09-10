@@ -1,0 +1,53 @@
+name: Noranuim Repair Push Validation
+
+on:
+  push:
+    branches:
+      - fix/noranuim-repair
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Unit and component tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: oven-sh/setup-bun@v2
+      - run: bun link
+      - run: bun install
+      - run: bun test --preload ./test-preload.ts
+
+  android:
+    name: Android full and FOSS builds
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        flavor: [full, foss]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+      - uses: oven-sh/setup-bun@v2
+      - if: matrix.flavor == 'foss'
+        run: rm -rf modules/nora-view/android/src/full
+      - run: bun link
+      - run: bun install
+      - run: bun bundle:es
+      - run: bun expo prebuild -p android --clean --no-install
+      - if: matrix.flavor == 'foss'
+        run: |
+          {
+            echo ''
+            echo 'org.gradle.jvmargs=-Xmx3g -XX:MaxMetaspaceSize=768m'
+            echo 'org.gradle.workers.max=2'
+            echo 'org.gradle.parallel=false'
+          } >> android/gradle.properties
+      - working-directory: android
+        run: ./gradlew assemble${{ matrix.flavor == 'full' && 'Full' || 'Foss' }}Release --stacktrace --no-daemon
