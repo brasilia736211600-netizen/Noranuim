@@ -6,6 +6,7 @@ if (typeof globalThis.location === 'undefined') {
       hostname: 'localhost',
       protocol: 'http:',
     },
+    writable: true,
     configurable: true,
   })
 }
