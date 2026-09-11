@@ -1,14 +1,11 @@
 name: Android Smoke Test
 
 on:
-  workflow_run:
-    workflows: [Build APK]
-    types: [completed]
   workflow_dispatch:
     inputs:
       run_id:
-        description: 'Successful Build APK workflow run ID to test'
-        required: true
+        description: 'Optional Build APK workflow run ID; leave empty to use the latest successful main build'
+        required: false
         type: string
 
 permissions:
@@ -18,55 +15,67 @@ permissions:
 jobs:
   smoke:
     name: Full + FOSS Android smoke
-    if: >-
-      ${{
-        github.event_name == 'workflow_dispatch' ||
-        github.event.workflow_run.conclusion == 'success'
-      }}
     runs-on: macos-14
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
-      - name: Checkout smoke workflow
-        uses: actions/checkout@v5
-
       - name: Select source Build APK run
         id: source
         shell: bash
         env:
-          EVENT_NAME: ${{ github.event_name }}
-          WORKFLOW_RUN_ID: ${{ github.event.workflow_run.id }}
           MANUAL_RUN_ID: ${{ inputs.run_id }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          if [[ "$EVENT_NAME" == "workflow_dispatch" ]]; then
+
+          if [[ -n "$MANUAL_RUN_ID" ]]; then
+            [[ "$MANUAL_RUN_ID" =~ ^[0-9]+$ ]]
             run_id="$MANUAL_RUN_ID"
+            echo "Using explicitly requested Build APK run: $run_id"
           else
-            run_id="$WORKFLOW_RUN_ID"
+            run_id="$(gh api \
+              "repos/${GITHUB_REPOSITORY}/actions/workflows/build.yml/runs?branch=main&status=success&per_page=1" \
+              --jq '.workflow_runs[0].id')"
+            [[ "$run_id" =~ ^[0-9]+$ ]]
+            echo "Using latest successful Build APK run on main: $run_id"
           fi
-          [[ "$run_id" =~ ^[0-9]+$ ]]
+
           echo "run_id=$run_id" >> "$GITHUB_OUTPUT"
-          echo "Testing Build APK workflow run: $run_id"
 
       - name: Download signed Full arm64-v8a artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v4
         with:
           name: nora-full-arm64-v8a-release-signed
           path: smoke/full
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
           run-id: ${{ steps.source.outputs.run_id }}
+          github-token: ${{ github.token }}
 
       - name: Download unsigned FOSS arm64-v8a artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v4
         with:
           name: nora-foss-arm64-v8a-release-unsigned
           path: smoke/foss
-          github-token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
           run-id: ${{ steps.source.outputs.run_id }}
+          github-token: ${{ github.token }}
 
-      - name: Prepare Android emulator
+      - name: Verify downloaded artifacts
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          full_apk="smoke/full/app-full-arm64-v8a-release.apk"
+          foss_apk="smoke/foss/app-foss-arm64-v8a-release-unsigned.apk"
+          test -f "$full_apk"
+          test -f "$foss_apk"
+
+          echo "Source Build APK run: ${{ steps.source.outputs.run_id }}"
+          echo "Full APK:  $(shasum -a 256 "$full_apk")"
+          echo "FOSS APK:  $(shasum -a 256 "$foss_apk")"
+          file "$full_apk" "$foss_apk"
+
+      - name: Start Android emulator and run smoke tests
         uses: reactivecircus/android-emulator-runner@v2.38.0
         with:
           api-level: 35
@@ -87,8 +96,6 @@ jobs:
             mkdir -p smoke/diagnostics
             full_apk="smoke/full/app-full-arm64-v8a-release.apk"
             foss_apk="smoke/foss/app-foss-arm64-v8a-release-unsigned.apk"
-            test -f "$full_apk"
-            test -f "$foss_apk"
 
             build_tools=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)
             aapt2="$build_tools/aapt2"
@@ -101,11 +108,10 @@ jobs:
             test -n "$package_name"
             test -n "$static_activity"
 
-            echo "Full APK SHA-256: $(shasum -a 256 "$full_apk" | awk '{print $1}')" | tee smoke/diagnostics/full-sha256.txt
-            echo "FOSS unsigned SHA-256: $(shasum -a 256 "$foss_apk" | awk '{print $1}')" | tee smoke/diagnostics/foss-unsigned-sha256.txt
             echo "Package: $package_name" | tee smoke/diagnostics/package.txt
             echo "Static launcher: $static_activity" | tee smoke/diagnostics/static-activity.txt
-
+            echo "Full APK SHA-256: $(shasum -a 256 "$full_apk" | awk '{print $1}')" | tee smoke/diagnostics/full-sha256.txt
+            echo "FOSS unsigned SHA-256: $(shasum -a 256 "$foss_apk" | awk '{print $1}')" | tee smoke/diagnostics/foss-unsigned-sha256.txt
             "$apksigner" verify --verbose "$full_apk" | tee smoke/diagnostics/full-signature.txt
 
             sign_foss_for_runtime() {
@@ -177,7 +183,6 @@ jobs:
 
               echo "=== $label ==="
               adb install -r "$apk"
-
               activity="$(adb shell cmd package resolve-activity --brief "$package_name" | tr -d '\r' | awk 'NF {last=$0} END {print last}')"
               test -n "$activity"
               test "$activity" != "No activity found"
@@ -186,18 +191,15 @@ jobs:
               adb shell am force-stop "$package_name"
               adb logcat -c
 
-              echo "Cold launch"
               adb shell am start -W -n "$activity" | tee "smoke/diagnostics/${safe_label}-cold-start.txt"
               wait_for_running
               wait_for_resumed
               adb exec-out screencap -p > "smoke/diagnostics/${safe_label}-cold-launch.png"
-
               adb shell dumpsys activity activities > "smoke/diagnostics/${safe_label}-activity.txt"
               adb shell dumpsys package "$package_name" > "smoke/diagnostics/${safe_label}-package.txt"
               adb logcat -d -v time > "smoke/diagnostics/${safe_label}-first-logcat.txt"
               assert_no_crash_signatures "smoke/diagnostics/${safe_label}-first-logcat.txt"
 
-              echo "Force-stop + relaunch"
               adb shell am force-stop "$package_name"
               adb shell am start -W -n "$activity" | tee "smoke/diagnostics/${safe_label}-relaunch.txt"
               wait_for_running
@@ -229,4 +231,4 @@ jobs:
         if: success()
         run: |
           echo "Android smoke test passed for Build APK run ${{ steps.source.outputs.run_id }}."
-          echo "The production-signed Full APK and the FOSS APK (signed ephemerally for runtime testing) both launched and survived a force-stop/relaunch cycle."
+          echo "No new APK build was performed by this workflow."
