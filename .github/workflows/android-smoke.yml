@@ -112,7 +112,10 @@ jobs:
             mkdir -p smoke/diagnostics
             x64="smoke/full-x86_64/app-full-x86_64-release.apk"
             foss="smoke/foss-x86_64/app-foss-x86_64-release-unsigned.apk"
-            build_tools="$ANDROID_HOME/build-tools/37.0.0"
+            adb_path="$(command -v adb)"
+            test -n "$adb_path"
+            sdk_root="$(cd "$(dirname "$adb_path")/.." && pwd)"
+            build_tools="$sdk_root/build-tools/37.0.0"
             aapt2="$build_tools/aapt2"
             apksigner="$build_tools/apksigner"
             test -x "$aapt2"
