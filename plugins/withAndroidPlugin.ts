@@ -2,6 +2,10 @@ import { ConfigPlugin, withGradleProperties, withMainActivity } from '@expo/conf
 import { withAppBuildGradle } from '@expo/config-plugins/build/plugins/android-plugins.js'
 
 const googlePlayBuild = !!process.env.GOOGLE_PLAY_BUILD
+const ciX86Build = process.env.NORANUIM_CI_X86 === '1'
+const abiCodes = ciX86Build
+  ? "['armeabi-v7a': 3, 'arm64-v8a': 4, 'x86_64': 5]"
+  : "['armeabi-v7a': 3, 'arm64-v8a': 4]"
 
 const SECONDARY_MOUSE_CLICK_BRIDGE = `
   private var lastSecondaryMouseClickTime = -1L
@@ -166,7 +170,7 @@ const withAndroidSigningConfig: ConfigPlugin = (config) => {
     if (!contents.includes('ext.abiCodes =')) {
       contents = contents.replace(
         'android {',
-        `ext.abiCodes = ['armeabi-v7a':3, 'arm64-v8a': 4]
+        `ext.abiCodes = ${abiCodes}
 
 android {
     flavorDimensions "distribution"

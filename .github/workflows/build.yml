@@ -74,6 +74,8 @@ jobs:
         run: bun bundle:es
 
       - name: Generate Android project
+        env:
+          NORANUIM_CI_X86: '1'
         run: bun expo prebuild -p android --clean --no-install
 
       - name: Show Gradle environment
@@ -260,6 +262,8 @@ jobs:
         run: bun bundle:es
 
       - name: Generate Android project
+        env:
+          NORANUIM_CI_X86: '1'
         run: bun expo prebuild -p android --clean --no-install
 
       - name: Apply FOSS Gradle limits
