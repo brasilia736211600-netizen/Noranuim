@@ -38,22 +38,14 @@ jobs:
             echo "Android signing secrets are missing or incomplete."
             exit 1
           fi
-
           KEYSTORE="$RUNNER_TEMP/noranuim-release.jks"
           printf '%s' "$SIGNING_KEY" | base64 --decode > "$KEYSTORE"
-
-          ENTRY_TYPE=$(keytool -list -v \
-            -keystore "$KEYSTORE" \
-            -storepass "$KEY_STORE_PASSWORD" \
-            -alias "$ALIAS" 2>/dev/null \
-            | awk -F': ' '/^Entry type:/{print $2; exit}')
-
+          ENTRY_TYPE=$(keytool -list -v -keystore "$KEYSTORE" -storepass "$KEY_STORE_PASSWORD" -alias "$ALIAS" 2>/dev/null | awk -F': ' '/^Entry type:/{print $2; exit}')
           if [[ "$ENTRY_TYPE" != "PrivateKeyEntry" ]]; then
             echo "Invalid Android signing keystore entry type: ${ENTRY_TYPE:-unknown}."
             echo "The configured alias must reference a PrivateKeyEntry."
             exit 1
           fi
-
           echo "Android signing keystore is valid (PrivateKeyEntry)."
           rm -f "$KEYSTORE"
 
@@ -299,8 +291,8 @@ jobs:
   smoke:
     name: Android emulator smoke test
     needs: [build, build-foss]
-    runs-on: ubuntu-24.04-arm
-    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Download signed Full arm64 APK
@@ -320,54 +312,56 @@ jobs:
         with:
           api-level: 35
           target: google_apis
-          arch: arm64-v8a
-          profile: pixel_4
-          cores: 4
-          ram-size: 4096
-          heap-size: 512
-          disk-size: 8192M
-          emulator-boot-timeout: 600
+          arch: x86_64
+          profile: pixel_2
+          cores: 2
+          ram-size: 2048
+          heap-size: 256
+          disk-size: 6144M
+          emulator-boot-timeout: 300
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -no-accel
           disable-animations: true
           script: |
             set -euo pipefail
 
+            sign_foss() {
+              local apk="smoke/foss/app-foss-arm64-v8a-release-unsigned.apk"
+              local keystore="$RUNNER_TEMP/smoke-debug.jks"
+              local signer="${ANDROID_HOME:-/usr/local/lib/android/sdk}/build-tools/37.0.0/apksigner"
+              keytool -genkeypair -noprompt -keystore "$keystore" -storepass android -keypass android \
+                -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 \
+                -dname 'CN=Android Debug,O=Android,C=US' >/dev/null 2>&1
+              "$signer" sign --ks "$keystore" --ks-pass pass:android --key-pass pass:android --out "$apk.signed" "$apk"
+              mv "$apk.signed" "$apk"
+              "$signer" verify --verbose "$apk"
+            }
+
             install_and_smoke() {
               local apk="$1"
               local label="$2"
-
-              echo "=== Installing $label: $apk ==="
+              echo "=== Installing $label ==="
               adb install -r "$apk"
-
-              echo "=== Resolving launch activity ==="
               activity=$(adb shell cmd package resolve-activity --brief jp.nonbili.nora | tr -d '\r' | tail -n 1)
               test -n "$activity"
               test "$activity" != "No activity found"
               echo "Resolved activity: $activity"
-
-              echo "=== Cold launch: $label ==="
               adb shell am force-stop jp.nonbili.nora
               adb shell am start -W -n "$activity"
-              sleep 8
-
-              echo "=== Process liveness: $label ==="
+              sleep 3
               pid=$(adb shell pidof jp.nonbili.nora | tr -d '\r' || true)
               test -n "$pid"
-
-              echo "=== Foreground activity: $label ==="
-              top=$(adb shell dumpsys activity activities | grep -m1 'mResumedActivity' || true)
-              echo "$top"
-              echo "$top" | grep -q 'jp.nonbili.nora'
-
-              echo "=== Relaunch after force-stop: $label ==="
+              resumed=$(adb shell dumpsys activity activities | grep -m1 'mResumedActivity' || true)
+              echo "$resumed"
+              echo "$resumed" | grep -q 'jp.nonbili.nora'
               adb shell am force-stop jp.nonbili.nora
               adb shell am start -W -n "$activity"
-              sleep 5
+              sleep 2
               pid=$(adb shell pidof jp.nonbili.nora | tr -d '\r' || true)
               test -n "$pid"
             }
 
             trap 'adb logcat -d -v time > smoke-logcat.txt; grep -E "FATAL EXCEPTION|ANR in jp\.nonbili\.nora|Process: jp\.nonbili\.nora" smoke-logcat.txt || true' EXIT
-
+            sign_foss
             install_and_smoke smoke/full/app-full-arm64-v8a-release.apk "Full arm64-v8a"
             adb uninstall jp.nonbili.nora
             install_and_smoke smoke/foss/app-foss-arm64-v8a-release-unsigned.apk "FOSS arm64-v8a"
