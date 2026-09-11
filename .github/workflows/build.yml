@@ -26,6 +26,37 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Validate Android signing keystore
+        shell: bash
+        env:
+          SIGNING_KEY: ${{ secrets.SIGNING_KEY }}
+          ALIAS: ${{ secrets.ALIAS }}
+          KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [[ -z "$SIGNING_KEY" || -z "$ALIAS" || -z "$KEY_STORE_PASSWORD" ]]; then
+            echo "Android signing secrets are missing or incomplete."
+            exit 1
+          fi
+
+          KEYSTORE="$RUNNER_TEMP/noranuim-release.jks"
+          printf '%s' "$SIGNING_KEY" | base64 --decode > "$KEYSTORE"
+
+          ENTRY_TYPE=$(keytool -list -v \
+            -keystore "$KEYSTORE" \
+            -storepass "$KEY_STORE_PASSWORD" \
+            -alias "$ALIAS" 2>/dev/null \
+            | awk -F': ' '/^Entry type:/{print $2; exit}')
+
+          if [[ "$ENTRY_TYPE" != "PrivateKeyEntry" ]]; then
+            echo "Invalid Android signing keystore entry type: ${ENTRY_TYPE:-unknown}."
+            echo "The configured alias must reference a PrivateKeyEntry."
+            exit 1
+          fi
+
+          echo "Android signing keystore is valid (PrivateKeyEntry)."
+          rm -f "$KEYSTORE"
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
