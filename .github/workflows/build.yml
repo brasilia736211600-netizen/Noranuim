@@ -65,7 +65,8 @@ jobs:
         run: |
           set -eux
           ls -lah android/app/build/outputs/apk/full/release
-          test -n "$(find android/app/build/outputs/apk/full/release -maxdepth 1 -name '*.apk' -print -quit)"
+          test -f android/app/build/outputs/apk/full/release/app-full-arm64-v8a-release-unsigned.apk
+          test -f android/app/build/outputs/apk/full/release/app-full-armeabi-v7a-release-unsigned.apk
 
       - name: Upload unsigned full APK artifact
         uses: actions/upload-artifact@v4
@@ -106,7 +107,7 @@ jobs:
           echo "BUILD_TOOL_VERSION=$BUILD_TOOL_VERSION" >> "$GITHUB_ENV"
           echo "build-tools version: $BUILD_TOOL_VERSION"
 
-      - name: Sign full APK
+      - name: Sign full APKs
         if: steps.signing.outputs.enabled == 'true'
         uses: r0adkll/sign-android-release@v1
         with:
@@ -118,25 +119,28 @@ jobs:
         env:
           BUILD_TOOLS_VERSION: ${{ env.BUILD_TOOL_VERSION }}
 
-      - name: Rename signed APK
-        if: steps.signing.outputs.enabled == 'true'
-        shell: bash
-        run: |
-          set -eu
-          shopt -s nullglob
-          for apk in android/app/build/outputs/apk/full/release/*-release-unsigned-signed.apk; do
-            mv "$apk" "${apk/-release-unsigned-signed.apk/-release.apk}"
-          done
-
-      - name: Verify signed APK
+      - name: Rename signed APKs
         if: steps.signing.outputs.enabled == 'true'
         shell: bash
         run: |
           set -eux
           shopt -s nullglob
-          apks=(android/app/build/outputs/apk/full/release/*-release.apk)
-          test "${#apks[@]}" -ge 1
-          for apk in "${apks[@]}"; do
+          signed=(android/app/build/outputs/apk/full/release/*-release-unsigned-signed.apk)
+          test "${#signed[@]}" -eq 2
+          for apk in "${signed[@]}"; do
+            mv "$apk" "${apk/-release-unsigned-signed.apk/-release.apk}"
+          done
+
+      - name: Verify signed APKs
+        if: steps.signing.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          set -eux
+          test -f android/app/build/outputs/apk/full/release/app-full-arm64-v8a-release.apk
+          test -f android/app/build/outputs/apk/full/release/app-full-armeabi-v7a-release.apk
+          signed=(android/app/build/outputs/apk/full/release/*-release.apk)
+          test "${#signed[@]}" -eq 2
+          for apk in "${signed[@]}"; do
             apksigner verify --verbose "$apk"
           done
 
