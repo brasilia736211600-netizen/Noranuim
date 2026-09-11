@@ -175,10 +175,12 @@ jobs:
           set -eux
           arm64=android/app/build/outputs/apk/full/release/app-full-arm64-v8a-release.apk
           armeabi=android/app/build/outputs/apk/full/release/app-full-armeabi-v7a-release.apk
+          apksigner="/usr/local/lib/android/sdk/build-tools/${BUILD_TOOL_VERSION}/apksigner"
+          test -x "$apksigner"
           test -f "$arm64"
           test -f "$armeabi"
-          apksigner verify --verbose "$arm64"
-          apksigner verify --verbose "$armeabi"
+          "$apksigner" verify --verbose "$arm64"
+          "$apksigner" verify --verbose "$armeabi"
 
       - name: Upload signed arm64-v8a APK
         if: steps.signing.outputs.enabled == 'true'
