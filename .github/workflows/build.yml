@@ -82,7 +82,7 @@ jobs:
 
       - name: Build full release APK
         working-directory: android
-        run: ./gradlew assembleFullRelease --stacktrace --no-daemon
+        run: ./gradlew assembleFullRelease --stacktrace --no-daemon -PreactNativeArchitectures=armeabi-v7a,arm64-v8a,x86_64
 
       - name: Verify full APK output
         run: |
@@ -90,6 +90,7 @@ jobs:
           ls -lah android/app/build/outputs/apk/full/release
           test -f android/app/build/outputs/apk/full/release/app-full-arm64-v8a-release-unsigned.apk
           test -f android/app/build/outputs/apk/full/release/app-full-armeabi-v7a-release-unsigned.apk
+          test -f android/app/build/outputs/apk/full/release/app-full-x86_64-release-unsigned.apk
 
       - name: Upload unsigned arm64-v8a APK
         uses: actions/upload-artifact@v4
@@ -103,6 +104,13 @@ jobs:
         with:
           name: nora-full-armeabi-v7a-release-unsigned
           path: android/app/build/outputs/apk/full/release/app-full-armeabi-v7a-release-unsigned.apk
+          if-no-files-found: error
+
+      - name: Upload unsigned x86_64 APK for CI smoke
+        uses: actions/upload-artifact@v4
+        with:
+          name: nora-full-x86_64-release-unsigned
+          path: android/app/build/outputs/apk/full/release/app-full-x86_64-release-unsigned.apk
           if-no-files-found: error
 
       - name: Determine release version
@@ -155,7 +163,7 @@ jobs:
           set -eux
           shopt -s nullglob
           signed=(android/app/build/outputs/apk/full/release/*-release-unsigned-signed.apk)
-          test "${#signed[@]}" -eq 2
+          test "${#signed[@]}" -eq 3
           for apk in "${signed[@]}"; do
             mv "$apk" "${apk/-release-unsigned-signed.apk/-release.apk}"
           done
@@ -167,12 +175,15 @@ jobs:
           set -eux
           arm64=android/app/build/outputs/apk/full/release/app-full-arm64-v8a-release.apk
           armeabi=android/app/build/outputs/apk/full/release/app-full-armeabi-v7a-release.apk
+          x86_64=android/app/build/outputs/apk/full/release/app-full-x86_64-release.apk
           apksigner="/usr/local/lib/android/sdk/build-tools/${BUILD_TOOL_VERSION}/apksigner"
           test -x "$apksigner"
           test -f "$arm64"
           test -f "$armeabi"
+          test -f "$x86_64"
           "$apksigner" verify --verbose "$arm64"
           "$apksigner" verify --verbose "$armeabi"
+          "$apksigner" verify --verbose "$x86_64"
 
       - name: Upload signed arm64-v8a APK
         if: steps.signing.outputs.enabled == 'true'
@@ -188,6 +199,14 @@ jobs:
         with:
           name: nora-full-armeabi-v7a-release-signed
           path: android/app/build/outputs/apk/full/release/app-full-armeabi-v7a-release.apk
+          if-no-files-found: error
+
+      - name: Upload signed x86_64 APK for CI smoke
+        if: steps.signing.outputs.enabled == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nora-full-x86_64-release-signed
+          path: android/app/build/outputs/apk/full/release/app-full-x86_64-release.apk
           if-no-files-found: error
 
       - name: Publish GitHub release
@@ -259,7 +278,7 @@ jobs:
 
       - name: Build FOSS release APKs
         working-directory: android
-        run: ./gradlew assembleFossRelease --stacktrace --no-daemon
+        run: ./gradlew assembleFossRelease --stacktrace --no-daemon -PreactNativeArchitectures=armeabi-v7a,arm64-v8a,x86_64
 
       - name: Verify FOSS APKs
         working-directory: android/app/build/outputs/apk/foss/release
@@ -267,6 +286,7 @@ jobs:
           set -eux
           test -f app-foss-armeabi-v7a-release-unsigned.apk
           test -f app-foss-arm64-v8a-release-unsigned.apk
+          test -f app-foss-x86_64-release-unsigned.apk
           for apk in app-foss-*-release-unsigned.apk; do
             if unzip -p "$apk" 'classes*.dex' | strings | grep -E 'com[./]google[./]mlkit'; then
               echo "ML Kit reference found in $apk"
@@ -286,4 +306,11 @@ jobs:
         with:
           name: nora-foss-armeabi-v7a-release-unsigned
           path: android/app/build/outputs/apk/foss/release/app-foss-armeabi-v7a-release-unsigned.apk
+          if-no-files-found: error
+
+      - name: Upload FOSS x86_64 APK for CI smoke
+        uses: actions/upload-artifact@v4
+        with:
+          name: nora-foss-x86_64-release-unsigned
+          path: android/app/build/outputs/apk/foss/release/app-foss-x86_64-release-unsigned.apk
           if-no-files-found: error
