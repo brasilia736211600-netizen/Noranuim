@@ -112,14 +112,23 @@ jobs:
             mkdir -p smoke/diagnostics
             x64="smoke/full-x86_64/app-full-x86_64-release.apk"
             foss="smoke/foss-x86_64/app-foss-x86_64-release-unsigned.apk"
-            adb_path="$(command -v adb)"
-            test -n "$adb_path"
-            sdk_root="$(cd "$(dirname "$adb_path")/.." && pwd)"
+
+            sdk_root="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+            if [[ -z "$sdk_root" ]]; then
+              adb_path="$(command -v adb)"
+              test -n "$adb_path"
+              adb_real="$(realpath "$adb_path")"
+              sdk_root="$(cd "$(dirname "$adb_real")/.." && pwd)"
+            fi
+            test -d "$sdk_root/platform-tools"
             build_tools="$sdk_root/build-tools/37.0.0"
             aapt2="$build_tools/aapt2"
             apksigner="$build_tools/apksigner"
             test -x "$aapt2"
             test -x "$apksigner"
+            echo "Android SDK root: $sdk_root"
+            echo "Android Build Tools: $build_tools"
+
             package_name=$("$aapt2" dump badging "$x64" | sed -n "s/^package: name='\([^']*\)'.*/\1/p" | head -n1)
             test -n "$package_name"
             echo "$package_name" | tee smoke/diagnostics/package.txt
