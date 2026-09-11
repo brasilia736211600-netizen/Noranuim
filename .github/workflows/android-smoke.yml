@@ -80,7 +80,7 @@ jobs:
           echo "Full x86_64 SHA-256: $(shasum -a 256 "$x64")"
           echo "FOSS x86_64 SHA-256: $(shasum -a 256 "$foss")"
 
-          build_tools=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)
+          build_tools="$ANDROID_HOME/build-tools/37.0.0"
           apksigner="$build_tools/apksigner"
           aapt2="$build_tools/aapt2"
           test -x "$apksigner"
@@ -112,9 +112,11 @@ jobs:
             mkdir -p smoke/diagnostics
             x64="smoke/full-x86_64/app-full-x86_64-release.apk"
             foss="smoke/foss-x86_64/app-foss-x86_64-release-unsigned.apk"
-            build_tools=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -n 1)
+            build_tools="$ANDROID_HOME/build-tools/37.0.0"
             aapt2="$build_tools/aapt2"
             apksigner="$build_tools/apksigner"
+            test -x "$aapt2"
+            test -x "$apksigner"
             package_name=$("$aapt2" dump badging "$x64" | sed -n "s/^package: name='\([^']*\)'.*/\1/p" | head -n1)
             test -n "$package_name"
             echo "$package_name" | tee smoke/diagnostics/package.txt
