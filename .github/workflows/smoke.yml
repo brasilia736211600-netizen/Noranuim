@@ -1,0 +1,107 @@
+name: Android Smoke Test
+
+on:
+  workflow_run:
+    workflows: ["Build APK"]
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "Successful Build APK workflow run ID"
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  smoke-arm64:
+    name: Smoke test signed arm64 APK
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == github.event.repository.default_branch)
+    runs-on: macos-14
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Download signed arm64 APK
+        uses: actions/download-artifact@v4
+        with:
+          name: nora-full-arm64-v8a-release-signed
+          path: smoke-apk
+          repository: ${{ github.repository }}
+          run-id: ${{ github.event_name == 'workflow_dispatch' && inputs.run_id || github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+
+      - name: Select APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK="$(find smoke-apk -maxdepth 2 -type f -name '*.apk' -print -quit)"
+          test -n "$APK"
+          echo "APK=$APK" >> "$GITHUB_ENV"
+          ls -lh "$APK"
+
+      - name: Start ARM64 Android emulator and smoke test
+        uses: reactivecircus/android-emulator-runner@v2.38.0
+        with:
+          api-level: 35
+          target: google_apis
+          arch: arm64-v8a
+          profile: pixel_6
+          cores: 3
+          ram-size: 4096M
+          heap-size: 512M
+          disk-size: 8G
+          emulator-options: -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect
+          disable-animations: true
+          force-avd-creation: true
+          emulator-boot-timeout: 900
+          script: |
+            set -euo pipefail
+
+            adb wait-for-device
+            adb shell getprop ro.product.cpu.abilist
+            adb shell getprop ro.build.version.sdk
+
+            adb install -r "$GITHUB_WORKSPACE/$APK"
+
+            package="jp.nonbili.nora"
+            adb shell cmd package path "$package"
+            adb shell cmd package resolve-activity --brief "$package" || true
+
+            adb shell am force-stop "$package"
+            adb shell monkey -p "$package" -c android.intent.category.LAUNCHER 1
+            sleep 12
+
+            pid="$(adb shell pidof "$package" | tr -d '\r' || true)"
+            test -n "$pid"
+
+            activity="$(adb shell dumpsys activity activities | grep -m1 "mResumedActivity" || true)"
+            echo "Resumed activity: $activity"
+            echo "Process: $pid"
+
+            adb logcat -d -t 400 > "$GITHUB_WORKSPACE/smoke-logcat.txt"
+            if grep -Eiq 'FATAL EXCEPTION|Process: jp\.nonbili\.nora.*(has died|died)|java\.lang\.RuntimeException' "$GITHUB_WORKSPACE/smoke-logcat.txt"; then
+              echo "Application crash signature detected in logcat."
+              exit 1
+            fi
+
+            adb shell am force-stop "$package"
+            adb shell monkey -p "$package" -c android.intent.category.LAUNCHER 1
+            sleep 8
+            pid="$(adb shell pidof "$package" | tr -d '\r' || true)"
+            test -n "$pid"
+            echo "Cold relaunch process: $pid"
+
+      - name: Upload smoke logcat on failure
+        if: failure() && hashFiles('smoke-logcat.txt') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: noranuim-android-smoke-logcat
+          path: smoke-logcat.txt
+          if-no-files-found: error
