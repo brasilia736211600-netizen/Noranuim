@@ -68,11 +68,18 @@ jobs:
           test -f android/app/build/outputs/apk/full/release/app-full-arm64-v8a-release-unsigned.apk
           test -f android/app/build/outputs/apk/full/release/app-full-armeabi-v7a-release-unsigned.apk
 
-      - name: Upload unsigned full APK artifact
+      - name: Upload unsigned arm64-v8a APK
         uses: actions/upload-artifact@v4
         with:
-          name: nora-full-release-unsigned
-          path: android/app/build/outputs/apk/full/release/*-release-unsigned.apk
+          name: nora-full-arm64-v8a-release-unsigned
+          path: android/app/build/outputs/apk/full/release/app-full-arm64-v8a-release-unsigned.apk
+          if-no-files-found: error
+
+      - name: Upload unsigned armeabi-v7a APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: nora-full-armeabi-v7a-release-unsigned
+          path: android/app/build/outputs/apk/full/release/app-full-armeabi-v7a-release-unsigned.apk
           if-no-files-found: error
 
       - name: Determine release version
@@ -136,20 +143,27 @@ jobs:
         shell: bash
         run: |
           set -eux
-          test -f android/app/build/outputs/apk/full/release/app-full-arm64-v8a-release.apk
-          test -f android/app/build/outputs/apk/full/release/app-full-armeabi-v7a-release.apk
-          signed=(android/app/build/outputs/apk/full/release/*-release.apk)
-          test "${#signed[@]}" -eq 2
-          for apk in "${signed[@]}"; do
-            apksigner verify --verbose "$apk"
-          done
+          arm64=android/app/build/outputs/apk/full/release/app-full-arm64-v8a-release.apk
+          armeabi=android/app/build/outputs/apk/full/release/app-full-armeabi-v7a-release.apk
+          test -f "$arm64"
+          test -f "$armeabi"
+          apksigner verify --verbose "$arm64"
+          apksigner verify --verbose "$armeabi"
 
-      - name: Upload signed full APK artifact
+      - name: Upload signed arm64-v8a APK
         if: steps.signing.outputs.enabled == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: nora-full-release-signed
-          path: android/app/build/outputs/apk/full/release/*-release.apk
+          name: nora-full-arm64-v8a-release-signed
+          path: android/app/build/outputs/apk/full/release/app-full-arm64-v8a-release.apk
+          if-no-files-found: error
+
+      - name: Upload signed armeabi-v7a APK
+        if: steps.signing.outputs.enabled == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nora-full-armeabi-v7a-release-signed
+          path: android/app/build/outputs/apk/full/release/app-full-armeabi-v7a-release.apk
           if-no-files-found: error
 
       - name: Publish GitHub release
@@ -157,7 +171,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           body_path: metadata/en-US/changelogs/${{ steps.version.outputs.version_code }}04.txt
-          files: android/app/build/outputs/apk/full/release/*-release.apk
+          files: |
+            android/app/build/outputs/apk/full/release/app-full-arm64-v8a-release.apk
+            android/app/build/outputs/apk/full/release/app-full-armeabi-v7a-release.apk
 
   build-foss:
     name: Build FOSS APKs
@@ -234,9 +250,16 @@ jobs:
             fi
           done
 
-      - name: Upload FOSS APK artifacts
+      - name: Upload FOSS arm64-v8a APK
         uses: actions/upload-artifact@v4
         with:
-          name: nora-foss-release-unsigned
-          path: android/app/build/outputs/apk/foss/release/*-release-unsigned.apk
+          name: nora-foss-arm64-v8a-release-unsigned
+          path: android/app/build/outputs/apk/foss/release/app-foss-arm64-v8a-release-unsigned.apk
+          if-no-files-found: error
+
+      - name: Upload FOSS armeabi-v7a APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: nora-foss-armeabi-v7a-release-unsigned
+          path: android/app/build/outputs/apk/foss/release/app-foss-armeabi-v7a-release-unsigned.apk
           if-no-files-found: error
