@@ -93,7 +93,8 @@ jobs:
             echo "Android signing secrets are configured."
           else
             echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "Android signing secrets are not fully configured; keeping the unsigned APK artifact."
+            echo "Android signing secrets are missing or incomplete."
+            exit 1
           fi
 
       - name: Set Android build-tools version
@@ -125,6 +126,18 @@ jobs:
           shopt -s nullglob
           for apk in android/app/build/outputs/apk/full/release/*-release-unsigned-signed.apk; do
             mv "$apk" "${apk/-release-unsigned-signed.apk/-release.apk}"
+          done
+
+      - name: Verify signed APK
+        if: steps.signing.outputs.enabled == 'true'
+        shell: bash
+        run: |
+          set -eux
+          shopt -s nullglob
+          apks=(android/app/build/outputs/apk/full/release/*-release.apk)
+          test "${#apks[@]}" -ge 1
+          for apk in "${apks[@]}"; do
+            apksigner verify --verbose "$apk"
           done
 
       - name: Upload signed full APK artifact
