@@ -13,11 +13,12 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window')
 const WIDGET_SIZE = 48
 
 export const FloatingSwitcher = observer(function FloatingSwitcher() {
-  const activeTabId = ui$.activeTabId.get()
   const tabs = tabs$.tabs.get() ?? []
   const profiles = settings$.profiles.get() ?? []
+  const activeTabIndex = tabs$.activeTabIndex.get()
+  const activeTabId = tabs[activeTabIndex]?.id
 
-  const activeTab = tabs.find(t => t.id === activeTabId)
+  const activeTab = tabs[activeTabIndex]
   const currentProfile = profiles.find(p => p.id === (activeTab?.profile || 'default'))
 
   const translateX = useSharedValue(SCREEN_WIDTH - WIDGET_SIZE - 16)
