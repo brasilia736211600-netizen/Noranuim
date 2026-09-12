@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { View, Pressable, Dimensions } from 'react-native'
 import { PanGestureHandler } from 'react-native-gesture-handler'
 import Animated, { useAnimatedGestureHandler, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
-import { useValue } from '@legendapp/state/react'
+import { observer } from '@legendapp/state/react'
 import { settings$ } from '@/states/settings'
 import { ui$ } from '@/states/ui'
 import { NouText } from './NouText'
@@ -12,17 +12,17 @@ import { tabs$ } from '@/states/tabs'
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window')
 const WIDGET_SIZE = 48
 
-export function FloatingSwitcher() {
-  const activeTabId = useValue(ui$.activeTabId)
-  const tabs = useValue(tabs$.tabs)
-  const profiles = useValue(settings$.profiles)
-  
+export const FloatingSwitcher = observer(function FloatingSwitcher() {
+  const activeTabId = ui$.activeTabId.get()
+  const tabs = tabs$.tabs.get() ?? []
+  const profiles = settings$.profiles.get() ?? []
+
   const activeTab = tabs.find(t => t.id === activeTabId)
   const currentProfile = profiles.find(p => p.id === (activeTab?.profile || 'default'))
-  
+
   const translateX = useSharedValue(SCREEN_WIDTH - WIDGET_SIZE - 16)
   const translateY = useSharedValue(SCREEN_HEIGHT - WIDGET_SIZE - 100)
-  
+
   const [expanded, setExpanded] = useState(false)
 
   const gestureHandler = useAnimatedGestureHandler({
@@ -35,7 +35,6 @@ export function FloatingSwitcher() {
       translateY.value = ctx.startY + event.translationY
     },
     onEnd: () => {
-      // Snap to bounds
       if (translateX.value < 16) translateX.value = withSpring(16)
       if (translateX.value > SCREEN_WIDTH - WIDGET_SIZE - 16) translateX.value = withSpring(SCREEN_WIDTH - WIDGET_SIZE - 16)
       if (translateY.value < 50) translateY.value = withSpring(50)
@@ -78,7 +77,7 @@ export function FloatingSwitcher() {
               ))}
             </View>
           )}
-          
+
           <Pressable
             onPress={() => setExpanded(!expanded)}
             style={{ width: WIDGET_SIZE, height: WIDGET_SIZE, borderRadius: WIDGET_SIZE / 2, backgroundColor: currentProfile.color || '#6366f1' }}
@@ -90,4 +89,4 @@ export function FloatingSwitcher() {
       </Animated.View>
     </PanGestureHandler>
   )
-}
+})
