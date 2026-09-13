@@ -48,7 +48,8 @@ done
 wait_for_resumed() {
   local deadline=$((SECONDS + 120))
   while (( SECONDS < deadline )); do
-    if adb shell dumpsys activity activities | grep -m1 'mResumedActivity' | grep -q "$package_name"; then return 0; fi
+    if adb shell dumpsys activity activities | grep -E -m1 "mResumedActivity|topResumedActivity" | grep -q "$package_name"; then return 0; fi
+    if adb shell dumpsys window windows | grep -E -m1 "mCurrentFocus|mFocusedApp" | grep -q "$package_name"; then return 0; fi
     sleep 2
 done
   return 1
@@ -71,14 +72,22 @@ smoke_apk() {
   echo "$activity" > "smoke/diagnostics/${safe}-activity.txt"
   adb shell am force-stop "$package_name"
   adb logcat -c
+  set +e
   adb shell am start -W -n "$activity" | tee "smoke/diagnostics/${safe}-cold-start.txt"
+  start_status=${PIPESTATUS[0]}
+  set -e
+  echo "am start -W exit: $start_status" >> "smoke/diagnostics/${safe}-cold-start.txt"
   wait_for_running
   wait_for_resumed
   adb exec-out screencap -p > "smoke/diagnostics/${safe}-cold-launch.png"
   adb logcat -d -v time > "smoke/diagnostics/${safe}-first-logcat.txt"
   assert_no_crash "smoke/diagnostics/${safe}-first-logcat.txt"
   adb shell am force-stop "$package_name"
+  set +e
   adb shell am start -W -n "$activity" | tee "smoke/diagnostics/${safe}-relaunch.txt"
+  start_status=${PIPESTATUS[0]}
+  set -e
+  echo "am start -W exit: $start_status" >> "smoke/diagnostics/${safe}-relaunch.txt"
   wait_for_running
   wait_for_resumed
   adb exec-out screencap -p > "smoke/diagnostics/${safe}-relaunch.png"
