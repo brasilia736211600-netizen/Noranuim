@@ -64,7 +64,7 @@ export function FloatingSwitcher() {
                   onPress={() => {
                     const tabIndex = tabs.findIndex(t => t.id === activeTabId)
                     if (tabIndex !== -1) {
-                      tabs$ .tabs[tabIndex].profile.set(p.id)
+                      tabs$.tabs[tabIndex].profile.set(p.id)
                     }
                     setExpanded(false)
                   }}
