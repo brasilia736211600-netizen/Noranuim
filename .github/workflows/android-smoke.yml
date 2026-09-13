@@ -98,7 +98,10 @@ jobs:
       - name: Start Android emulator and run smoke tests
         uses: reactivecircus/android-emulator-runner@v2.38.0
         with:
-          api-level: 35
+          # API 35 has shown guest-system instability on the hosted macOS runner
+          # (system_server abort followed by package-service Broken pipe). API 34
+          # is sufficient for runtime smoke coverage and is the stable runner path.
+          api-level: 34
           target: google_apis
           arch: x86_64
           profile: pixel_4
@@ -107,8 +110,9 @@ jobs:
           heap-size: 512M
           disk-size: 8192M
           emulator-boot-timeout: 600
-          emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
           disable-animations: true
+          disable-spellchecker: true
           force-avd-creation: true
           script: bash .github/scripts/android-smoke.sh
 
