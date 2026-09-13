@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { View, Pressable, Dimensions } from 'react-native'
-import { PanGestureHandler } from 'react-native-gesture-handler'
-import Animated, { useAnimatedGestureHandler, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
+import { Gesture, GestureDetector } from 'react-native-gesture-handler'
+import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
 import { useValue } from '@legendapp/state/react'
 import { settings$ } from '@/states/settings'
 import { NouText } from './NouText'
@@ -22,25 +22,26 @@ export function FloatingSwitcher() {
 
   const translateX = useSharedValue(SCREEN_WIDTH - WIDGET_SIZE - 16)
   const translateY = useSharedValue(SCREEN_HEIGHT - WIDGET_SIZE - 100)
+  const gestureStartX = useSharedValue(SCREEN_WIDTH - WIDGET_SIZE - 16)
+  const gestureStartY = useSharedValue(SCREEN_HEIGHT - WIDGET_SIZE - 100)
 
   const [expanded, setExpanded] = useState(false)
 
-  const gestureHandler = useAnimatedGestureHandler({
-    onStart: (_, ctx: any) => {
-      ctx.startX = translateX.value
-      ctx.startY = translateY.value
-    },
-    onActive: (event, ctx: any) => {
-      translateX.value = ctx.startX + event.translationX
-      translateY.value = ctx.startY + event.translationY
-    },
-    onEnd: () => {
+  const gesture = Gesture.Pan()
+    .onStart(() => {
+      gestureStartX.value = translateX.value
+      gestureStartY.value = translateY.value
+    })
+    .onUpdate(event => {
+      translateX.value = gestureStartX.value + event.translationX
+      translateY.value = gestureStartY.value + event.translationY
+    })
+    .onEnd(() => {
       if (translateX.value < 16) translateX.value = withSpring(16)
       if (translateX.value > SCREEN_WIDTH - WIDGET_SIZE - 16) translateX.value = withSpring(SCREEN_WIDTH - WIDGET_SIZE - 16)
       if (translateY.value < 50) translateY.value = withSpring(50)
       if (translateY.value > SCREEN_HEIGHT - WIDGET_SIZE - 50) translateY.value = withSpring(SCREEN_HEIGHT - WIDGET_SIZE - 50)
-    }
-  })
+    })
 
   const style = useAnimatedStyle(() => ({
     transform: [
@@ -52,7 +53,7 @@ export function FloatingSwitcher() {
   if (!activeTab || !currentProfile) return null
 
   return (
-    <PanGestureHandler onGestureEvent={gestureHandler}>
+    <GestureDetector gesture={gesture}>
       <Animated.View style={[style, { position: 'absolute', zIndex: 999 }]}>
         <View className="relative">
           {expanded && (
@@ -87,6 +88,6 @@ export function FloatingSwitcher() {
           </Pressable>
         </View>
       </Animated.View>
-    </PanGestureHandler>
+    </GestureDetector>
   )
 }
