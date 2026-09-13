@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { View, Pressable, Dimensions } from 'react-native'
 import { PanGestureHandler } from 'react-native-gesture-handler'
 import Animated, { useAnimatedGestureHandler, useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
-import { observer } from '@legendapp/state/react'
+import { useValue } from '@legendapp/state/react'
 import { settings$ } from '@/states/settings'
 import { NouText } from './NouText'
 import MaterialIcons from '@react-native-vector-icons/material-icons'
@@ -11,10 +11,10 @@ import { tabs$ } from '@/states/tabs'
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window')
 const WIDGET_SIZE = 48
 
-export const FloatingSwitcher = observer(function FloatingSwitcher() {
-  const tabs = tabs$.tabs.get() ?? []
-  const profiles = settings$.profiles.get() ?? []
-  const activeTabIndex = tabs$.activeTabIndex.get()
+export function FloatingSwitcher() {
+  const tabs = useValue(tabs$.tabs) ?? []
+  const profiles = useValue(settings$.profiles) ?? []
+  const activeTabIndex = useValue(tabs$.activeTabIndex)
   const activeTabId = tabs[activeTabIndex]?.id
 
   const activeTab = tabs[activeTabIndex]
@@ -62,9 +62,9 @@ export const FloatingSwitcher = observer(function FloatingSwitcher() {
                 <Pressable
                   key={p.id}
                   onPress={() => {
-                    const tabIndex = tabs$.tabs.get().findIndex(t => t.id === activeTabId)
+                    const tabIndex = tabs.findIndex(t => t.id === activeTabId)
                     if (tabIndex !== -1) {
-                      tabs$.tabs[tabIndex].profile.set(p.id)
+                      tabs$ .tabs[tabIndex].profile.set(p.id)
                     }
                     setExpanded(false)
                   }}
@@ -89,4 +89,4 @@ export const FloatingSwitcher = observer(function FloatingSwitcher() {
       </Animated.View>
     </PanGestureHandler>
   )
-})
+}
