@@ -27,17 +27,19 @@ Evidence:
 - `98d4ba6...`: non-default `NoraCookies` access no longer falls back to global CookieManager.
 - `93288ae...`: `getCookies` and `clearHostData` use exact non-default ProfileStore profiles or fail closed.
 - `ee19e167...`: Native WebView profile setup records isolation readiness; unsupported/failed non-default profile navigation is blocked; non-default popups fail closed.
-- `ad05da1...`: standalone profile changes cannot reuse an existing WebView instance and unsupported/failed profile setup terminates the standalone window.
-Validation gate: Android runtime proof is still required before declaring the isolation guarantee complete.
+- `ad05da1...`: standalone profile changes cannot reuse existing WebView instances and unsupported/failed profile setup terminates the standalone window.
+Validation gate: Android runtime proof remains required.
 
 ### CP3 — storage/permission isolation coverage
 Status: IMPLEMENTATION COMPLETE / CI VALIDATION REQUIRED
 Evidence:
-- `security/profile-isolation.test.ts`: static regression guards for profile fallbacks, fail-closed setup, secret exclusion, and cleartext policy.
-- `modules/nora-view/android/src/androidTest/.../ProfileIsolationInstrumentedTest.kt`: Android runtime coverage creates two real WebView profiles and verifies distinct Cookies and DOM storage, plus profile-scoped WebStorage and ServiceWorkerController instances.
-- `.github/workflows/security-profile-runtime.yml`: pull-request/manual emulator gate runs the Android instrumentation suite on API 34 x86_64.
-- `security/android-profile-isolation-runtime.sh`: standalone launch/task-switch smoke gate for profile transitions.
-Remaining gap: cache API, IndexedDB content, service-worker registration/content, and runtime permission-state separation need dedicated probes rather than being inferred solely from profile-scoped objects.
+- `security/profile-isolation.test.ts`: static regression guards.
+- `modules/nora-view/android/src/androidTest/.../ProfileIsolationInstrumentedTest.kt`: runtime Cookies/DOM-storage/profile-object coverage.
+- `.github/workflows/security-profile-runtime.yml`: emulator instrumentation gate.
+- `security/android-profile-isolation-runtime.sh`: standalone profile-transition smoke gate.
+Current CI finding: the first runtime attempt failed before tests because the Ubuntu hosted runner had no usable KVM; ADB remained offline until the emulator boot timeout. This is an infrastructure failure, not evidence against the isolation implementation.
+Remediation committed in `4d497f18211675ed4a4cd77e9f7416ce280d965c`: runtime workflow moved to `macos-15-intel`, matching the repository's existing accelerated Android smoke environment, and `setup-java` upgraded to v5.
+Remaining functional gap: dedicated cache API, IndexedDB content, service-worker registration/content, and runtime permission-state separation probes.
 
 ### CP4 — security regression suite
 Status: PENDING
@@ -51,7 +53,7 @@ Goal: CodeRabbit/review, reconcile diff against backup baseline, update PR and p
 An intermediate WebView edit accidentally removed unrelated comments and changed an unrelated locale assignment. The locale assignment was restored in `ddb02d33...`. The branch was reset away from the unsafe `b905996...` commit before continuing.
 
 ## Current branch head
-- `481daee36e67ff9b734591d8f5af7f3196fcfebf`
+- latest committed security workflow change: `4d497f18211675ed4a4cd77e9f7416ce280d965c`
 
 ## Resume protocol after interruption
 1. Read this file first.
