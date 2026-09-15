@@ -40,6 +40,8 @@ class NoraStandaloneActivity : Activity() {
 
   private lateinit var webView: NouWebView
   private lateinit var rootView: FrameLayout
+  private var configuredProfile = "default"
+  private var profileIsolationReady = true
   private var fileChooserCallback: ValueCallback<Array<Uri>>? = null
   private var customView: View? = null
   private var customViewCallback: WebChromeClient.CustomViewCallback? = null
@@ -62,8 +64,6 @@ class NoraStandaloneActivity : Activity() {
     }
     ViewCompat.setOnApplyWindowInsetsListener(rootView) { view, insets ->
       val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
-      // Web content does not consistently honor the top safe-area inset, while sites
-      // such as X already use the bottom CSS safe area for their fixed navigation bar.
       view.setPadding(bars.left, bars.top, bars.right, 0)
       insets
     }
@@ -72,9 +72,16 @@ class NoraStandaloneActivity : Activity() {
       isAppearanceLightStatusBars = false
       isAppearanceLightNavigationBars = false
     }
-    configureProfile(intent.getStringExtra(EXTRA_PROFILE) ?: "default")
+
+    configuredProfile = intent.getStringExtra(EXTRA_PROFILE) ?: "default"
+    profileIsolationReady = configureProfile(configuredProfile)
     configureWebView()
     updateTaskLabel(intent.getStringExtra(EXTRA_LABEL))
+
+    if (!profileIsolationReady) {
+      finishAndRemoveTask()
+      return
+    }
 
     if (savedInstanceState == null) {
       loadIntent(intent)
@@ -85,6 +92,18 @@ class NoraStandaloneActivity : Activity() {
 
   override fun onNewIntent(intent: Intent) {
     super.onNewIntent(intent)
+    val nextProfile = intent.getStringExtra(EXTRA_PROFILE) ?: "default"
+    if (nextProfile != configuredProfile) {
+      // A WebView cannot safely change Chromium profile in place. Never load a new
+      // profile into the existing instance, and never restore the old instance's state.
+      finishAndRemoveTask()
+      startActivity(Intent(this, NoraStandaloneActivity::class.java).apply {
+        data = intent.data
+        putExtras(intent)
+        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+      })
+      return
+    }
     setIntent(intent)
     updateTaskLabel(intent.getStringExtra(EXTRA_LABEL))
     val userAgent = intent.getStringExtra(EXTRA_USER_AGENT)
@@ -94,14 +113,20 @@ class NoraStandaloneActivity : Activity() {
     loadIntent(intent)
   }
 
-  private fun configureProfile(profile: String) {
-    if (profile == "default" || !WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) {
-      return
+  private fun configureProfile(profile: String): Boolean {
+    if (profile == "default") {
+      return true
     }
-    try {
+    if (!WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) {
+      nouController.log("blocked standalone profile: MULTI_PROFILE unsupported")
+      return false
+    }
+    return try {
       WebViewCompat.setProfile(webView, profile)
+      true
     } catch (e: Exception) {
-      nouController.log("set standalone profile failed: ${e.message}")
+      nouController.log("blocked standalone profile setup failed: ${e.message}")
+      false
     }
   }
 
@@ -197,6 +222,10 @@ class NoraStandaloneActivity : Activity() {
   }
 
   private fun loadIntent(intent: Intent) {
+    if (!profileIsolationReady) {
+      finishAndRemoveTask()
+      return
+    }
     val url = intent.dataString ?: return finishAndRemoveTask()
     val scheme = Uri.parse(url).scheme?.lowercase()
     if (scheme != "http" && scheme != "https") {
