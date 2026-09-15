@@ -37,8 +37,8 @@ Evidence:
 - `modules/nora-view/android/src/androidTest/.../ProfileIsolationInstrumentedTest.kt`: runtime Cookies/DOM-storage/profile-object coverage.
 - `.github/workflows/security-profile-runtime.yml`: emulator instrumentation gate.
 - `security/android-profile-isolation-runtime.sh`: standalone profile-transition smoke gate.
-Current CI finding: the first runtime attempt failed before tests because the Ubuntu hosted runner had no usable KVM; ADB remained offline until the emulator boot timeout. This is an infrastructure failure, not evidence against the isolation implementation.
-Remediation committed in `4d497f18211675ed4a4cd77e9f7416ce280d965c`: runtime workflow moved to `macos-15-intel`, matching the repository's existing accelerated Android smoke environment, and `setup-java` upgraded to v5.
+Current CI finding: initial runtime attempts failed before test execution due emulator/runner infrastructure. The latest concrete failure reached a healthy boot but the runner script could not locate `android/gradlew` because the action's execution context differed from the checkout working directory.
+Remediation committed in `d4549ff17b7863e0753c3153ac280335281fffa0`: verify the generated wrapper explicitly and invoke it via `$GITHUB_WORKSPACE/android` inside the emulator action.
 Remaining functional gap: dedicated cache API, IndexedDB content, service-worker registration/content, and runtime permission-state separation probes.
 
 ### CP4 — security regression suite
@@ -53,7 +53,7 @@ Goal: CodeRabbit/review, reconcile diff against backup baseline, update PR and p
 An intermediate WebView edit accidentally removed unrelated comments and changed an unrelated locale assignment. The locale assignment was restored in `ddb02d33...`. The branch was reset away from the unsafe `b905996...` commit before continuing.
 
 ## Current branch head
-- latest committed security workflow change: `4d497f18211675ed4a4cd77e9f7416ce280d965c`
+- latest fix: `d4549ff17b7863e0753c3153ac280335281fffa0`
 
 ## Resume protocol after interruption
 1. Read this file first.
