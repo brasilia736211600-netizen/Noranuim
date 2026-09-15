@@ -37,8 +37,11 @@ Evidence:
 - `modules/nora-view/android/src/androidTest/.../ProfileIsolationInstrumentedTest.kt`: runtime Cookies/DOM-storage/profile-object coverage.
 - `.github/workflows/security-profile-runtime.yml`: emulator instrumentation gate.
 - `security/android-profile-isolation-runtime.sh`: standalone profile-transition smoke gate.
-Current CI finding: initial runtime attempts failed before test execution due emulator/runner infrastructure. The latest concrete failure reached a healthy boot but the runner script could not locate `android/gradlew` because the action's execution context differed from the checkout working directory.
-Remediation committed in `d4549ff17b7863e0753c3153ac280335281fffa0`: verify the generated wrapper explicitly and invoke it via `$GITHUB_WORKSPACE/android` inside the emulator action.
+CI findings:
+- Initial runtime attempt failed because the emulator action executed the script outside the checkout working directory.
+- Follow-up attempt confirmed the generated Gradle wrapper exists before emulator launch, but the action still used its own working context despite the absolute workspace path.
+Remediation: configure the emulator action's documented `working-directory: ./android` input and invoke `./gradlew` directly from that directory.
+Latest remediation commit: `4f0dbcfb4dcad8e3b692f3b8c226924434d2e5ba`.
 Remaining functional gap: dedicated cache API, IndexedDB content, service-worker registration/content, and runtime permission-state separation probes.
 
 ### CP4 — security regression suite
@@ -53,7 +56,7 @@ Goal: CodeRabbit/review, reconcile diff against backup baseline, update PR and p
 An intermediate WebView edit accidentally removed unrelated comments and changed an unrelated locale assignment. The locale assignment was restored in `ddb02d33...`. The branch was reset away from the unsafe `b905996...` commit before continuing.
 
 ## Current branch head
-- latest fix: `d4549ff17b7863e0753c3153ac280335281fffa0`
+- latest CI working-directory fix: `4f0dbcfb4dcad8e3b692f3b8c226924434d2e5ba`
 
 ## Resume protocol after interruption
 1. Read this file first.
