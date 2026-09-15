@@ -47,7 +47,7 @@ Goal: CodeRabbit/review, reconcile diff against backup baseline, update PR and p
 An intermediate WebView edit accidentally removed unrelated comments and changed an unrelated locale assignment. The locale assignment was restored in `ddb02d33...`. The branch was reset away from the unsafe `b905996...` commit before continuing.
 
 ## Current branch head
-- `db327fa9cec4f374a5020692a557e44f5aceca8d`
+- `eeb1f768a940c96e02eaa555322b5dc51bf572c2`
 
 ## Resume protocol after interruption
 1. Read this file first.
