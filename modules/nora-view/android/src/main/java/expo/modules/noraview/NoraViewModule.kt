@@ -156,7 +156,7 @@ class NoraViewModule : Module() {
 
     Function("setLocaleStrings") { v: JavaScriptObject ->
       v.getPropertyNames().forEach {
-        nouController.i18nStrings[it]!!.getString()
+        nouController.i18nStrings[it] = v[it]!!.getString()
       }
     }
     AsyncFunction("setProxyOverride") { type: String, host: String, port: String ->
