@@ -69,8 +69,5 @@ jobs:
           disable-animations: true
           disable-spellchecker: true
           force-avd-creation: true
-          script: |
-            set -euo pipefail
-            cd "$GITHUB_WORKSPACE/android"
-            test -x ./gradlew
-            ./gradlew connectedFullDebugAndroidTest --stacktrace --no-daemon -PreactNativeArchitectures=x86_64
+          working-directory: ./android
+          script: ./gradlew connectedFullDebugAndroidTest --stacktrace --no-daemon -PreactNativeArchitectures=x86_64
