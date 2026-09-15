@@ -204,11 +204,6 @@ val systemMimeTypes = object : MimeTypeLookup {
     MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType)
 }
 
-// Gives a saved file an extension the media scanner understands. `detected` marks
-// a MIME type read off the bytes or the blob itself, which can overrule the name;
-// a type merely guessed from context only fills in a name with nothing usable.
-// An unrecognized extension is otherwise left alone, private formats included --
-// renaming one can be what stops the user loading the file back where it came from.
 fun normalizeFileName(
   name: String,
   mimeType: String?,
@@ -219,8 +214,6 @@ fun normalizeFileName(
   val extMimeType = if (ext == "") null else mimeTypes.mimeTypeFor(ext)
   val fromMimeType = mimeType?.let(mimeTypes::extensionFor)
   val alias = FILE_EXTENSION_ALIASES[ext]
-  // Only a disagreement about the kind of file counts: sniffing routinely reads a
-  // .csv as text/plain, and that must not rename it.
   val contradicted = detected &&
     fromMimeType != null &&
     extMimeType?.substringBefore('/') != mimeType.orEmpty().substringBefore('/')
@@ -235,7 +228,6 @@ fun normalizeFileName(
   return if (ext == "") "$name.$replacement" else name.dropLast(ext.length) + replacement
 }
 
-// Hosts where Google runs WebView-detection for OAuth.
 val GOOGLE_AUTH_HOSTS = setOf("accounts.google.com", "accounts.youtube.com")
 val GOOGLE_AUTH_ORIGIN_RULES = GOOGLE_AUTH_HOSTS.map { "https://$it" }.toSet()
 
@@ -244,7 +236,6 @@ fun isGoogleOAuthPopupUrl(url: String): Boolean {
   return host in GOOGLE_AUTH_HOSTS
 }
 
-// Masks WebView-only fingerprints that Google's sign-in checks.
 val OAUTH_SHIM_SCRIPT = """
   (function() {
     try {
@@ -295,9 +286,6 @@ fun shouldNoraOverrideUrlLoading(view: WebView, url: String): Boolean {
   }
 }
 
-// `<input accept>` may carry extensions (`.jpg`), bare MIME types
-// (`image/png`) or comma separated lists in a single entry. Turn all of them
-// into a plain MIME list the document picker understands.
 fun normalizeAcceptTypes(acceptTypes: Array<String>?): Array<String> {
   val mimeTypes = LinkedHashSet<String>()
   acceptTypes?.forEach { entry ->
@@ -416,6 +404,7 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
   internal var userAgent: String? = null
   private var profileSet = false
   private var profileName = "default"
+  private var profileIsolationReady = true
 
   private var popupContainer: FrameLayout? = null
   private var popupWebView: WebView? = null
@@ -476,12 +465,6 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
   private var lastTouchX = 0f
   private var lastTouchY = 0f
 
-  // Resolving the context menu targets runs elementFromPoint in the page, which forces a
-  // synchronous style+layout flush. On a busy site mid-scroll that costs ~70ms, and pages
-  // whose scrolling is main-thread gated (x.com, whose own pointermove handler is
-  // non-passive) turn that stall into a visible jump under the finger. So it is not run
-  // on every touch: it is posted on the long-press delay and cancelled as soon as the
-  // gesture turns out to be a scroll.
   private val touchHandler = Handler(Looper.getMainLooper())
   private var contextMenuPrewarm: Runnable? = null
   private val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
@@ -640,9 +623,6 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
     }
   }
 
-  // A touch sample carries one bridge message per ACTION_MOVE (~120/s), so it is only
-  // emitted when a setting actually consumes it. Both header auto-hide settings default
-  // to off, which left every scroll paying for messages the JS side discarded.
   internal var scrollEventsEnabled = false
 
   inner class NoraGestureListener : GestureDetector.SimpleOnGestureListener() {
@@ -661,15 +641,9 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
     }
   }
 
-  // Pull down from the top of the page to reload, like Chrome and Firefox do. Off unless
-  // the setting turns it on, so pages with their own overscroll gestures are untouched.
   private var pullToRefreshEnabled = false
   private val swipeRefresh = SwipeRefreshLayout(context)
 
-  // The refresh layout only sees the WebView's own scroll position, which stays at 0 on
-  // pages that scroll an inner element instead of the document. The page reports where
-  // those scrolled away elements are (through NouJsInterface, so off the main thread),
-  // and a drag starting inside one of them is left to the page.
   @Volatile
   private var scrolledRegions: List<RectF> = emptyList()
   private var lastDownX = 0f
@@ -694,8 +668,6 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
 
   private fun isInScrolledRegion(x: Float, y: Float) = scrolledRegions.any { it.contains(x, y) }
 
-  // Runs before the refresh layout's own interception, so the callback below can ask
-  // where this gesture started rather than where the last one did.
   override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
     if (ev.actionMasked == MotionEvent.ACTION_DOWN) {
       lastDownX = ev.x
@@ -749,8 +721,6 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
             if (Uri.parse(url).host in GOOGLE_AUTH_HOSTS) {
               evaluateJavascript(OAUTH_SHIM_SCRIPT, null)
             }
-            // Only a fallback: when the WebView supports document start scripts the
-            // guard is already installed before any page script has run.
             if (documentStartScriptHandler == null) {
               evaluateJavascript(documentStartSource(), null)
             }
@@ -831,6 +801,14 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
           }
 
           val resources = request.resources
+          if (resources.isEmpty() || resources.any {
+              it != PermissionRequest.RESOURCE_AUDIO_CAPTURE &&
+                it != PermissionRequest.RESOURCE_VIDEO_CAPTURE
+            }) {
+            request.deny()
+            return
+          }
+
           val permissionsToRequest = mutableListOf<String>()
 
           if (resources.contains(PermissionRequest.RESOURCE_AUDIO_CAPTURE)) {
@@ -840,14 +818,6 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
             permissionsToRequest.add(android.Manifest.permission.CAMERA)
           }
 
-          if (permissionsToRequest.isEmpty()) {
-            request.grant(resources)
-            return
-          }
-
-          // In a real production app, we should handle the result of the permission request.
-          // For now, we request them and grant the WebView request.
-          // Note: If the user denies, the WebView will just fail to get the stream.
           activity.requestPermissions(permissionsToRequest.toTypedArray(), 101)
           request.grant(resources)
         }
@@ -894,15 +864,7 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
           callback: ValueCallback<Array<Uri>>,
           params: WebChromeClient.FileChooserParams
         ): Boolean {
-          // https://stackoverflow.com/a/62625964
           nouController.setFileChooserCallback(callback)
-          // params.createIntent() only honors acceptTypes[0] and passes it to
-          // setType() verbatim, so extension based accept lists (`.jpg,.png`,
-          // used by desktop Facebook and Reddit) leave the picker with an
-          // invalid MIME filter and it shows no photos or videos at all.
-          // Keep the platform intent so save and folder picker modes retain
-          // their actions and extras, but replace its MIME filter with the
-          // full, normalized list.
           val mimeTypes = normalizeAcceptTypes(params.acceptTypes)
           val intent = params.createIntent().apply {
             type = if (mimeTypes.size == 1) mimeTypes[0] else "*/*"
@@ -922,12 +884,18 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
           isUserGesture: Boolean,
           resultMsg: android.os.Message
         ): Boolean {
+          if (profileName != "default" && !WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) {
+            log("blocked popup: multi-profile isolation unsupported")
+            return false
+          }
           val newWebView = NouWebView(view.getContext())
-          if (profileName != "default" && WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) {
+          if (profileName != "default") {
             try {
               WebViewCompat.setProfile(newWebView, profileName)
             } catch (e: Exception) {
-              log("set popup profile failed: ${e.message}")
+              log("blocked popup: profile setup failed: ${e.message}")
+              newWebView.destroy()
+              return false
             }
           }
           installGoogleOAuthShim(newWebView)
@@ -943,9 +911,6 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
                 popup.evaluateJavascript(OAUTH_SHIM_SCRIPT, null)
               }
               if (decided) return
-              // about:blank is a transient placeholder; JS will navigate the popup
-              // via window.opener. Attach as overlay so it stays alive, but defer the
-              // commit until a real URL appears.
               if (url == "about:blank" || url.startsWith("about:")) {
                 if (popupWebView !== popup) showPopup(popup)
                 return
@@ -963,7 +928,6 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
 
             override fun shouldOverrideUrlLoading(popup: WebView, url: String): Boolean {
               if (!decided) {
-                // Pre-first-load redirect; defer the new-tab decision to onPageStarted.
                 return shouldNoraOverrideUrlLoading(popup, url)
               }
               return shouldNoraOverrideUrlLoading(popup, url)
@@ -1091,9 +1055,6 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
     layoutChildren()
   }
 
-  // On RN 0.85 + Fabric, requestLayout() from imperatively-added children
-  // (the WebView, popup container, etc.) can be swallowed because Yoga only
-  // manages views it owns. Re-layout children on the next frame.
   override fun requestLayout() {
     super.requestLayout()
     post { layoutChildren() }
@@ -1122,8 +1083,6 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
     webView.addJavascriptInterface(NouJsInterface(context, this), "NoraI")
     installGoogleOAuthShim(webView)
 
-    // some websites have `padding-bottom: env(safe-area-inset-bottom)`, this set it to 0
-    // but we need to preserve the IME inset so the WebView resizes when the keyboard opens
     ViewCompat.setOnApplyWindowInsetsListener(webView) { v, insets ->
       val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
       val newInsets = WindowInsetsCompat.Builder()
@@ -1136,6 +1095,10 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
 
   fun load(url: String) {
     if (url == "" || url == "about:blank") return
+    if (profileName != "default" && !profileIsolationReady) {
+      log("blocked navigation: profile isolation unavailable for $profileName")
+      return
+    }
     if (handleExternalAppUrl(context, url)) {
       return
     }
@@ -1183,13 +1146,23 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
   fun setProfile(profile: String) {
     profileName = profile
     if (profileSet) return
-    if (profile == "default") return
+    if (profile == "default") {
+      profileIsolationReady = true
+      profileSet = true
+      return
+    }
+    if (!WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) {
+      profileIsolationReady = false
+      profileSet = true
+      log("profile $profile rejected: MULTI_PROFILE unsupported; failing closed")
+      return
+    }
     try {
-      if (WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) {
-        WebViewCompat.setProfile(webView, profile)
-      }
+      WebViewCompat.setProfile(webView, profile)
+      profileIsolationReady = true
     } catch (e: Exception) {
-      log("setProfile failed: ${e.message}")
+      profileIsolationReady = false
+      log("profile $profile rejected: ${e.message}")
     }
     profileSet = true
   }
@@ -1220,12 +1193,6 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
     documentStartScriptHandler = installDocumentStartScript(webView)
   }
 
-  /**
-   * The guards and the per-site ad blocking exceptions share the one document
-   * start script the WebView takes. Each part is self-contained, so they are
-   * separated by a newline and a semicolon: a part ending in an expression must
-   * not swallow the next one.
-   */
   private fun documentStartSource(): String {
     return listOf(nouController.blocklistExclusionsScript(), documentStartScript)
       .filter { it.isNotEmpty() }
@@ -1250,8 +1217,6 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
       return
     }
 
-    // DownloadManager can't read `blob:` URLs, the page has to hand us the bytes.
-    // The blob knows its own type, so `mimeType` is left out on purpose here.
     if (url.startsWith("blob:")) {
       val name = fileName?.let(JSONObject::quote) ?: "null"
       webView.evaluateJavascript(
@@ -1265,7 +1230,6 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
       try {
         val uri = Uri.parse(url)
         val request = DownloadManager.Request(uri)
-        // A name from Content-Disposition is the server's own, leave it alone.
         val name = fileName ?: normalizeFileName(uri.getLastPathSegment() ?: "download", mimeType)
         request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, name)
         request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
@@ -1282,8 +1246,6 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
     }
   }
 
-  // DownloadManager posts its own notification, files written straight to MediaStore
-  // need one so the save is more than a toast the user has to act on immediately.
   private fun notifySaved(uri: Uri, fileName: String, mimeType: String?) {
     try {
       val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -1317,7 +1279,6 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
         .build()
       manager.notify(notificationId, notification)
     } catch (e: Exception) {
-      // The file is already saved, a missing notification must not fail the download.
       e.printStackTrace()
     }
   }
