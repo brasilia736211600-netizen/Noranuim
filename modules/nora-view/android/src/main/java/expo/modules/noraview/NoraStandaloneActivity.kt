@@ -48,6 +48,7 @@ class NoraStandaloneActivity : Activity() {
     super.onCreate(savedInstanceState)
     window.statusBarColor = Color.BLACK
     window.navigationBarColor = Color.BLACK
+    window.addFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
     WindowCompat.setDecorFitsSystemWindows(window, false)
 
     webView = NouWebView(this).apply {
@@ -146,7 +147,7 @@ class NoraStandaloneActivity : Activity() {
                 this@NoraStandaloneActivity,
                 android.Manifest.permission.CAMERA,
               ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-            else -> true
+            else -> false
           }
         }
         if (allowed.isEmpty()) request.deny() else request.grant(allowed.toTypedArray())
