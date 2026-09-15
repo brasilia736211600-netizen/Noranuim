@@ -31,9 +31,13 @@ Evidence:
 Validation gate: Android runtime proof is still required before declaring the isolation guarantee complete.
 
 ### CP3 — storage/permission isolation coverage
-Status: IN PROGRESS
-Evidence: `security/profile-isolation.test.ts` statically checks forbidden profile fallbacks, main/standalone fail-closed invariants, secret exclusion, and cleartext policy.
-Next: add/execute runtime-oriented Android coverage for Cookies, WebStorage, IndexedDB, service workers, cache and permissions.
+Status: IMPLEMENTATION COMPLETE / CI VALIDATION REQUIRED
+Evidence:
+- `security/profile-isolation.test.ts`: static regression guards for profile fallbacks, fail-closed setup, secret exclusion, and cleartext policy.
+- `modules/nora-view/android/src/androidTest/.../ProfileIsolationInstrumentedTest.kt`: Android runtime coverage creates two real WebView profiles and verifies distinct Cookies and DOM storage, plus profile-scoped WebStorage and ServiceWorkerController instances.
+- `.github/workflows/security-profile-runtime.yml`: pull-request/manual emulator gate runs the Android instrumentation suite on API 34 x86_64.
+- `security/android-profile-isolation-runtime.sh`: standalone launch/task-switch smoke gate for profile transitions.
+Remaining gap: cache API, IndexedDB content, service-worker registration/content, and runtime permission-state separation need dedicated probes rather than being inferred solely from profile-scoped objects.
 
 ### CP4 — security regression suite
 Status: PENDING
@@ -47,7 +51,7 @@ Goal: CodeRabbit/review, reconcile diff against backup baseline, update PR and p
 An intermediate WebView edit accidentally removed unrelated comments and changed an unrelated locale assignment. The locale assignment was restored in `ddb02d33...`. The branch was reset away from the unsafe `b905996...` commit before continuing.
 
 ## Current branch head
-- `eeb1f768a940c96e02eaa555322b5dc51bf572c2`
+- `481daee36e67ff9b734591d8f5af7f3196fcfebf`
 
 ## Resume protocol after interruption
 1. Read this file first.
