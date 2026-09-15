@@ -27,13 +27,13 @@ Evidence:
 - `98d4ba6...`: non-default `NoraCookies` access no longer falls back to global CookieManager.
 - `93288ae...`: `getCookies` and `clearHostData` use exact non-default ProfileStore profiles or fail closed.
 - `ee19e167...`: Native WebView profile setup records isolation readiness; unsupported/failed non-default profile navigation is blocked; non-default popups fail closed.
-- Current branch comparison against `bdef697...` confirms these security edits are present.
+- `ad05da1...`: standalone profile changes cannot reuse an existing WebView instance and unsupported/failed profile setup terminates the standalone window.
 Validation gate: Android runtime proof is still required before declaring the isolation guarantee complete.
 
 ### CP3 — storage/permission isolation coverage
 Status: IN PROGRESS
-Evidence: `security/profile-isolation.test.ts` adds static regression checks for forbidden profile fallbacks, fail-closed markers, secret exclusion, and cleartext policy.
-Next: add runtime-oriented Android coverage for Cookies, WebStorage, IndexedDB, service workers, cache and permissions.
+Evidence: `security/profile-isolation.test.ts` statically checks forbidden profile fallbacks, main/standalone fail-closed invariants, secret exclusion, and cleartext policy.
+Next: add/execute runtime-oriented Android coverage for Cookies, WebStorage, IndexedDB, service workers, cache and permissions.
 
 ### CP4 — security regression suite
 Status: PENDING
@@ -44,10 +44,10 @@ Status: PENDING
 Goal: CodeRabbit/review, reconcile diff against backup baseline, update PR and project state.
 
 ## Important correction made during execution
-An intermediate WebView edit accidentally removed unrelated comments and changed an unrelated locale assignment. The locale assignment was restored in `ddb02d33...`. No intermediate bad WebView commit is reachable from the current branch head; current branch was reset away from `b905996...` before continuing.
+An intermediate WebView edit accidentally removed unrelated comments and changed an unrelated locale assignment. The locale assignment was restored in `ddb02d33...`. The branch was reset away from the unsafe `b905996...` commit before continuing.
 
 ## Current branch head
-- `4d7bee32bce8ad1a28d8f731bec2aff1d43f3fce`
+- `db327fa9cec4f374a5020692a557e44f5aceca8d`
 
 ## Resume protocol after interruption
 1. Read this file first.
