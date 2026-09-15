@@ -35,10 +35,13 @@ object NoraCookies {
 
   // WebView APIs, ProfileStore included, are only safe to touch on the UI thread.
   private suspend fun cookieManager(profile: String): CookieManager? = withContext(Dispatchers.Main) {
-    if (profile != "default" && WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) {
+    if (profile == "default") {
+      CookieManager.getInstance()
+    } else if (WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) {
       ProfileStore.getInstance().getProfile(profile)?.cookieManager
     } else {
-      CookieManager.getInstance()
+      // Never fall back from a requested non-default profile to the global manager.
+      null
     }
   }
 
