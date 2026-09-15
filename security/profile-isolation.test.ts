@@ -25,6 +25,16 @@ describe('security boundary invariants', () => {
     expect(view).toContain('blocked popup: multi-profile isolation unsupported')
   })
 
+  test('standalone activities never reuse a WebView across profile changes', () => {
+    const activity = read('modules/nora-view/android/src/main/java/expo/modules/noraview/NoraStandaloneActivity.kt')
+    expect(activity).toContain('configuredProfile')
+    expect(activity).toContain('profileIsolationReady')
+    expect(activity).toContain('if (nextProfile != configuredProfile)')
+    expect(activity).toContain('finishAndRemoveTask()')
+    expect(activity).toContain('putExtras(intent)')
+    expect(activity).toContain('WebViewCompat.setProfile(webView, profile)')
+  })
+
   test('profile secrets stay out of cloud settings payload construction', () => {
     const sync = read('lib/supabase/sync/settings.ts')
     expect(sync).toContain('proxyUsername')
