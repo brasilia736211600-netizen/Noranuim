@@ -2,7 +2,6 @@ package expo.modules.noraview
 
 import android.os.Handler
 import android.os.Looper
-import android.webkit.CookieManager
 import android.webkit.WebView
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
@@ -35,6 +34,8 @@ class ProfileIsolationInstrumentedTest {
     var secondCookie = ""
     var firstStorage = ""
     var secondStorage = ""
+    var serviceWorkersDistinct = false
+    var webStorageDistinct = false
 
     instrumentation.runOnMainSync {
       val store = ProfileStore.getInstance()
@@ -71,8 +72,7 @@ class ProfileIsolationInstrumentedTest {
         null,
       )
 
-      val handler = Handler(Looper.getMainLooper())
-      handler.postDelayed({
+      Handler(Looper.getMainLooper()).postDelayed({
         firstWebView.evaluateJavascript("localStorage.getItem('profile')") { value ->
           firstStorage = value.trim('"')
           firstWebView.evaluateJavascript("document.cookie") { cookie ->
@@ -98,14 +98,17 @@ class ProfileIsolationInstrumentedTest {
     assertTrue(secondCookie.contains("profile=B"))
     assertNotEquals(firstCookie, secondCookie)
 
-    val firstProfile = ProfileStore.getInstance().getProfile(first)
-    val secondProfile = ProfileStore.getInstance().getProfile(second)
-    assertNotEquals(firstProfile!!.serviceWorkerController, secondProfile!!.serviceWorkerController)
-    assertNotEquals(firstProfile.webStorage, secondProfile.webStorage)
-
     instrumentation.runOnMainSync {
-      ProfileStore.getInstance().deleteProfile(first)
-      ProfileStore.getInstance().deleteProfile(second)
+      val store = ProfileStore.getInstance()
+      val firstProfile = store.getProfile(first)!!
+      val secondProfile = store.getProfile(second)!!
+      serviceWorkersDistinct = firstProfile.serviceWorkerController !== secondProfile.serviceWorkerController
+      webStorageDistinct = firstProfile.webStorage !== secondProfile.webStorage
+      store.deleteProfile(first)
+      store.deleteProfile(second)
     }
+
+    assertTrue("service worker controllers must be profile-scoped", serviceWorkersDistinct)
+    assertTrue("web storage must be profile-scoped", webStorageDistinct)
   }
 }
