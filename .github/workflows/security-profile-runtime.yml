@@ -1,0 +1,69 @@
+name: Security Profile Runtime
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  profile-isolation:
+    name: Android profile isolation instrumentation
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: |
+          set -euo pipefail
+          bun link
+          bun install
+
+      - name: Bundle web assets
+        run: bun bundle:es
+
+      - name: Generate Android project
+        env:
+          NORANUIM_CI_X86: '1'
+        run: bun expo prebuild -p android --clean --no-install
+
+      - name: Start emulator and run profile isolation tests
+        uses: reactivecircus/android-emulator-runner@v2.38.0
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_4
+          cores: 4
+          ram-size: 4096M
+          heap-size: 512M
+          disk-size: 8192M
+          emulator-boot-timeout: 600
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
+          disable-animations: true
+          disable-spellchecker: true
+          force-avd-creation: true
+          script: |
+            set -euo pipefail
+            cd android
+            ./gradlew connectedFullDebugAndroidTest --stacktrace --no-daemon -PreactNativeArchitectures=x86_64
