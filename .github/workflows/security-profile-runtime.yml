@@ -12,10 +12,6 @@ permissions:
 jobs:
   profile-isolation:
     name: Android profile isolation instrumentation
-    # Hosted Ubuntu currently runs the Android Emulator without KVM on this
-    # repository's runner and times out before the tests start. Use the Intel
-    # macOS runner, which already backs the repository's successful Android
-    # smoke gate and provides hardware acceleration for x86_64.
     runs-on: macos-15-intel
     timeout-minutes: 45
 
@@ -51,6 +47,12 @@ jobs:
           NORANUIM_CI_X86: '1'
         run: bun expo prebuild -p android --clean --no-install
 
+      - name: Verify generated Gradle wrapper
+        run: |
+          set -euo pipefail
+          test -x "$GITHUB_WORKSPACE/android/gradlew"
+          test -f "$GITHUB_WORKSPACE/android/gradle/wrapper/gradle-wrapper.properties"
+
       - name: Start emulator and run profile isolation tests
         uses: reactivecircus/android-emulator-runner@v2.38.0
         with:
@@ -69,5 +71,6 @@ jobs:
           force-avd-creation: true
           script: |
             set -euo pipefail
-            cd android
+            cd "$GITHUB_WORKSPACE/android"
+            test -x ./gradlew
             ./gradlew connectedFullDebugAndroidTest --stacktrace --no-daemon -PreactNativeArchitectures=x86_64
