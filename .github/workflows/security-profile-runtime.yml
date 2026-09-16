@@ -12,13 +12,16 @@ permissions:
 jobs:
   profile-isolation:
     name: Android profile isolation instrumentation
-    # GitHub-hosted macOS Intel runners expose fewer than 6 logical cores, so the
-    # Android emulator is forced down to a single virtual core and routinely
-    # exceeds the boot timeout or fails to install the test APKs. Ubuntu runners
-    # provide KVM hardware acceleration, which is the supported way to run the
-    # emulator in CI and is an order of magnitude faster.
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # Emulator acceleration history on GitHub-hosted runners:
+    #  - macOS Intel: fewer than 6 logical cores, so the emulator is forced to a
+    #    single virtual core and routinely times out booting or fails to install
+    #    the test APKs.
+    #  - Ubuntu: /dev/kvm is not usable by the runner user, so the emulator falls
+    #    back to pure TCG software emulation and takes ~15 minutes just to boot.
+    #  - macOS arm64 (Apple Silicon): native Hypervisor.framework acceleration with
+    #    the full core count and an arm64 system image -- the supported combination.
+    runs-on: macos-15
+    timeout-minutes: 60
 
     steps:
       - name: Checkout
@@ -63,7 +66,7 @@ jobs:
         with:
           api-level: 34
           target: google_apis
-          arch: x86_64
+          arch: arm64-v8a
           profile: pixel_4
           cores: 4
           ram-size: 4096M
@@ -76,6 +79,6 @@ jobs:
           force-avd-creation: true
           working-directory: ./android
           script: |
-            set -euo pipefail
+            set -eu
             adb shell cmd package wait-for-ready
-            ./gradlew connectedFullDebugAndroidTest --stacktrace --no-daemon -PreactNativeArchitectures=x86_64
+            ./gradlew connectedFullDebugAndroidTest --stacktrace --no-daemon -PreactNativeArchitectures=arm64-v8a
