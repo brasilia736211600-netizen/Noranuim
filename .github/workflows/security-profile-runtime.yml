@@ -12,7 +12,12 @@ permissions:
 jobs:
   profile-isolation:
     name: Android profile isolation instrumentation
-    runs-on: macos-15-intel
+    # GitHub-hosted macOS Intel runners expose fewer than 6 logical cores, so the
+    # Android emulator is forced down to a single virtual core and routinely
+    # exceeds the boot timeout or fails to install the test APKs. Ubuntu runners
+    # provide KVM hardware acceleration, which is the supported way to run the
+    # emulator in CI and is an order of magnitude faster.
+    runs-on: ubuntu-latest
     timeout-minutes: 45
 
     steps:
@@ -70,4 +75,7 @@ jobs:
           disable-spellchecker: true
           force-avd-creation: true
           working-directory: ./android
-          script: ./gradlew connectedFullDebugAndroidTest --stacktrace --no-daemon -PreactNativeArchitectures=x86_64
+          script: |
+            set -euo pipefail
+            adb shell cmd package wait-for-ready
+            ./gradlew connectedFullDebugAndroidTest --stacktrace --no-daemon -PreactNativeArchitectures=x86_64

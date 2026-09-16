@@ -40,8 +40,9 @@ Evidence:
 CI findings:
 - Initial runtime attempt failed because the emulator action executed the script outside the checkout working directory.
 - Follow-up attempt confirmed the generated Gradle wrapper exists before emulator launch, but the action still used its own working context despite the absolute workspace path.
-Remediation: configure the emulator action's documented `working-directory: ./android` input and invoke `./gradlew` directly from that directory.
-Latest remediation commit: `4f0dbcfb4dcad8e3b692f3b8c226924434d2e5ba`.
+- Remediation: configure the emulator action's documented `working-directory: ./android` input and invoke `./gradlew` directly from that directory.
+- Latest remediation commit: `4f0dbcfb4dcad8e3b692f3b8c226924434d2e5ba`.
+- New CI diagnosis (2026-09-16 fresh runs): the latest runtime run on the old runner booted the emulator but the instrumentation test APK failed to install with `Failed to install-write all apks`; a prior run never finished booting. The macOS Intel runner log shows `Running on a system with less than 6 logical cores. Setting number of virtual cores to 1`, i.e. the hosted macOS runner starves the emulator to a single virtual core. Infrastructure fix applied: the runtime job now runs on `ubuntu-latest` (KVM hardware-accelerated emulator) and waits for the package manager before launching the connected tests.
 Remaining functional gap: dedicated cache API, IndexedDB content, service-worker registration/content, and runtime permission-state separation probes.
 
 ### CP4 — security regression suite
