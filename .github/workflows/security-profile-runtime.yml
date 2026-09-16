@@ -1,0 +1,96 @@
+name: Security Profile Runtime
+
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  profile-isolation:
+    name: Android profile isolation instrumentation
+    # Emulator acceleration history on GitHub-hosted runners:
+    #  - macOS Intel: fewer than 6 logical cores, so the emulator is forced to a
+    #    single virtual core and routinely times out booting or fails to install
+    #    the test APKs.
+    #  - macOS arm64: the aarch64 guest crashes with `failed to initialize HVF:
+    #    Invalid argument`, i.e. hosted Apple-Silicon runners expose no nested
+    #    Hypervisor.framework either.
+    #  - Ubuntu: /dev/kvm is owned by the kvm group the runner user is not in, so
+    #    the emulator falls back to pure TCG software emulation (~15 min boot but
+    #    it does boot). We chmod /dev/kvm for the runner when it exists; when it
+    #    does not, the raised timeouts let the software (TCG) fallback complete.
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Install dependencies
+        run: |
+          set -euo pipefail
+          bun link
+          bun install
+
+      - name: Bundle web assets
+        run: bun bundle:es
+
+      - name: Generate Android project
+        env:
+          NORANUIM_CI_X86: '1'
+        run: bun expo prebuild -p android --clean --no-install
+
+      - name: Verify generated Gradle wrapper
+        run: |
+          set -euo pipefail
+          test -x "$GITHUB_WORKSPACE/android/gradlew"
+          test -f "$GITHUB_WORKSPACE/android/gradle/wrapper/gradle-wrapper.properties"
+
+      - name: Enable emulator KVM acceleration (when available)
+        run: |
+          if [ -e /dev/kvm ]; then
+            sudo chmod 0666 /dev/kvm || true
+            ls -l /dev/kvm || true
+          else
+            echo "No /dev/kvm on this runner; the emulator will fall back to TCG software emulation."
+          fi
+
+      - name: Start emulator and run profile isolation tests
+        uses: reactivecircus/android-emulator-runner@v2.38.0
+        with:
+          api-level: 34
+          target: google_apis
+          arch: x86_64
+          profile: pixel_4
+          cores: 4
+          ram-size: 4096M
+          heap-size: 512M
+          disk-size: 8192M
+          emulator-boot-timeout: 1200
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
+          disable-animations: true
+          disable-spellchecker: true
+          force-avd-creation: true
+          working-directory: ./android
+          script: |
+            set -eu
+            adb shell cmd package wait-for-ready
+            ./gradlew connectedFullDebugAndroidTest --stacktrace --no-daemon -PreactNativeArchitectures=x86_64

@@ -176,7 +176,6 @@ class NoraViewModule : Module() {
       }
     }
 
-
     AsyncFunction("clearProfileData") { profile: String ->
       try {
         if (profile == "default") {
@@ -211,13 +210,16 @@ class NoraViewModule : Module() {
 
         val cookieManager: CookieManager
         val webStorage: WebStorage
-        if (profile != "default" && WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) {
+        if (profile == "default") {
+          cookieManager = CookieManager.getInstance()
+          webStorage = WebStorage.getInstance()
+        } else {
+          if (!WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) {
+            return@AsyncFunction
+          }
           val targetProfile = ProfileStore.getInstance().getProfile(profile) ?: return@AsyncFunction
           cookieManager = targetProfile.cookieManager
           webStorage = targetProfile.webStorage
-        } else {
-          cookieManager = CookieManager.getInstance()
-          webStorage = WebStorage.getInstance()
         }
 
         // getCookie() returns cookies visible to the origin, including ones set
@@ -249,12 +251,14 @@ class NoraViewModule : Module() {
     AsyncFunction("getCookies") Coroutine { url: String, profile: String? ->
       withContext(Dispatchers.Main) {
         try {
-          val manager = if (profile != null && profile != "default" &&
-            WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) {
-            ProfileStore.getInstance().getProfile(profile)?.cookieManager
-              ?: CookieManager.getInstance()
-          } else {
+          val manager = if (profile == null || profile == "default") {
             CookieManager.getInstance()
+          } else {
+            if (!WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) {
+              return@withContext ""
+            }
+            ProfileStore.getInstance().getProfile(profile)?.cookieManager
+              ?: return@withContext ""
           }
           manager.getCookie(url) ?: ""
         } catch (e: Exception) {

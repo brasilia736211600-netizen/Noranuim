@@ -67,7 +67,7 @@ module.exports = ({ config }: { config: ExpoConfig }) => {
         'expo-build-properties',
         {
           android: {
-            usesCleartextTraffic: true,
+            usesCleartextTraffic: false,
             // Build only the ARM ABIs that real devices use; x86/x86_64 are
             // emulator-only and dropping them cuts CI time and disk (see the
             // matching abiCodes in plugins/withAndroidPlugin.ts).
