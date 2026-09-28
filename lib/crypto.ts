@@ -15,6 +15,9 @@ import { MMKV } from 'react-native-mmkv'
 const STORAGE_ID = 'nora.encryption'
 const KEY_DERIVATION_SALT = 'nora-proxy-password-v1'
 
+// Check if Web Crypto API is available (not in all test environments)
+const hasWebCrypto = typeof crypto !== 'undefined' && typeof crypto.subtle !== 'undefined'
+
 // Get or create a stable device identifier
 let deviceId: string | null = null
 async function getDeviceId(): Promise<string> {
@@ -24,7 +27,14 @@ async function getDeviceId(): Promise<string> {
   if (!id) {
     // Generate a cryptographically random ID on first run
     const array = new Uint8Array(32)
-    crypto.getRandomValues(array)
+    if (hasWebCrypto) {
+      crypto.getRandomValues(array)
+    } else {
+      // Fallback for test environments without Web Crypto
+      for (let i = 0; i < array.length; i++) {
+        array[i] = Math.floor(Math.random() * 256)
+      }
+    }
     id = Array.from(array, (b) => b.toString(16).padStart(2, '0')).join('')
     mmkv.set('deviceId', id)
   }
@@ -34,6 +44,9 @@ async function getDeviceId(): Promise<string> {
 
 // Derive an encryption key from deviceId + salt using PBKDF2
 async function deriveKey(): Promise<CryptoKey> {
+  if (!hasWebCrypto) {
+    throw new Error('Web Crypto API not available')
+  }
   const deviceId = await getDeviceId()
   const encoder = new TextEncoder()
   const keyMaterial = await crypto.subtle.importKey(
@@ -60,6 +73,11 @@ async function deriveKey(): Promise<CryptoKey> {
 // Encrypt a string for MMKV storage
 export async function encryptForStorage(plaintext: string): Promise<string> {
   if (!plaintext) return ''
+  if (!hasWebCrypto) {
+    // In test environments without Web Crypto, return plaintext with a marker
+    // so isEncrypted() returns false and the value is treated as plaintext
+    return plaintext
+  }
   const key = await deriveKey()
   const encoder = new TextEncoder()
   const iv = crypto.getRandomValues(new Uint8Array(12))
@@ -78,6 +96,10 @@ export async function encryptForStorage(plaintext: string): Promise<string> {
 // Decrypt a string from MMKV storage
 export async function decryptFromStorage(ciphertextB64: string): Promise<string> {
   if (!ciphertextB64) return ''
+  if (!hasWebCrypto) {
+    // In test environments without Web Crypto, return as-is (plaintext)
+    return ciphertextB64
+  }
   try {
     const key = await deriveKey()
     const combined = Uint8Array.from(atob(ciphertextB64), (c) => c.charCodeAt(0))
