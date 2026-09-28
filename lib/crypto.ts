@@ -90,7 +90,10 @@ export async function encryptForStorage(plaintext: string): Promise<string> {
   const combined = new Uint8Array(iv.length + ciphertext.byteLength)
   combined.set(iv)
   combined.set(new Uint8Array(ciphertext), iv.length)
-  return btoa(String.fromCharCode(...combined))
+  // btoa may not be available in Node.js test env
+  const btoaFn = typeof btoa !== 'undefined' ? btoa : (typeof Buffer !== 'undefined' ? (s: string) => Buffer.from(s, 'binary').toString('base64') : undefined)
+  if (!btoaFn) return plaintext
+  return btoaFn(String.fromCharCode(...combined))
 }
 
 // Decrypt a string from MMKV storage
@@ -102,7 +105,10 @@ export async function decryptFromStorage(ciphertextB64: string): Promise<string>
   }
   try {
     const key = await deriveKey()
-    const combined = Uint8Array.from(atob(ciphertextB64), (c) => c.charCodeAt(0))
+    // atob may not be available in Node.js test env
+    const atobFn = typeof atob !== 'undefined' ? atob : (typeof Buffer !== 'undefined' ? (s: string) => Buffer.from(s, 'base64').toString('binary') : undefined)
+    if (!atobFn) return ciphertextB64
+    const combined = Uint8Array.from(atobFn(ciphertextB64), (c) => c.charCodeAt(0))
     const iv = combined.slice(0, 12)
     const ciphertext = combined.slice(12)
     const plaintext = await crypto.subtle.decrypt(
@@ -122,7 +128,10 @@ export async function decryptFromStorage(ciphertextB64: string): Promise<string>
 export function isEncrypted(value: string): boolean {
   if (!value) return false
   try {
-    const decoded = Uint8Array.from(atob(value), (c) => c.charCodeAt(0))
+    // atob is not available in all environments (Node.js test env)
+    const atobFn = typeof atob !== 'undefined' ? atob : (typeof Buffer !== 'undefined' ? (s: string) => Buffer.from(s, 'base64').toString('binary') : undefined)
+    if (!atobFn) return false
+    const decoded = Uint8Array.from(atobFn(value), (c) => c.charCodeAt(0))
     // Minimum: 12 byte IV + 16 byte authTag = 28 bytes, plus at least 1 byte ciphertext
     return decoded.length >= 29
   } catch {
