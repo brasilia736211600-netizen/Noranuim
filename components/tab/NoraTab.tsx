@@ -696,9 +696,49 @@ export const NoraTab: React.FC<{
     }
   }
 
+  /**
+   * Parses a WebView message payload without ever throwing.
+   *
+   * The payload is page-originated: it may be malformed, truncated, or shaped
+   * like anything. The old code did a bare `JSON.parse(payload)` and then
+   * destructured the result, so a single malformed message threw inside the
+   * event handler and left the rest of the bridge unprocessed.
+   *
+   * Returns null when the payload cannot be read as a message object, so the
+   * caller can drop it instead of crashing. `type` and `data` keep their
+   * original `any` typing so downstream handling is unchanged.
+   */
+  const parseWebviewMessage = (payload: string | object): any => {
+    let parsed: any = payload
+    if (typeof payload === 'string') {
+      try {
+        parsed = JSON.parse(payload)
+      } catch {
+        return null
+      }
+    }
+    if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+      return null
+    }
+    if (typeof parsed.type !== 'string') {
+      return null
+    }
+    // Copy own properties onto a null-prototype object so a payload carrying
+    // "__proto__" or "constructor" cannot influence objects built downstream.
+    const record: any = Object.assign(Object.create(null), parsed)
+    const data: any =
+      record.data !== null && typeof record.data === 'object' && !Array.isArray(record.data)
+        ? Object.assign(Object.create(null), record.data)
+        : {}
+    return { type: record.type, data }
+  }
+
   const onMessage = async (e: { nativeEvent: { payload: string | object } }) => {
     const { payload } = e.nativeEvent
-    const { type, data } = typeof payload == 'string' ? JSON.parse(payload) : payload
+    const message = parseWebviewMessage(payload)
+    // A malformed or non-object payload is dropped rather than thrown.
+    if (!message) return
+    const { type, data } = message
     switch (type) {
       case '[content]':
       case '[kotlin]':

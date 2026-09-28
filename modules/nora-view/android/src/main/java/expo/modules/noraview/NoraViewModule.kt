@@ -1,7 +1,5 @@
 package expo.modules.noraview
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import android.net.Uri
 import android.os.Environment
@@ -19,10 +17,10 @@ import expo.modules.kotlin.functions.Queues
 import expo.modules.kotlin.jni.JavaScriptObject
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
-import expo.modules.kotlin.records.Field
-import expo.modules.kotlin.records.Record
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import android.content.ClipboardManager
+import android.content.ClipData
 import java.io.File
 import java.io.FileOutputStream
 import java.io.FileWriter
@@ -58,7 +56,7 @@ class NoraViewModule : Module() {
 
   private fun applyProxy(settings: NoraSettings) {
     if (WebViewFeature.isFeatureSupported(WebViewFeature.PROXY_OVERRIDE)) {
-      val proxyKey = "${settings.proxyEnabled}|${settings.proxyType}|${settings.proxyHost}|${settings.proxyPort}"
+      val proxyKey = "${settings.proxyEnabled}|${settings.proxyType}|${settings.proxyHost}|${settings.proxyPort}|${settings.proxyUsername}|${settings.proxyPassword}"
       if (proxyKey == lastProxyKey) {
         return
       }
@@ -67,7 +65,12 @@ class NoraViewModule : Module() {
       if (settings.proxyEnabled && settings.proxyHost.isNotEmpty()) {
         val type = if (settings.proxyType == "socks") "socks" else "http"
         val portStr = if (settings.proxyPort.isNotEmpty()) ":${settings.proxyPort}" else ""
-        val proxyRule = "$type://${settings.proxyHost}$portStr"
+        val authStr = if (settings.proxyUsername.isNotEmpty() || settings.proxyPassword.isNotEmpty()) {
+          val user = settings.proxyUsername
+          val pass = settings.proxyPassword
+          if (user.isNotEmpty() && pass.isNotEmpty()) "$user:$pass@" else if (user.isNotEmpty()) "$user@" else ":$pass@"
+        } else ""
+        val proxyRule = "$type://$authStr${settings.proxyHost}$portStr"
         val proxyConfig = ProxyConfig.Builder()
           .addProxyRule(proxyRule)
           .build()
@@ -150,9 +153,13 @@ class NoraViewModule : Module() {
       nouController.setBlocklistExcludedHosts(hosts)
     }.runOnQueue(Queues.MAIN)
 
-    Function("setBlocklist") { blocklist: NoraBlocklist ->
+    // setBlocklist parses a potentially large JSON payload (blockedHosts,
+    // allowedHosts, cosmeticFilters, cosmeticExceptions). Running it on the
+    // main thread blocks the UI. Move off the main queue; DEFAULT is the
+    // module's background work queue (sdk-56 Queues has only MAIN/DEFAULT).
+    AsyncFunction("setBlocklist") { blocklist: NoraBlocklist ->
       nouController.setBlocklist(blocklist)
-    }
+    }.runOnQueue(Queues.DEFAULT)
 
     Function("setLocaleStrings") { v: JavaScriptObject ->
       v.getPropertyNames().forEach {
@@ -331,7 +338,9 @@ class NoraViewModule : Module() {
       }
 
       Prop("inspectable") { _: NoraView, inspectable: Boolean ->
-        WebView.setWebContentsDebuggingEnabled(inspectable)
+        if (BuildConfig.DEBUG) {
+          WebView.setWebContentsDebuggingEnabled(inspectable)
+        }
       }
 
       Prop("scrollEvents") { view: NoraView, enabled: Boolean ->

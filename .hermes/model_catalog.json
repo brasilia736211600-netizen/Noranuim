@@ -1,0 +1,56 @@
+{
+  "last_updated": "2026-09-28T04:45:00+03:00",
+  "next_scout_due": "2026-09-28T10:45:00+03:00",
+  "scout_status": "pending_initial_run",
+  "tiers": {
+    "LOW": {
+      "primary": "cline-free/deepseek-v4.1-flash",
+      "fallback": ["openrouter/google/gemma-2-9b-it:free", "openrouter/meta-llama/llama-3.2-3b-instruct:free"],
+      "context_window": 131072,
+      "reasoning": "fast, free, good for mechanical/recon tasks"
+    },
+    "MEDIUM": {
+      "primary": "cline-free/deepseek-v4.1",
+      "fallback": ["openrouter/mistralai/mistral-nemo:free", "openrouter/google/gemma-2-27b-it:free"],
+      "context_window": 131072,
+      "reasoning": "balanced quality/speed for bugfix/architecture"
+    },
+    "HIGH": {
+      "primary": "cline-free/qwen3-coder-plus",
+      "fallback": ["openrouter/deepseek/deepseek-chat-v3.1:free", "openrouter/mistralai/mistral-large:free"],
+      "context_window": 131072,
+      "reasoning": "strong coding/reasoning for complex fixes"
+    },
+    "XHIGH": {
+      "primary": "freeflow/glm-4.5",
+      "fallback": ["openrouter/qwen/qwen3-235b-a22b:free", "openrouter/mistralai/magistral:free"],
+      "context_window": 131072,
+      "reasoning": "maximum reasoning for security/crypto"
+    }
+  },
+  "benchmarks": {
+    "fixed_prompts": [
+      "Write a concurrent-safe LRU cache in Kotlin with coroutines",
+      "Find the security flaw in this WebView JavaScript bridge code",
+      "Refactor this 200-line React component into custom hooks"
+    ],
+    "scoring": {
+      "correctness": 0.4,
+      "latency_ms": 0.2,
+      "context_usage": 0.2,
+      "structured_output": 0.2
+    }
+  },
+  "providers": {
+    "freeflow": {
+      "endpoint": "https://api.freeflow.example.com/v1",
+      "status": "active",
+      "models": ["deepseek-v4.1-flash", "deepseek-v4.1", "qwen3-coder-plus", "glm-4.5"]
+    },
+    "openrouter": {
+      "endpoint": "https://openrouter.ai/api/v1",
+      "status": "active",
+      "models": ["google/gemma-2-9b-it:free", "meta-llama/llama-3.2-3b-instruct:free", "mistralai/mistral-nemo:free", "google/gemma-2-27b-it:free", "deepseek/deepseek-chat-v3.1:free", "mistralai/mistral-large:free", "qwen/qwen3-235b-a22b:free", "mistralai/magistral:free"]
+    }
+  }
+}

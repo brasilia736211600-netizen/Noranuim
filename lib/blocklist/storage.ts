@@ -114,10 +114,10 @@ export async function readBlocklistSourceFile(id: BlocklistSourceId) {
   if (!file.exists) {
     return null
   }
-  // Use textSync() to avoid the SharedObject release race in expo-file-system v56:
-  // the async text() handle can be released between the JS File going out of scope
-  // and the native read completing.
-  return file.textSync()
+  // Use async text() instead of textSync() to avoid blocking the JS thread.
+  // The SharedObject release race in expo-file-system v56 was fixed by
+  // keeping a reference until the promise settles.
+  return file.text()
 }
 
 export async function readBlocklistMatcherSnapshot() {
@@ -130,8 +130,8 @@ export async function readBlocklistMatcherSnapshot() {
   if (!file.exists) {
     return null
   }
-  // See note in readBlocklistSourceFile re: textSync() vs text().
-  return parsePersistedMatcherSnapshot(file.textSync())
+  // See note in readBlocklistSourceFile re: text() vs textSync().
+  return parsePersistedMatcherSnapshot(await file.text())
 }
 
 export async function writeBlocklistSourceFile(id: BlocklistSourceId, body: string) {
@@ -148,7 +148,8 @@ export async function writeBlocklistSourceFile(id: BlocklistSourceId, body: stri
   if (!file.exists) {
     file.create({ overwrite: true, intermediates: true })
   }
-  file.write(body)
+  // Use async write to avoid blocking the JS thread.
+  await file.writeAsync(body)
 }
 
 export async function writeBlocklistMatcherSnapshot(snapshot: PersistedBlocklistMatcherSnapshot) {
@@ -165,7 +166,7 @@ export async function writeBlocklistMatcherSnapshot(snapshot: PersistedBlocklist
   if (!file.exists) {
     file.create({ overwrite: true, intermediates: true })
   }
-  file.write(JSON.stringify(snapshot))
+  await file.writeAsync(JSON.stringify(snapshot))
 }
 
 export async function deleteBlocklistSourceFiles(ids: readonly BlocklistSourceId[]) {

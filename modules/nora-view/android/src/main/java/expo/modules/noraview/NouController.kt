@@ -44,6 +44,12 @@ class NoraSettings : Record {
 
   @Field
   val proxyPort: String = ""
+
+  @Field
+  val proxyUsername: String = ""
+
+  @Field
+  val proxyPassword: String = ""
 }
 
 class NoraBlocklist : Record {
@@ -100,6 +106,23 @@ class NouController {
 
   fun setFileChooserCallback(callback: ValueCallback<Array<Uri>>) {
     fileChooserCallback = callback
+  }
+
+  /** Clears a held file chooser without delivering a result, for when none can arrive. */
+  fun clearFileChooserCallback() {
+    fileChooserCallback?.onReceiveValue(null)
+    fileChooserCallback = null
+  }
+
+  /** Sets the file chooser callback to null without invoking it. */
+  fun setFileChooserCallback(nullCallback: Nothing?) {
+    fileChooserCallback = null
+  }
+
+  fun onRequestPermissionsResult(requestCode: Int, grantResults: IntArray) {
+    for (view in registeredViews.toList()) {
+      view.onRequestPermissionsResult(requestCode, grantResults)
+    }
   }
 
   fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

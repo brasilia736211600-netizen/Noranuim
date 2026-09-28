@@ -209,7 +209,9 @@ public class NoraViewModule: Module {
       }
 
       Prop("inspectable") { (view: NoraView, inspectable: Bool) in
+        #if DEBUG
         view.setInspectable(inspectable)
+        #endif
       }
 
       Prop("pullToRefresh") { (view: NoraView, enabled: Bool) in

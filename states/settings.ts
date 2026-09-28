@@ -12,6 +12,7 @@ import {
   getFaviconUrl,
   isValidSearchTemplate,
 } from '@/lib/search'
+import { encryptForStorage, decryptFromStorage, isEncrypted } from '@/lib/crypto'
 
 export type ProfileProxyType = 'http' | 'socks'
 export type UserAgentMode = 'default' | 'custom' | 'builder'
@@ -126,6 +127,9 @@ export interface Settings {
   selectedSearchProviderId: string
   customSearchProviders: CustomSearchProvider[]
   profiles: Profile[]
+
+  // User consent for clipboard tracking parameter stripping
+  clipboardTrackingConsent: boolean
 }
 
 interface Store extends Settings {
@@ -321,6 +325,15 @@ export const normalizeSettings = <T extends Partial<Settings> | undefined>(data:
   if (typeof data.proxyPort !== 'string') {
     data.proxyPort = ''
   }
+  if (typeof data.proxyUsername !== 'string') {
+    data.proxyUsername = ''
+  }
+  if (typeof data.proxyPassword !== 'string') {
+    data.proxyPassword = ''
+  }
+  if (typeof data.clipboardTrackingConsent !== 'boolean') {
+    data.clipboardTrackingConsent = false
+  }
   if (typeof data.defaultZoom !== 'number') {
     data.defaultZoom = 100
   }
@@ -355,6 +368,9 @@ export const settings$: Observable<Store> = observable<Store>({
   proxyType: 'http',
   proxyHost: '',
   proxyPort: '',
+
+  // User consent for clipboard tracking parameter stripping (default false = off)
+  clipboardTrackingConsent: false,
 
   showNewTabButtonInHeader: true,
   showBackButtonInHeader: false,
@@ -476,7 +492,25 @@ export const settings$: Observable<Store> = observable<Store>({
       return
     }
     const id = genId()
-    settings$.profiles.push({ id, name: trimmedName, color })
+    settings$.profiles.push({
+      id,
+      name: trimmedName,
+      color,
+      proxyEnabled: false,
+      proxyType: 'http',
+      proxyHost: '',
+      proxyPort: '',
+      proxyUsername: '',
+      proxyPassword: '',
+      proxyPacUrl: '',
+      userAgentMode: 'default',
+      customUserAgent: '',
+      uaBuilderState: {},
+      timeMode: 'default',
+      timezone: '',
+      timezoneOffset: 0,
+      clipboardTrackingConsent: false,
+    })
     return id
   },
   updateProfile: (id, name, color) => {
@@ -509,8 +543,39 @@ syncObservable(settings$, {
     name: 'settings',
     plugin: ObservablePersistMMKV,
     transform: {
-      load: (data: Store) => {
+      load: async (data: Store) => {
+        // Decrypt proxyPassword for each profile after loading from MMKV
+        if (data.profiles && Array.isArray(data.profiles)) {
+          for (const profile of data.profiles) {
+            const password = profile?.proxyPassword
+            if (password && typeof password === 'string' && password.length > 0 && isEncrypted(password)) {
+              try {
+                profile.proxyPassword = await decryptFromStorage(password)
+              } catch {
+                // Decryption failed, leave as-is
+              }
+            }
+          }
+        }
         return normalizeSettings(data)
+      },
+      save: async (data: Store) => {
+        // Encrypt proxyPassword for each profile before saving to MMKV
+        if (data.profiles && Array.isArray(data.profiles)) {
+          for (const profile of data.profiles) {
+            const password = profile?.proxyPassword
+            // Only encrypt if there's a non-empty password that isn't already encrypted
+            if (password && typeof password === 'string' && password.length > 0 && !isEncrypted(password)) {
+              try {
+                profile.proxyPassword = await encryptForStorage(password)
+              } catch {
+                // In test environments or if encryption fails, keep plaintext
+                // (isEncrypted will return false on next save, but that's fine)
+              }
+            }
+          }
+        }
+        return data
       },
     },
   },

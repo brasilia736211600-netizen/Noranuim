@@ -44,7 +44,11 @@ object NoraCookies {
 
   private suspend fun flush(profile: String) {
     val manager = cookieManager(profile) ?: return
-    withContext(Dispatchers.Main) { manager.flush() }
+    // CookieManager.flush() is a blocking I/O call that writes the in-memory
+    // cookie store to disk. Doing it on the UI thread can cause jank.
+    // Move it to IO; the caller (getProfileCookies) already runs on IO,
+    // and no other caller depends on synchronous completion.
+    withContext(Dispatchers.IO) { manager.flush() }
   }
 
   private suspend fun resolveProfileDir(context: Context, profile: String, log: (String) -> Unit): File? {

@@ -31,6 +31,22 @@ news.example##.promo
     expect(getAdvertisedExpiryMs('! no expiry header')).toBe(DEFAULT_BLOCKLIST_EXPIRY_MS)
   })
 
+  // A cosmetic selector is written verbatim into `${selector}{display:none!important;}`.
+  // Braces/semicolons would let a list line close that block and append its own
+  // declarations, so a compromised list could inject arbitrary CSS. Scriptlets
+  // are already rejected by token; this covers the CSS-injection path.
+  it('rejects cosmetic selectors that try to break out of the declaration block', () => {
+    const parsed = parseFilterList(`
+news.example##.promo
+evil.example##.ad}body{background:url(//evil.test/beacon)
+evil2.example##.ad{color:red}
+evil3.example##.ad;behavior:url(x.htc)
+`)
+
+    expect(parsed.cosmeticFilters).toEqual(['news.example##.promo'])
+    expect(parsed.cosmeticExceptions).toEqual([])
+  })
+
   it('merges multiple lists without changing host semantics', async () => {
     const parsed = await mergeFilterListsAsync([
       `
