@@ -184,7 +184,7 @@ class NoraView: ExpoView, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHan
     installUserScripts(config.userContentController)
 
     config.allowsInlineMediaPlayback = true
-    config.preferences.javaScriptCanOpenWindowsAutomatically = true
+    config.preferences.javaScriptCanOpenWindowsAutomatically = false
     config.websiteDataStore = NoraView.dataStore(for: profile)
 
     return config
