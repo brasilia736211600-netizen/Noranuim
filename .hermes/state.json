@@ -63,7 +63,13 @@
     "effort": "XHIGH",
     "notes": "Standing rule (D-001): every subagent finding must be grep-verified against the working tree before entering the backlog. The first Kotlin audit returned 37 findings, ~100% fabricated."
   },
-  "last_update": "2026-09-28T04:50:00+03:00",
+  "last_update": "2026-09-28T05:00:00+03:00",
+  "reference_docs": {
+    "repository_analysis": "REPOSITORY_ANALYSIS.md",
+    "work_journal": ".hermes/work_journal.md",
+    "decision_log": "DECISION_LOG.md",
+    "model_catalog": ".hermes/model_catalog.json"
+  },
   "model_tiers": {
     "LOW": "cline-free/deepseek-v4.1-flash",
     "MEDIUM": "cline-free/deepseek-v4.1",

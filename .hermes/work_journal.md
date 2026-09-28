@@ -105,6 +105,8 @@
 
 ## Files Created/Modified
 
+- `REPOSITORY_ANALYSIS.md` - **Comprehensive repository reference** (16KB): architecture, tech stack, critical modules deep-dive, security/performance posture, build/CI config, technical debt, resumability framework, standing rules, next actions priority, quick reference commands, file index. Use this to avoid re-analyzing the codebase for future feature/fix work.
+
 - `.hermes/state.json` - Machine-readable state for resumption
 - `.hermes/work_journal.md` - This journal
 - `.hermes/model_catalog.json` - Model tier mappings for offline-first rotation
