@@ -60,7 +60,7 @@ class NoraViewModule : Module() {
 
   private fun applyProxy(settings: NoraSettings) {
     if (WebViewFeature.isFeatureSupported(WebViewFeature.PROXY_OVERRIDE)) {
-      val proxyKey = "${settings.proxyEnabled}|${settings.proxyType}|${settings.proxyHost}|${settings.proxyPort}"
+      val proxyKey = "${settings.proxyEnabled}|${settings.proxyType}|${settings.proxyHost}|${settings.proxyPort}|${settings.proxyUsername}|${settings.proxyPassword}"
       if (proxyKey == lastProxyKey) {
         return
       }
@@ -69,7 +69,12 @@ class NoraViewModule : Module() {
       if (settings.proxyEnabled && settings.proxyHost.isNotEmpty()) {
         val type = if (settings.proxyType == "socks") "socks" else "http"
         val portStr = if (settings.proxyPort.isNotEmpty()) ":${settings.proxyPort}" else ""
-        val proxyRule = "$type://${settings.proxyHost}$portStr"
+        val authStr = if (settings.proxyUsername.isNotEmpty() || settings.proxyPassword.isNotEmpty()) {
+          val user = settings.proxyUsername
+          val pass = settings.proxyPassword
+          if (user.isNotEmpty() && pass.isNotEmpty()) "$user:$pass@" else if (user.isNotEmpty()) "$user@" else ":$pass@"
+        } else ""
+        val proxyRule = "$type://$authStr${settings.proxyHost}$portStr"
         val proxyConfig = ProxyConfig.Builder()
           .addProxyRule(proxyRule)
           .build()

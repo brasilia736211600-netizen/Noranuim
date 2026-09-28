@@ -12,6 +12,7 @@ import {
   getFaviconUrl,
   isValidSearchTemplate,
 } from '@/lib/search'
+import { encryptForStorage, decryptFromStorage, isEncrypted } from '@/lib/crypto'
 
 export type ProfileProxyType = 'http' | 'socks'
 export type UserAgentMode = 'default' | 'custom' | 'builder'
@@ -321,6 +322,12 @@ export const normalizeSettings = <T extends Partial<Settings> | undefined>(data:
   if (typeof data.proxyPort !== 'string') {
     data.proxyPort = ''
   }
+  if (typeof data.proxyUsername !== 'string') {
+    data.proxyUsername = ''
+  }
+  if (typeof data.proxyPassword !== 'string') {
+    data.proxyPassword = ''
+  }
   if (typeof data.defaultZoom !== 'number') {
     data.defaultZoom = 100
   }
@@ -509,8 +516,27 @@ syncObservable(settings$, {
     name: 'settings',
     plugin: ObservablePersistMMKV,
     transform: {
-      load: (data: Store) => {
+      load: async (data: Store) => {
+        // Decrypt proxyPassword for each profile after loading from MMKV
+        if (data.profiles && Array.isArray(data.profiles)) {
+          for (const profile of data.profiles) {
+            if (profile.proxyPassword && isEncrypted(profile.proxyPassword)) {
+              profile.proxyPassword = await decryptFromStorage(profile.proxyPassword)
+            }
+          }
+        }
         return normalizeSettings(data)
+      },
+      save: async (data: Store) => {
+        // Encrypt proxyPassword for each profile before saving to MMKV
+        if (data.profiles && Array.isArray(data.profiles)) {
+          for (const profile of data.profiles) {
+            if (profile.proxyPassword && !isEncrypted(profile.proxyPassword)) {
+              profile.proxyPassword = await encryptForStorage(profile.proxyPassword)
+            }
+          }
+        }
+        return data
       },
     },
   },
