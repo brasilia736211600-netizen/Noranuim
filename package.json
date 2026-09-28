@@ -10,7 +10,7 @@
   "buildNumber": "35",
   "scripts": {
     "bundle": "bun build --target browser --format iife content/main.ts content/webrtc.ts content/youtube.ts --outdir assets/scripts --entry-naming '[name].bjs'",
-    "bundle:es": "esbuild --bundle content/main.ts --outfile=assets/scripts/main.bjs && esbuild --bundle content/webrtc.ts --outfile=assets/scripts/webrtc.bjs && esbuild --bundle content/youtube.ts --outfile=assets/scripts/youtube.bjs",
+    "bundle:es": "esbuild --bundle content/main.ts --outfile=assets/scripts/main.bjs --loader:.js=jsx --loader:.ts=ts --loader:.tsx=tsx && esbuild --bundle content/webrtc.ts --outfile=assets/scripts/webrtc.bjs --loader:.js=jsx --loader:.ts=ts --loader:.tsx=tsx && esbuild --bundle content/youtube.ts --outfile=assets/scripts/youtube.bjs --loader:.js=jsx --loader:.ts=ts --loader:.tsx=tsx",
     "dev": "bun bundle --watch",
     "start": "expo start",
     "android": "expo run:android --variant fullDebug",
