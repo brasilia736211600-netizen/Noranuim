@@ -50,6 +50,9 @@ class NoraSettings : Record {
 
   @Field
   val proxyPassword: String = ""
+
+  @Field
+  val clipboardTrackingConsent: Boolean = false
 }
 
 class NoraBlocklist : Record {

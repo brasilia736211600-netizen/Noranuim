@@ -112,6 +112,12 @@ class NoraViewModule : Module() {
       if (clipText == text) {
         return@let
       }
+      // Check if clipboard tracking consent is enabled (passed from settings)
+      val settings = nouController.settings
+      val consent = settings.clipboardTrackingConsent ?: false
+      if (!consent) {
+        return@let
+      }
       val uri = Uri.parse(text)
       if (uri.host in VIEW_HOSTS) {
         val cleanUrl = removeTrackingParams(text)
@@ -119,6 +125,10 @@ class NoraViewModule : Module() {
           clipText = cleanUrl
           val clipData = ClipData.newPlainText("", clipText)
           clipboardManager?.setPrimaryClip(clipData)
+          // Notify user that tracking params were stripped
+          appContext.reactContext?.let { context ->
+            Toast.makeText(context, "Tracking parameters removed from copied URL", Toast.LENGTH_SHORT).show()
+          }
         }
       }
     }
