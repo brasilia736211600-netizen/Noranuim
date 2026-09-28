@@ -257,11 +257,18 @@ export const SettingsBrowsingContent: React.FC<{ onFocusInput?: () => void }> = 
                 />
               </View>,
             )}
-            <View className={rowCls}>
+            <View className={clsx(rowCls, rowBorderCls)}>
               <NouSwitch
                 label={<NouText>{t('settings.inspectable')}</NouText>}
                 value={settings.inspectable}
                 onPress={() => settings$.inspectable.toggle()}
+              />
+            </View>
+            <View className={rowCls}>
+              <NouSwitch
+                label={<NouText>{t('settings.clipboardTrackingConsent')}</NouText>}
+                value={settings.clipboardTrackingConsent}
+                onPress={() => settings$.clipboardTrackingConsent.toggle()}
               />
             </View>
           </View>

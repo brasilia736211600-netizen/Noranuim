@@ -127,6 +127,9 @@ export interface Settings {
   selectedSearchProviderId: string
   customSearchProviders: CustomSearchProvider[]
   profiles: Profile[]
+
+  // User consent for clipboard tracking parameter stripping
+  clipboardTrackingConsent: boolean
 }
 
 interface Store extends Settings {
@@ -328,6 +331,9 @@ export const normalizeSettings = <T extends Partial<Settings> | undefined>(data:
   if (typeof data.proxyPassword !== 'string') {
     data.proxyPassword = ''
   }
+  if (typeof data.clipboardTrackingConsent !== 'boolean') {
+    data.clipboardTrackingConsent = false
+  }
   if (typeof data.defaultZoom !== 'number') {
     data.defaultZoom = 100
   }
@@ -362,6 +368,9 @@ export const settings$: Observable<Store> = observable<Store>({
   proxyType: 'http',
   proxyHost: '',
   proxyPort: '',
+
+  // User consent for clipboard tracking parameter stripping (default false = off)
+  clipboardTrackingConsent: false,
 
   showNewTabButtonInHeader: true,
   showBackButtonInHeader: false,
