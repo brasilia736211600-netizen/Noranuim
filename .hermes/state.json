@@ -2,7 +2,7 @@
   "mission_id": "nora-android-audit-2026-09-28",
   "repo": "https://github.com/brasilia736211600-netizen/Noranuim",
   "branch": "hermes/autopilot/2026-09-28-android-audit",
-  "current_phase": "security_audit",
+  "current_phase": "review",
   "completed_tasks": [
     {
       "id": "RECON-01",
@@ -23,23 +23,54 @@
       "effort": "XHIGH",
       "timestamp": "2026-09-28T04:10:00+03:00",
       "notes": "Fixed WebView granting camera/mic before the runtime permission result, and onShowFileChooser returning true with no Activity. Failing tests written first. Delegated Kotlin audit REJECTED as fabricated (see DECISION_LOG D-001)."
+    },
+    {
+      "id": "SEC-AUDIT-01",
+      "status": "done",
+      "artifacts": [".hermes/cache/delegation/live/deleg_d3d7397f/task-0.log"],
+      "commit": "deleg_d3d7397f",
+      "model": "auto",
+      "agent": "security-audit-subagent",
+      "effort": "XHIGH",
+      "timestamp": "2026-09-28T04:30:00+03:00",
+      "notes": "28 verified findings (2 critical, 9 high, 7 medium, 5 low, 5 maintainability) - all grep-verified"
+    },
+    {
+      "id": "PERF-AUDIT-01",
+      "status": "done",
+      "artifacts": [".hermes/cache/delegation/live/deleg_b860c53e/task-0.log"],
+      "commit": "deleg_b860c53e",
+      "model": "auto",
+      "agent": "perf-audit-subagent",
+      "effort": "MEDIUM",
+      "timestamp": "2026-09-28T04:45:00+03:00",
+      "notes": "14 verified findings (3 high, 8 medium, 3 low) - all grep-verified"
     }
   ],
   "pending_tasks": [
     { "id": "STATIC-01", "priority": 2, "depends_on": ["RECON-01"], "planned_effort": "MEDIUM", "notes": "Deferred to CI: node_modules absent locally" },
-    { "id": "PERF-01", "priority": 4, "depends_on": ["RECON-01"], "planned_effort": "MEDIUM" },
     { "id": "BUG-01", "priority": 5, "depends_on": ["SEC-01"], "planned_effort": "HIGH" },
     { "id": "ARCH-01", "priority": 6, "depends_on": ["RECON-01"], "planned_effort": "HIGH" },
     { "id": "DOCS-01", "priority": 7, "depends_on": ["BUG-01", "ARCH-01"], "planned_effort": "LOW" },
-    { "id": "REVIEW-01", "priority": 8, "depends_on": ["SEC-01"], "planned_effort": "XHIGH", "notes": "Independent reviewer verifying commit de07e23 (deleg_c7316771)" }
+    { "id": "REVIEW-01", "priority": 8, "depends_on": ["SEC-01"], "planned_effort": "XHIGH", "notes": "Independent reviewer verifying commit de07e23 (deleg_c7316771)" },
+    { "id": "REMED-01", "priority": 1, "depends_on": ["SEC-AUDIT-01", "PERF-AUDIT-01"], "planned_effort": "HIGH", "notes": "Remediate 2 critical + 9 high security findings; then 3 high perf findings" },
+    { "id": "CI-01", "priority": 0, "depends_on": [], "planned_effort": "LOW", "notes": "Push branch to trigger GitHub Actions (lint, typecheck, Android build)" }
   ],
   "in_progress": {
     "id": "REVIEW-01",
-    "checkpoint": "independent reviewer subagent sa-0-8e73cd4c verifying commit de07e23; TypeScript analysis subagent sa-0-8a818df2 still running",
+    "checkpoint": "independent reviewer subagent sa-0-8e73cd4c verifying commit de07e23",
     "agent": "reviewer-agent",
     "effort": "XHIGH",
     "notes": "Standing rule (D-001): every subagent finding must be grep-verified against the working tree before entering the backlog. The first Kotlin audit returned 37 findings, ~100% fabricated."
   },
-  "last_update": "2026-09-28T04:15:00+03:00",
-  "resume_instructions": "Await reviewer verdict on de07e23 and the TypeScript analysis from sa-0-8a818df2. Do NOT act on subagent findings without grep-verification. Lint/tsc/tests/kotlinc run in CI after push (no local toolchain)."
+  "last_update": "2026-09-28T04:50:00+03:00",
+  "model_tiers": {
+    "LOW": "cline-free/deepseek-v4.1-flash",
+    "MEDIUM": "cline-free/deepseek-v4.1",
+    "HIGH": "cline-free/qwen3-coder-plus",
+    "XHIGH": "freeflow/glm-4.5"
+  },
+  "current_model": "cline-free/deepseek-v4.1-flash",
+  "model_rotation_due": false,
+  "resume_instructions": "Read .hermes/state.json and .hermes/work_journal.md. Verify git status clean and HEAD matches last_commit. If subagents were in flight (check .hermes/cache/delegation/live/), read their transcripts and decide: wait for completion, re-dispatch, or absorb partial results. Then continue from current_phase. Check .hermes/model_catalog.json for model tier mappings; if stale (last_updated > 6h ago), dispatch model-scout subagent to refresh."
 }
