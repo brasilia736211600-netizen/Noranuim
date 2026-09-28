@@ -177,9 +177,12 @@ class NoraViewModule : Module() {
       nouController.setBlocklistExcludedHosts(hosts)
     }.runOnQueue(Queues.MAIN)
 
-    Function("setBlocklist") { blocklist: NoraBlocklist ->
+    // setBlocklist parses a potentially large JSON payload (blockedHosts,
+    // allowedHosts, cosmeticFilters, cosmeticExceptions). Running it on the
+    // main thread blocks the UI. Move to IO.
+    AsyncFunction("setBlocklist") { blocklist: NoraBlocklist ->
       nouController.setBlocklist(blocklist)
-    }
+    }.runOnQueue(Queues.IO)
 
     Function("setLocaleStrings") { v: JavaScriptObject ->
       v.getPropertyNames().forEach {
