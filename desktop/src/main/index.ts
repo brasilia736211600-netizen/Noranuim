@@ -118,7 +118,13 @@ function createWindow(): void {
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
-      sandbox: false,
+      // Keep the renderer sandboxed. `sandbox: false` also makes Electron append
+      // --no-sandbox/--no-zygote to the renderer command line, which turns the
+      // Chromium OS sandbox off for this window. contextIsolation/nodeIntegration
+      // are spelled out even though they already match the secure defaults.
+      sandbox: true,
+      contextIsolation: true,
+      nodeIntegration: false,
       webviewTag: true,
     },
   })
@@ -146,20 +152,30 @@ function createWindow(): void {
   }
 
   mainWindow.webContents.on('will-attach-webview', (_, webPreferences) => {
-    webPreferences.sandbox = false
+    webPreferences.sandbox = true
     webPreferences.preload = join(__dirname, '../preload/index.js')
-    // Load the preload in iframes too, so the YouTube ad guard reaches embedded
-    // players (a YouTube video on Reddit is an iframe on youtube.com, and it
-    // fetches its own player response). The preload keeps the renderer bridge
-    // main-frame only, and context isolation still applies per frame.
-    webPreferences.nodeIntegrationInSubFrames = true
+    // The preload used to run in every frame (`nodeIntegrationInSubFrames`) so the
+    // YouTube ad guard could reach embedded players (a YouTube video on Reddit is
+    // an iframe on youtube.com and fetches its own player response). That option
+    // hands Node.js to third-party iframes, so it stays off: the guard still
+    // patches the top-level page, but no longer runs inside embedded iframes, and
+    // the preload is main-frame only by construction. Context isolation still
+    // applies per frame.
+    webPreferences.nodeIntegrationInSubFrames = false
   })
 
   attachDownloadHandler(mainWindow.webContents.session)
   attachContextMenu(mainWindow.webContents, mainWindow)
 
+  // Cross-Origin-Resource-Policy stops a response from being reused cross-origin.
+  // Stripping it for every image in this session also stripped it for webview
+  // guests, i.e. for every origin, which defeats the policy sites set for
+  // themselves. Keep the workaround for the app's own UI only: a file:// document
+  // rendering remote images hits same-origin CORP in a way a normal https:// page
+  // does not. Guest pages keep the header exactly as Chrome would enforce it.
   mainWindow.webContents.session.webRequest.onHeadersReceived((details, cb) => {
-    if (details.resourceType === 'image' && details.responseHeaders) {
+    const isAppUi = details.webContentsId === mainWindow.webContents.id
+    if (isAppUi && details.resourceType === 'image' && details.responseHeaders) {
       for (const k of Object.keys(details.responseHeaders)) {
         if (k.toLowerCase() === 'cross-origin-resource-policy') {
           delete details.responseHeaders[k]
@@ -178,8 +194,13 @@ function createWindow(): void {
     wc.setMaxListeners(50)
     attachWebRtcProtection(wc)
     attachDownloadHandler(wc.session)
-    wc.session.setPermissionRequestHandler((_wc, permission, callback) => {
-      callback(permission === 'notifications')
+    // Deny every permission request instead of auto-granting notifications to
+    // arbitrary origins. A page must not be able to send desktop notifications
+    // without the user opting in, and nothing in the app uses the web
+    // Notification API on desktop (mention notifications are hidden behind
+    // `!isWeb` in settings).
+    wc.session.setPermissionRequestHandler((_wc, _permission, callback) => {
+      callback(false)
     })
     attachContextMenu(wc, mainWindow)
     wc.setWindowOpenHandler((details) => {
