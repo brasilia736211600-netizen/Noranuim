@@ -128,6 +128,12 @@ class NoraViewModule : Module() {
       nouController.onActivityResult(payload.requestCode, payload.resultCode, payload.data)
     }
 
+    // A page's getUserMedia request is settled once the runtime permission
+    // behind it is answered, which only arrives through the Activity.
+    OnRequestPermissionsResult { activity, payload ->
+      nouController.onRequestPermissionsResult(payload.requestCode, payload.grantResults)
+    }
+
     Events("log")
 
     OnStartObserving {
