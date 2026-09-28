@@ -2,7 +2,7 @@
   "mission_id": "nora-android-audit-2026-09-28",
   "repo": "https://github.com/brasilia736211600-netizen/Noranuim",
   "branch": "hermes/autopilot/2026-09-28-android-audit",
-  "current_phase": "reconnaissance",
+  "current_phase": "security_audit",
   "completed_tasks": [
     {
       "id": "RECON-01",
@@ -12,23 +12,34 @@
       "agent": "recon-agent",
       "effort": "LOW",
       "timestamp": "2026-09-28T03:30:00+03:00"
+    },
+    {
+      "id": "SEC-01",
+      "status": "done",
+      "artifacts": ["DECISION_LOG.md", "modules/nora-view/android/src/test/java/expo/modules/noraview/WebRtcPermissionDecisionTest.kt"],
+      "commit": "de07e23",
+      "model": "cline-free/deepseek-v4.1-flash",
+      "agent": "security-agent",
+      "effort": "XHIGH",
+      "timestamp": "2026-09-28T04:10:00+03:00",
+      "notes": "Fixed WebView granting camera/mic before the runtime permission result, and onShowFileChooser returning true with no Activity. Failing tests written first. Delegated Kotlin audit REJECTED as fabricated (see DECISION_LOG D-001)."
     }
   ],
   "pending_tasks": [
-    { "id": "STATIC-01", "priority": 2, "depends_on": ["RECON-01"], "planned_effort": "MEDIUM" },
-    { "id": "SEC-01", "priority": 3, "depends_on": ["RECON-01"], "planned_effort": "XHIGH" },
+    { "id": "STATIC-01", "priority": 2, "depends_on": ["RECON-01"], "planned_effort": "MEDIUM", "notes": "Deferred to CI: node_modules absent locally" },
     { "id": "PERF-01", "priority": 4, "depends_on": ["RECON-01"], "planned_effort": "MEDIUM" },
-    { "id": "BUG-01", "priority": 5, "depends_on": ["STATIC-01", "SEC-01", "PERF-01"], "planned_effort": "HIGH" },
+    { "id": "BUG-01", "priority": 5, "depends_on": ["SEC-01"], "planned_effort": "HIGH" },
     { "id": "ARCH-01", "priority": 6, "depends_on": ["RECON-01"], "planned_effort": "HIGH" },
-    { "id": "DOCS-01", "priority": 7, "depends_on": ["BUG-01", "ARCH-01"], "planned_effort": "LOW" }
+    { "id": "DOCS-01", "priority": 7, "depends_on": ["BUG-01", "ARCH-01"], "planned_effort": "LOW" },
+    { "id": "REVIEW-01", "priority": 8, "depends_on": ["SEC-01"], "planned_effort": "XHIGH", "notes": "Independent reviewer verifying commit de07e23 (deleg_c7316771)" }
   ],
   "in_progress": {
-    "id": "STATIC-01",
-    "checkpoint": "local lint/typecheck blocked: node_modules not installed; static analysis deferred to GitHub Actions CI to save device resources. Two subagents analyzing Kotlin + TypeScript code in background.",
-    "agent": "static-analysis-agent",
-    "effort": "MEDIUM",
-    "notes": "npx tsc failed (wrong package), npx expo lint failed (no eslint module). Installing full deps locally would burn device storage + internet per user constraint - deferred lint/typecheck/test runs to CI on GitHub Actions instead."
+    "id": "REVIEW-01",
+    "checkpoint": "independent reviewer subagent sa-0-8e73cd4c verifying commit de07e23; TypeScript analysis subagent sa-0-8a818df2 still running",
+    "agent": "reviewer-agent",
+    "effort": "XHIGH",
+    "notes": "Standing rule (D-001): every subagent finding must be grep-verified against the working tree before entering the backlog. The first Kotlin audit returned 37 findings, ~100% fabricated."
   },
-  "last_update": "2026-09-28T03:45:00+03:00",
-  "resume_instructions": "Await subagent results (sa-0-be8b8657 Kotlin analysis, sa-0-8a818df2 TypeScript analysis), consolidate findings, then dispatch security/bugfix subagents. Lint+tsc+tests run in CI after push."
+  "last_update": "2026-09-28T04:15:00+03:00",
+  "resume_instructions": "Await reviewer verdict on de07e23 and the TypeScript analysis from sa-0-8a818df2. Do NOT act on subagent findings without grep-verification. Lint/tsc/tests/kotlinc run in CI after push (no local toolchain)."
 }

@@ -8,12 +8,19 @@
 ## Phase Progress
 
 - [x] **Phase 1: Reconnaissance** (done) - Repository cloned, branch created, initial exploration
-- [x] **Phase 2: Static Analysis** (in-progress) - Running lint, typecheck, reviewing native code
-- [ ] **Phase 3: Security Audit** (pending)
+- [x] **Phase 2: Static Analysis** (deferred to CI) - node_modules absent locally; lint/tsc/tests run on GitHub Actions
+- [x] **Phase 3: Security Audit** (done) - commit de07e23; delegated audit rejected as fabricated
 - [ ] **Phase 4: Performance Audit** (pending)
 - [ ] **Phase 5: Bug Hunt & Fix** (pending)
 - [ ] **Phase 6: Architecture Review** (pending)
-- [ ] **Phase 7: Documentation** (pending)
+- [ ] **Phase 7: Documentation** (in-progress - DECISION_LOG.md written)
+
+## Key Working Rules (learned this mission)
+
+1. **Never trust subagent output without grep-verification.** The first Kotlin audit returned 37 findings (~100% fabricated: nonexistent `executeShellCommand`, nonexistent SSL bypass, nonexistent file-access toggles, claimed test file in wrong tree). It also read a stale clone at `~/Nora/`. Verify every claim against the working tree before it enters the backlog.
+2. **Do not install heavy toolchains locally.** No `npm install`, no `kotlinc`, no Android SDK on-device. Lint, typecheck, tests, and builds run on GitHub Actions, which the repo already wires up.
+3. **English only** for all artifacts, commits, logs, and output.
+4. **Preserve device resources:** prefer one background subagent batch over repeated local scans; batch independent calls; avoid re-reading large files.
 
 ## Mission Metadata
 
