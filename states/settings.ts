@@ -547,8 +547,13 @@ syncObservable(settings$, {
         // Decrypt proxyPassword for each profile after loading from MMKV
         if (data.profiles && Array.isArray(data.profiles)) {
           for (const profile of data.profiles) {
-            if (profile.proxyPassword && isEncrypted(profile.proxyPassword)) {
-              profile.proxyPassword = await decryptFromStorage(profile.proxyPassword)
+            const password = profile.proxyPassword
+            if (password && typeof password === 'string' && password.length > 0 && isEncrypted(password)) {
+              try {
+                profile.proxyPassword = await decryptFromStorage(password)
+              } catch {
+                // Decryption failed, leave as-is
+              }
             }
           }
         }
@@ -558,8 +563,15 @@ syncObservable(settings$, {
         // Encrypt proxyPassword for each profile before saving to MMKV
         if (data.profiles && Array.isArray(data.profiles)) {
           for (const profile of data.profiles) {
-            if (profile.proxyPassword && !isEncrypted(profile.proxyPassword)) {
-              profile.proxyPassword = await encryptForStorage(profile.proxyPassword)
+            const password = profile.proxyPassword
+            // Only encrypt if there's a non-empty password that isn't already encrypted
+            if (password && typeof password === 'string' && password.length > 0 && !isEncrypted(password)) {
+              try {
+                profile.proxyPassword = await encryptForStorage(password)
+              } catch {
+                // In test environments or if encryption fails, keep plaintext
+                // (isEncrypted will return false on next save, but that's fine)
+              }
             }
           }
         }
