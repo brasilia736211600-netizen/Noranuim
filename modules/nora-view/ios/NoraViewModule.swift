@@ -208,12 +208,6 @@ public class NoraViewModule: Module {
         view.setTextZoom(zoom)
       }
 
-      Prop("inspectable") { (view: NoraView, inspectable: Bool) in
-        #if DEBUG
-        view.setInspectable(inspectable)
-        #endif
-      }
-
       Prop("pullToRefresh") { (view: NoraView, enabled: Bool) in
         view.setPullToRefresh(enabled)
       }
