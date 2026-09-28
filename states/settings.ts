@@ -492,7 +492,25 @@ export const settings$: Observable<Store> = observable<Store>({
       return
     }
     const id = genId()
-    settings$.profiles.push({ id, name: trimmedName, color })
+    settings$.profiles.push({
+      id,
+      name: trimmedName,
+      color,
+      proxyEnabled: false,
+      proxyType: 'http',
+      proxyHost: '',
+      proxyPort: '',
+      proxyUsername: '',
+      proxyPassword: '',
+      proxyPacUrl: '',
+      userAgentMode: 'default',
+      customUserAgent: '',
+      uaBuilderState: {},
+      timeMode: 'default',
+      timezone: '',
+      timezoneOffset: 0,
+      clipboardTrackingConsent: false,
+    })
     return id
   },
   updateProfile: (id, name, color) => {

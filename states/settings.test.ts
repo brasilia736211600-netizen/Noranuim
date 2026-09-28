@@ -18,7 +18,11 @@ describe('Settings Profile Manager', () => {
     
     // Testing normalization and default injection via state
     expect(profile?.proxyEnabled).toBeFalsy()
-    expect(profile?.userAgentMode).toBeUndefined() // Since we only inject them during normalize if missing, wait - addProfile does not set defaults currently, but normalizeSettings will
+    expect(profile?.proxyType).toBe('http')
+    expect(profile?.proxyHost).toBe('')
+    expect(profile?.proxyPort).toBe('')
+    expect(profile?.userAgentMode).toBe('default')
+    expect(profile?.clipboardTrackingConsent).toBe(false)
   })
 
   it('should normalize proxy settings in profiles', () => {
