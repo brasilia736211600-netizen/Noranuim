@@ -49,7 +49,7 @@ describe('settings transfer', () => {
 
     expect(parsed.settings?.headerPosition).toBe('bottom')
     expect(parsed.settings?.defaultZoom).toBe(100)
-    expect(parsed.settings?.allowHttpWebsite).toBe(true)
+    expect(parsed.settings?.allowHttpWebsite).toBe(false)
     expect(parsed.settings?.selectedSearchProviderId).toBe('url')
     expect(parsed.settings?.profiles.some((profile) => profile.id === 'default')).toBe(true)
   })

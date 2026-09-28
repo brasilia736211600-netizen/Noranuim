@@ -527,12 +527,17 @@ async function fetchSource(id: BlocklistSourceId, now: number): Promise<Blocklis
   }
 }
 
-async function getSourceBodiesFromRefreshResults(settled: PromiseSettledResult<BlocklistFetchSourceResult>[]) {
+async function getSourceBodiesFromRefreshResults(
+  settled: PromiseSettledResult<BlocklistFetchSourceResult>[],
+  currentSources: BlocklistSnapshot['sources'],
+): Promise<string[] | null> {
   const bodies = await Promise.all(
     BLOCKLIST_SOURCE_IDS.map(async (id, index) => {
       const result = settled[index]
       if (result?.status !== 'fulfilled') {
-        return null
+        // Source failed — keep the old cached body so the merge can still proceed
+        // with whatever sources succeeded.
+        return await readBlocklistSourceFile(id)
       }
       if (typeof result.value.body === 'string') {
         return result.value.body
@@ -639,7 +644,7 @@ async function runRefresh(manual: boolean) {
         .filter((result) => result.status !== 304 && typeof result.body === 'string')
         .map((result) => writeBlocklistSourceFile(result.id, result.body || ''))
 
-      const sourceBodies = await getSourceBodiesFromRefreshResults(settled)
+      const sourceBodies = await getSourceBodiesFromRefreshResults(settled, nextSources)
       if (!sourceBodies) {
         throw new Error('Blocklist source files are missing or invalid')
       }
