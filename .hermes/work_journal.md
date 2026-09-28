@@ -177,3 +177,15 @@
 4. **REM-PERF-HIGH-01** through **REM-PERF-HIGH-03**: 3 High performance findings
 
 The system is now fully autonomous: state persisted, CI monitored, errors learned from, models rotated data-driven, and resumable from any interruption point.
+
+---
+
+## 2026-09-29 02:30 +03 — PromptPlus adopted; state reconciled (checkpoint)
+
+- **Governing prompt:** `~/NoraniumPromptPlus.md` read in full (1215 lines) and adopted as the process layer on top of the existing workflow (it explicitly says "improve and extend, do not replace").
+- **Sequencing decision:** the user asked whether to apply PromptPlus process rules before resuming repository work. Decision: APPLY NOW. Rules that change how work is delivered (never self-merge PRs, skills enrichment, dynamic model registry, per-task reasoning effort, PR report format) would otherwise force re-doing/re-reporting work already in flight. Cost of applying first is low; cost of rework is high.
+- **Reconciliation (PromptPlus step 1):** state files were stale (listed completed REM-SEC/PERF tasks as pending). GitHub is authoritative: `origin/main = 82eb350`, zero open PRs, all 10 REM-SEC findings evidence-verified merged, all 3 REM-PERF findings verified already-fixed (`777dfae`, async storage, `Queues.DEFAULT`). `state.json` rewritten to match. Stale `wt-perf-*` worktrees and `perf-*` branches removed.
+- **New rule (ADOPT-NOMERGE-01):** from now on, PRs are opened with full reports but never merged by this agent — human review merges. PRs 15-24 were self-merged before this rule existed; recorded, not retroactively judged.
+- **Model hierarchy:** strongest free model available = `nemotron-3-ultra-free` (T5 deep-think tier in `~/.hermes/model_router.yaml`); log evidence confirms this session's complex turns already route there. Supervisor/decisions = T5, coding = T3 deepseek, planner = T4 glm, triage = T1. `model_catalog.json` (>20h stale) to be refreshed by a model-scout subagent (ADOPT-CATALOG-01).
+- **In-flight branch:** `hermes/autopilot/2026-09-28-ios-parity` created from `origin/main`. The only real remaining code gap found so far = iOS clipboard consent/notification parity (IOS-PARITY-01). Old-branch iOS WIP stashed (`stash@{0}`) and copied to `.hermes/cache/scratch/ios-parity-wip.diff` — it contains a security regression (`javaScriptCanOpenWindowsAutomatically = true`) and must never be applied verbatim.
+- **Device:** MemAvailable ~465 MB of 3.5 GB, disk 92% full — concurrency stays at the measured-safe 3 subagents; no local builds.
