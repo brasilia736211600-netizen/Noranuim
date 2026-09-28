@@ -57,6 +57,8 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import expo.modules.kotlin.AppContext
+import expo.modules.interfaces.permissions.PermissionsResponseListener
+import expo.modules.interfaces.permissions.PermissionsStatus
 import expo.modules.kotlin.viewevent.EventDispatcher
 import expo.modules.kotlin.views.ExpoView
 import java.io.ByteArrayInputStream
@@ -952,9 +954,34 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
           }
           // A permission still has to be asked for, and the page cannot be told
           // anything until the user has answered. Hold the request and settle
-          // it from onRequestPermissionsResult.
+          // it from the permissions listener below. The ask goes through expo's
+          // Permissions interface (backed by PermissionAwareActivity), which
+          // delivers the result to the listener itself — no ActivityEventListener
+          // registration exists in expo-modules-core sdk-56. The interface also
+          // answers synchronously (denied) when there is nothing to ask through,
+          // so the request always gets settled exactly once.
           pendingPermissionRequest = request
-          activity.requestPermissions(requested.mapNotNull { runtimePermissionFor(it) }.toTypedArray(), PERMISSION_REQUEST_CODE)
+          val permissionsToAsk = requested.mapNotNull { runtimePermissionFor(it) }.toTypedArray()
+          appContext.permissions?.askForPermissions(
+            PermissionsResponseListener { response ->
+              val grantResults = requested.map { resource ->
+                val permission = runtimePermissionFor(resource)
+                if (permission != null && response[permission]?.status == PermissionsStatus.GRANTED) {
+                  android.content.pm.PackageManager.PERMISSION_GRANTED
+                } else {
+                  android.content.pm.PackageManager.PERMISSION_DENIED
+                }
+              }.toIntArray()
+              onRequestPermissionsResult(PERMISSION_REQUEST_CODE, grantResults)
+            },
+            *permissionsToAsk,
+          )
+          // If the permissions service is unavailable the ask never happened and
+          // no listener will fire, so settle it as a denial now.
+          if (appContext.permissions == null) {
+            pendingPermissionRequest = null
+            request.deny()
+          }
         }
 
         override fun onPermissionRequestCanceled(request: PermissionRequest) {

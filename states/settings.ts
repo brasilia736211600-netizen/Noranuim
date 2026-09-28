@@ -547,7 +547,7 @@ syncObservable(settings$, {
         // Decrypt proxyPassword for each profile after loading from MMKV
         if (data.profiles && Array.isArray(data.profiles)) {
           for (const profile of data.profiles) {
-            const password = profile.proxyPassword
+            const password = profile?.proxyPassword
             if (password && typeof password === 'string' && password.length > 0 && isEncrypted(password)) {
               try {
                 profile.proxyPassword = await decryptFromStorage(password)
@@ -563,7 +563,7 @@ syncObservable(settings$, {
         // Encrypt proxyPassword for each profile before saving to MMKV
         if (data.profiles && Array.isArray(data.profiles)) {
           for (const profile of data.profiles) {
-            const password = profile.proxyPassword
+            const password = profile?.proxyPassword
             // Only encrypt if there's a non-empty password that isn't already encrypted
             if (password && typeof password === 'string' && password.length > 0 && !isEncrypted(password)) {
               try {

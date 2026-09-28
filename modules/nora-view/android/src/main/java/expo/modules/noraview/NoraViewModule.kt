@@ -1,8 +1,6 @@
 package expo.modules.noraview
 
-import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
@@ -19,8 +17,6 @@ import expo.modules.kotlin.functions.Queues
 import expo.modules.kotlin.jni.JavaScriptObject
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
-import com.facebook.react.ReactContext
-import com.facebook.react.bridge.ActivityEventListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import android.content.ClipboardManager
@@ -128,26 +124,6 @@ class NoraViewModule : Module() {
     }
   }
 
-  // Register ActivityEventListener to receive onRequestPermissionsResult callbacks.
-  // This is the correct API in expo-modules-core@56.0.13; OnRequestPermissionsResult
-  // does not exist in the ModuleDefinition DSL.
-  override fun onCreate(reactContext: ReactContext) {
-    super.onCreate(reactContext)
-    reactContext.addActivityEventListener(object : ActivityEventListener {
-      override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, data: Intent?) {
-        nouController.onActivityResult(requestCode, resultCode, data)
-      }
-
-      override fun onRequestPermissionsResult(requestCode: Int, grantResults: IntArray) {
-        nouController.onRequestPermissionsResult(requestCode, grantResults)
-      }
-
-      override fun onNewIntent(intent: Intent?) {
-        // Not used
-      }
-    })
-  }
-
   override fun definition() = ModuleDefinition {
     Name("NoraView")
 
@@ -179,10 +155,11 @@ class NoraViewModule : Module() {
 
     // setBlocklist parses a potentially large JSON payload (blockedHosts,
     // allowedHosts, cosmeticFilters, cosmeticExceptions). Running it on the
-    // main thread blocks the UI. Move to IO.
+    // main thread blocks the UI. Move off the main queue; DEFAULT is the
+    // module's background work queue (sdk-56 Queues has only MAIN/DEFAULT).
     AsyncFunction("setBlocklist") { blocklist: NoraBlocklist ->
       nouController.setBlocklist(blocklist)
-    }.runOnQueue(Queues.IO)
+    }.runOnQueue(Queues.DEFAULT)
 
     Function("setLocaleStrings") { v: JavaScriptObject ->
       v.getPropertyNames().forEach {
