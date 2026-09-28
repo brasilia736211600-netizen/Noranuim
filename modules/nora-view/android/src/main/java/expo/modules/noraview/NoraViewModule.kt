@@ -340,6 +340,8 @@ class NoraViewModule : Module() {
       Prop("inspectable") { _: NoraView, inspectable: Boolean ->
         if (BuildConfig.DEBUG) {
           WebView.setWebContentsDebuggingEnabled(inspectable)
+        } else {
+          // ignore in release builds; debugging not available
         }
       }
 
