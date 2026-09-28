@@ -208,6 +208,15 @@ public class NoraViewModule: Module {
         view.setTextZoom(zoom)
       }
 
+      // Debug-only parity with Android's BuildConfig.DEBUG gate
+      // (NoraViewModule.kt:350): release builds compile this prop out, so the
+      // inspectable setting can never expose a production WebView.
+      Prop("inspectable") { (view: NoraView, inspectable: Bool) in
+        #if DEBUG
+        view.setInspectable(inspectable)
+        #endif
+      }
+
       Prop("pullToRefresh") { (view: NoraView, enabled: Bool) in
         view.setPullToRefresh(enabled)
       }
@@ -296,6 +305,13 @@ public class NoraViewModule: Module {
       return
     }
 
+    // Consent gate, parity with Android NoraViewModule.kt:117: clipboard
+    // rewriting is opt-in; default false means the listener is a no-op until
+    // the user flips the settings toggle.
+    if !NouController.shared.settings.clipboardTrackingConsent {
+      return
+    }
+
     guard let url = URL(string: text), let host = url.host else {
       return
     }
@@ -305,6 +321,45 @@ public class NoraViewModule: Module {
       if cleanUrl != text {
         clipText = cleanUrl
         UIPasteboard.general.string = cleanUrl
+        showTrackingStrippedNotice()
+      }
+    }
+  }
+
+  // Non-blocking banner mirroring Android's Toast (NoraViewModule.kt:130):
+  // the user is told that the copied URL was rewritten without having to
+  // dismiss a modal on every copy.
+  private func showTrackingStrippedNotice() {
+    DispatchQueue.main.async {
+      guard let windowScene = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first,
+            let window = windowScene.windows.first(where: { $0.isKeyWindow }) else {
+        return
+      }
+      let tag = 0x4e4f5241
+      window.viewWithTag(tag)?.removeFromSuperview()
+      let label = UILabel()
+      label.tag = tag
+      label.text = "Tracking parameters removed from copied URL"
+      label.font = .systemFont(ofSize: 14, weight: .medium)
+      label.textColor = .white
+      label.backgroundColor = UIColor.black.withAlphaComponent(0.85)
+      label.textAlignment = .center
+      label.layer.cornerRadius = 8
+      label.layer.masksToBounds = true
+      label.numberOfLines = 0
+      label.translatesAutoresizingMaskIntoConstraints = false
+      window.addSubview(label)
+      NSLayoutConstraint.activate([
+        label.centerXAnchor.constraint(equalTo: window.centerXAnchor),
+        label.bottomAnchor.constraint(equalTo: window.safeAreaLayoutGuide.bottomAnchor, constant: -32),
+        label.leadingAnchor.constraint(greaterThanOrEqualTo: window.leadingAnchor, constant: 24),
+        label.trailingAnchor.constraint(lessThanOrEqualTo: window.trailingAnchor, constant: -24)
+      ])
+      label.alpha = 0
+      UIView.animate(withDuration: 0.2, animations: { label.alpha = 1 }) { _ in
+        UIView.animate(withDuration: 0.3, delay: 1.8, options: [], animations: { label.alpha = 0 }) { _ in
+          label.removeFromSuperview()
+        }
       }
     }
   }

@@ -354,6 +354,14 @@ class NoraView: ExpoView, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHan
     popupContainer?.frame = bounds
   }
 
+  func setInspectable(_ inspectable: Bool) {
+    #if DEBUG
+    if #available(iOS 16.4, *) {
+      webView?.isInspectable = inspectable
+    }
+    #endif
+  }
+
   func setScriptOnStart(_ script: String) {
       if script == scriptOnStart { return }
       scriptOnStart = script
