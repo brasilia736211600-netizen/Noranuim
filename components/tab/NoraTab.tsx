@@ -174,13 +174,17 @@ const parseWebviewMeta = (value?: string | null) => {
   return parsed
 }
 
+import { getCspNonce } from '@/modules/nora-view/src/NoraView.web'
+
 const getTabLabel = (tab?: Pick<Tab, 'title' | 'url'> | null) => tab?.title || tab?.url || t('tabs.new')
 
-const buildUserScriptRunner = (host: string) => {
+const buildUserScriptRunner = (host: string, nonce?: string) => {
   const scripts = getEnabledUserScripts(host, getUserStylesSnapshot())
   if (!scripts.length) {
     return ''
   }
+
+  const nonceAttr = nonce ? ` nonce="${nonce}"` : ''
 
   const calls = scripts
     .map(
@@ -190,7 +194,7 @@ const buildUserScriptRunner = (host: string) => {
         });
       `,
     )
-    .join('\n')
+    .join('\\n')
 
   return `
     (() => {
@@ -366,7 +370,8 @@ export const NoraTab: React.FC<{
       const userStylesScript = `window.Nora?.setUserStyles?.(${JSON.stringify(getUserStylesSnapshot())})`
       void executeWebviewJavaScriptQuietly(webview, settingsScript)
       void executeWebviewJavaScriptQuietly(webview, userStylesScript)
-      const userScriptRunner = buildUserScriptRunner(currentHost)
+      const nonce = isWeb ? getCspNonce() : undefined
+      const userScriptRunner = buildUserScriptRunner(currentHost, nonce)
       if (userScriptRunner) {
         void executeWebviewJavaScriptQuietly(webview, userScriptRunner)
       }
@@ -707,9 +712,12 @@ export const NoraTab: React.FC<{
    * Returns null when the payload cannot be read as a message object, so the
    * caller can drop it instead of crashing. `type` and `data` keep their
    * original `any` typing so downstream handling is unchanged.
+   *
+   * Validates against a strict message schema: { type: string, data?: unknown }
+   * Rejects messages with prototype pollution vectors (__proto__, constructor).
    */
-  const parseWebviewMessage = (payload: string | object): any => {
-    let parsed: any = payload
+  const parseWebviewMessage = (payload: string | object): { type: string; data: unknown } | null => {
+    let parsed: unknown = payload
     if (typeof payload === 'string') {
       try {
         parsed = JSON.parse(payload)
@@ -717,20 +725,31 @@ export const NoraTab: React.FC<{
         return null
       }
     }
+    // Schema validation: must be a plain object with string `type`
     if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
       return null
     }
-    if (typeof parsed.type !== 'string') {
+    const record = parsed as Record<string, unknown>
+    if (typeof record.type !== 'string') {
+      return null
+    }
+    // Reject prototype pollution vectors
+    if ('__proto__' in record || 'constructor' in record) {
+      return null
+    }
+    // Validate data if present - must be a plain object or primitive, not array
+    const data = record.data
+    if (data !== undefined && data !== null && typeof data === 'object' && Array.isArray(data)) {
       return null
     }
     // Copy own properties onto a null-prototype object so a payload carrying
     // "__proto__" or "constructor" cannot influence objects built downstream.
-    const record: any = Object.assign(Object.create(null), parsed)
-    const data: any =
-      record.data !== null && typeof record.data === 'object' && !Array.isArray(record.data)
-        ? Object.assign(Object.create(null), record.data)
-        : {}
-    return { type: record.type, data }
+    const safeRecord: Record<string, unknown> = Object.assign(Object.create(null), record)
+    const safeData: unknown =
+      data !== null && typeof data === 'object' && !Array.isArray(data)
+        ? Object.assign(Object.create(null), data as Record<string, unknown>)
+        : data
+    return { type: safeRecord.type, data: safeData }
   }
 
   const onMessage = async (e: { nativeEvent: { payload: string | object } }) => {
@@ -739,6 +758,8 @@ export const NoraTab: React.FC<{
     // A malformed or non-object payload is dropped rather than thrown.
     if (!message) return
     const { type, data } = message
+    const isObj = (v: unknown): v is Record<string, unknown> =>
+      v !== null && typeof v === 'object' && !Array.isArray(v)
     switch (type) {
       case '[content]':
       case '[kotlin]':
@@ -755,22 +776,26 @@ export const NoraTab: React.FC<{
         break
       }
       case 'new-tab':
-        if (!isExternalAppUrl(data.url)) {
-          const nextUrl = data.kind === 'image' ? buildImageViewerUrl(data.url, theme) : forceHttps(data.url)
+        if (isObj(data) && !isExternalAppUrl(data.url as string)) {
+          const nextUrl = data.kind === 'image' ? buildImageViewerUrl(data.url as string, theme) : forceHttps(data.url as string)
           tabs$.openTab(nextUrl, { parentTabId: tab.id, source: 'child' })
         }
         break
       case 'open-in-profile':
-        if (!isExternalAppUrl(data.url)) {
-          ui$.profileLinkUrl.set(forceHttps(data.url))
+        if (isObj(data) && !isExternalAppUrl(data.url as string)) {
+          ui$.profileLinkUrl.set(forceHttps(data.url as string))
         }
         break
       case 'save-file':
-        await ensureDownloadNotificationPermission()
-        getCurrentWebview()?.saveFile(data.content, data.fileName, data.mimeType)
+        if (isObj(data)) {
+          await ensureDownloadNotificationPermission()
+          getCurrentWebview()?.saveFile(data.content as string, data.fileName as string, data.mimeType as string)
+        }
         break
       case 'scroll':
-        onScroll({ dy: data.dy, y: data.y, autoHideHeader, hideToolbarWhenScrolled })
+        if (isObj(data)) {
+          onScroll({ dy: data.dy as number, y: data.y as number, autoHideHeader, hideToolbarWhenScrolled })
+        }
         break
       case 'header-double-tap':
         if (isAndroid && doubleTapToToggleHeader) {
@@ -778,9 +803,9 @@ export const NoraTab: React.FC<{
         }
         break
       case 'translate-block':
-        if (!isWeb && translateOnDoubleTap && translationTargetLanguage && typeof data?.text === 'string') {
+        if (!isWeb && translateOnDoubleTap && translationTargetLanguage && isObj(data) && typeof data.text === 'string') {
           ui$.translation.set({
-            id: String(data.id || Date.now()),
+            id: String(data.id ?? Date.now()),
             text: data.text,
             targetLanguage: translationTargetLanguage,
             x: Number(data.x) || 16,
