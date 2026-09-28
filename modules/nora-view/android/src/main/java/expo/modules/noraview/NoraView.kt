@@ -194,15 +194,22 @@ enum class PermissionResource(val webViewResource: String) {
  * A getUserMedia request reaches `onPermissionRequest` before Android has
  * resolved the runtime permission behind it, so the answer cannot be given
  * there. It is given here once the permission result is known: the page keeps
- * only the resources whose permission was granted, in the order it asked for
- * them. Anything it asked for that was refused is dropped rather than granted
- * alongside, so a page asking for camera and microphone with only the
- * microphone allowed gets the microphone alone.
- */
-fun resolveWebRtcPermissionGrant(
-  requested: Set<PermissionResource>,
-  granted: Set<PermissionResource>,
-): List<PermissionResource> = PermissionResource.entries.filter { it in requested && it in granted }
+ // The page keeps only the resources whose permission was granted, in the order
+   * it asked for them. Anything it asked for that was refused is dropped rather
+   * than granted alongside, so a page asking for camera and microphone with only
+   * the microphone allowed gets the microphone alone.
+   */
+  fun resolveWebRtcPermissionGrant(
+    requested: Set<PermissionResource>,
+    granted: Set<PermissionResource>,
+  ): List<PermissionResource> = PermissionResource.entries
+    .filter { it in requested && it in granted }
+    .let { entries ->
+      // Reorder to match the page's requested order (which is the order in the
+      // `requested` set — it was built from a LinkedHashSet preserving insertion
+      // order from the page's getUserMedia constraints).
+      requested.toList().filter { it in entries }
+    }
 
 /**
  * Whether `onShowFileChooser` may report the chooser as launched.
@@ -578,19 +585,22 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
       request.deny()
       return
     }
-    // requestPermissions() is asked for in PermissionResource.entries order, so
-    // the results line up with the entries one for one. Each one is also
-    // re-checked against the Activity: a result can be a grant the user gave
-    // for a different resource, and the platform's own answer is the final word.
-    val activity = currentActivity
-    val allowed = if (activity == null) {
-      emptySet()
-    } else {
-      PermissionResource.entries
-        .filter { index -> grantResults.getOrNull(index) == android.content.pm.PackageManager.PERMISSION_GRANTED }
-        .filter { hasRuntimePermission(activity, it) }
-        .toSet()
-    }
+    // requestPermissions() is asked for in the page's requested order (the order
+      // of resources in the getUserMedia call), so the results line up with the
+      // requested set one for one. Each one is also re-checked against the Activity:
+      // a result can be a grant the user gave for a different resource, and the
+      // platform's own answer is the final word.
+      val activity = currentActivity
+      val allowed = if (activity == null) {
+        emptySet()
+      } else {
+        PermissionResource.entries
+          .filterIndexed { index, resource ->
+            grantResults.getOrNull(index) == android.content.pm.PackageManager.PERMISSION_GRANTED &&
+            hasRuntimePermission(activity, resource)
+          }
+          .toSet()
+      }
     val toGrant = resolveWebRtcPermissionGrant(
       requested = request.resources.mapNotNull { PermissionResource.fromWebViewResource(it) }.toSet(),
       granted = allowed,
@@ -1015,10 +1025,12 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
           val activity = currentActivity
           if (activity == null) {
             // Nothing can report a result back, so the page's input would wait
-            // forever. Release the stored callback and tell it the chooser is
-            // not up, so it resolves empty instead of hanging.
-            nouController.clearFileChooserCallback()
-            shouldReportFileChooserLaunched(activityAvailable = false)
+            // forever. Do NOT invoke the callback here — just drop the stored
+            // reference and return false. Chromium will call onReceiveValue(null)
+            // on its own when onShowFileChooser returns false, which resolves
+            // the input empty instead of hanging. Invoking it ourselves + returning
+            // false causes a duplicate call and an IllegalStateException.
+            nouController.setFileChooserCallback(null)
             return false
           }
           activity.startActivityForResult(intent, 0)

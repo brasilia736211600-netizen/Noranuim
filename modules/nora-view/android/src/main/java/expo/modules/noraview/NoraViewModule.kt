@@ -1,8 +1,8 @@
 package expo.modules.noraview
 
-import android.content.ClipData
-import android.content.ClipboardManager
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Environment
 import android.provider.MediaStore
@@ -19,8 +19,8 @@ import expo.modules.kotlin.functions.Queues
 import expo.modules.kotlin.jni.JavaScriptObject
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
-import expo.modules.kotlin.records.Field
-import expo.modules.kotlin.records.Record
+import expo.modules.kotlin.modules.ReactContext
+import expo.modules.kotlin.modules.ActivityEventListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -121,17 +121,31 @@ class NoraViewModule : Module() {
     }
   }
 
+  // Register ActivityEventListener to receive onRequestPermissionsResult callbacks.
+  // This is the correct API in expo-modules-core@56.0.13; OnRequestPermissionsResult
+  // does not exist in the ModuleDefinition DSL.
+  override fun onCreate(reactContext: ReactContext) {
+    super.onCreate(reactContext)
+    reactContext.addActivityEventListener(object : ActivityEventListener {
+      override fun onActivityResult(activity: Activity, requestCode: Int, resultCode: Int, data: Intent?) {
+        nouController.onActivityResult(requestCode, resultCode, data)
+      }
+
+      override fun onRequestPermissionsResult(requestCode: Int, grantResults: IntArray) {
+        nouController.onRequestPermissionsResult(requestCode, grantResults)
+      }
+
+      override fun onNewIntent(intent: Intent?) {
+        // Not used
+      }
+    })
+  }
+
   override fun definition() = ModuleDefinition {
     Name("NoraView")
 
     OnActivityResult { activity, payload ->
       nouController.onActivityResult(payload.requestCode, payload.resultCode, payload.data)
-    }
-
-    // A page's getUserMedia request is settled once the runtime permission
-    // behind it is answered, which only arrives through the Activity.
-    OnRequestPermissionsResult { activity, payload ->
-      nouController.onRequestPermissionsResult(payload.requestCode, payload.grantResults)
     }
 
     Events("log")
