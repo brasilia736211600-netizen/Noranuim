@@ -358,7 +358,9 @@ class NoraViewModule : Module() {
       }
 
       Prop("inspectable") { _: NoraView, inspectable: Boolean ->
-        WebView.setWebContentsDebuggingEnabled(inspectable)
+        if (BuildConfig.DEBUG) {
+          WebView.setWebContentsDebuggingEnabled(inspectable)
+        }
       }
 
       Prop("scrollEvents") { view: NoraView, enabled: Boolean ->
