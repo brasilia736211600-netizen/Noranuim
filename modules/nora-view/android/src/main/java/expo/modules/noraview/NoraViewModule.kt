@@ -19,10 +19,12 @@ import expo.modules.kotlin.functions.Queues
 import expo.modules.kotlin.jni.JavaScriptObject
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
-import expo.modules.kotlin.modules.ReactContext
-import expo.modules.kotlin.modules.ActivityEventListener
+import com.facebook.react.ReactContext
+import com.facebook.react.bridge.ActivityEventListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import android.content.ClipboardManager
+import android.content.ClipData
 import java.io.File
 import java.io.FileOutputStream
 import java.io.FileWriter

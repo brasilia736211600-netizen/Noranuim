@@ -113,22 +113,10 @@ class NouController {
     fileChooserCallback = null
   }
 
-  /**
-   * Settles a page's held getUserMedia request now that Android has reported
-   * the runtime permission result. Routed to every live view because a request
-   * is held by whichever one the page happened to be in, and only that view
-   * holds it.
-   */
   fun onRequestPermissionsResult(requestCode: Int, grantResults: IntArray) {
     for (view in registeredViews.toList()) {
       view.onRequestPermissionsResult(requestCode, grantResults)
     }
-  }
-
-  /** Clears a held file chooser without delivering a result, for when none can arrive. */
-  fun clearFileChooserCallback() {
-    fileChooserCallback?.onReceiveValue(null)
-    fileChooserCallback = null
   }
 
   fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
