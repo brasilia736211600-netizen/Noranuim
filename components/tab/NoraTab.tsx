@@ -174,13 +174,17 @@ const parseWebviewMeta = (value?: string | null) => {
   return parsed
 }
 
+import { getCspNonce } from '@/modules/nora-view/src/NoraView.web'
+
 const getTabLabel = (tab?: Pick<Tab, 'title' | 'url'> | null) => tab?.title || tab?.url || t('tabs.new')
 
-const buildUserScriptRunner = (host: string) => {
+const buildUserScriptRunner = (host: string, nonce?: string) => {
   const scripts = getEnabledUserScripts(host, getUserStylesSnapshot())
   if (!scripts.length) {
     return ''
   }
+
+  const nonceAttr = nonce ? ` nonce="${nonce}"` : ''
 
   const calls = scripts
     .map(
@@ -190,7 +194,7 @@ const buildUserScriptRunner = (host: string) => {
         });
       `,
     )
-    .join('\n')
+    .join('\\n')
 
   return `
     (() => {
@@ -366,7 +370,8 @@ export const NoraTab: React.FC<{
       const userStylesScript = `window.Nora?.setUserStyles?.(${JSON.stringify(getUserStylesSnapshot())})`
       void executeWebviewJavaScriptQuietly(webview, settingsScript)
       void executeWebviewJavaScriptQuietly(webview, userStylesScript)
-      const userScriptRunner = buildUserScriptRunner(currentHost)
+      const nonce = isWeb ? getCspNonce() : undefined
+      const userScriptRunner = buildUserScriptRunner(currentHost, nonce)
       if (userScriptRunner) {
         void executeWebviewJavaScriptQuietly(webview, userScriptRunner)
       }
