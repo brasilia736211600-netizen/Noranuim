@@ -149,13 +149,21 @@ const withSecondaryDisplayMetricsFix: ConfigPlugin = (config) =>
  * entries filters Nora off hardware that lacks them — even though browsing
  * works perfectly well there. Both capabilities are optional and only ever
  * activated by an explicit page/user request, hence required="false".
+ * Google Play treats the CAMERA permission as implicitly requiring BOTH
+ * android.hardware.camera AND android.hardware.camera.autofocus, so both must
+ * be overridden or autofocus-less devices (Chromebooks, most tablets) stay
+ * filtered; RECORD_AUDIO implies android.hardware.microphone only.
  * Idempotent: prebuild re-runs must not stack duplicates.
  */
 const withOptionalHardwareFeatures: ConfigPlugin = (config) =>
   withAndroidManifest(config, (config) => {
     const manifest = config.modResults.manifest
     const existing: Array<{ $?: Record<string, string> }> = (manifest['uses-feature'] ??= [])
-    for (const name of ['android.hardware.camera', 'android.hardware.microphone']) {
+    for (const name of [
+      'android.hardware.camera',
+      'android.hardware.camera.autofocus',
+      'android.hardware.microphone',
+    ]) {
       const already = existing.some((feature) => feature.$?.['android:name'] === name)
       if (!already) existing.push({ $: { 'android:name': name, 'android:required': 'false' } })
     }

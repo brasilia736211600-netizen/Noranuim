@@ -17,6 +17,14 @@ import { join, relative } from 'node:path'
  * returning: every permission the native code checks or asks for must be
  * declared in app.config.ts. It is a relation between two artifacts, not a
  * snapshot of either list, so normal permission work does not churn it.
+ *
+ * Scope: the scan covers the Nora view module's Kotlin sources
+ * (modules/nora-view/android/src) — the only tree in this repo that asks for
+ * permissions. It deliberately does NOT walk the whole repository: vendored
+ * third-party Kotlin (node_modules, when present in CI) declares its own
+ * permissions in its own manifests and would be a false positive here.
+ * If another first-party native module starts asking for permissions, add
+ * its source root to the scan below.
  */
 
 // import.meta.dir is this file's own directory (<repo>/lib), so the repo root
