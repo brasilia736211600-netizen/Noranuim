@@ -157,6 +157,7 @@
     "redirectToOldReddit": "Redirect to Old Reddit",
     "allowHttpWebsite": "Allow HTTP websites",
     "inspectable": "Make webview inspectable",
+    "clipboardTrackingConsent": "Strip tracking parameters from copied URLs",
     "webrtc": {
       "label": "WebRTC",
       "protectIp": "Prevent WebRTC IP leaks",

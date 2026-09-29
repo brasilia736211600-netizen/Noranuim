@@ -47,7 +47,17 @@ module.exports = ({ config }: { config: ExpoConfig }) => {
     },
     android: {
       versionCode,
-      permissions: ['RECORD_AUDIO', 'MODIFY_AUDIO_SETTINGS', 'POST_NOTIFICATIONS'],
+      // Every permission here is requested from native code at a point of user
+      // intent, and lib/permission-declaration.test.ts fails if the two ever
+      // drift: an undeclared permission is denied by Android WITHOUT a prompt,
+      // so the feature guarding it silently cannot work (that is how CAMERA
+      // became un-grantable while NoraView.kt kept asking for it — see the
+      // permission audit / DECISION_LOG SEC-01 for why video capture is intended).
+      // MODIFY_AUDIO_SETTINGS is declared for the system WebView's WebRTC call
+      // audio routing; it is not referenced in app code, so it is kept by
+      // review rather than by usage evidence (removing it cannot be validated
+      // without device-side call audio testing).
+      permissions: ['RECORD_AUDIO', 'CAMERA', 'MODIFY_AUDIO_SETTINGS', 'POST_NOTIFICATIONS'],
       adaptiveIcon: {
         foregroundImage: './assets/images/adaptive-icon.png',
         monochromeImage: './assets/images/monochrome-icon.png',

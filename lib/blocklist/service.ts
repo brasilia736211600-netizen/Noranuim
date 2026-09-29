@@ -527,12 +527,17 @@ async function fetchSource(id: BlocklistSourceId, now: number): Promise<Blocklis
   }
 }
 
-async function getSourceBodiesFromRefreshResults(settled: PromiseSettledResult<BlocklistFetchSourceResult>[]) {
+async function getSourceBodiesFromRefreshResults(
+  settled: PromiseSettledResult<BlocklistFetchSourceResult>[],
+  currentSources: BlocklistSnapshot['sources'],
+): Promise<string[] | null> {
   const bodies = await Promise.all(
     BLOCKLIST_SOURCE_IDS.map(async (id, index) => {
       const result = settled[index]
       if (result?.status !== 'fulfilled') {
-        return null
+        // Source failed — keep the old cached body so the merge can still proceed
+        // with whatever sources succeeded.
+        return await readBlocklistSourceFile(id)
       }
       if (typeof result.value.body === 'string') {
         return result.value.body
@@ -601,9 +606,19 @@ async function runRefresh(manual: boolean) {
     refreshPromise = (async () => {
       const now = Date.now()
       const settled = await Promise.allSettled(BLOCKLIST_SOURCE_IDS.map((id) => fetchSource(id, now)))
-      const failure = settled.find((result) => result.status === 'rejected')
-      if (failure) {
-        throw failure.reason instanceof Error ? failure.reason : new Error(String(failure.reason))
+
+      // Partial failure is acceptable: collect successful sources, only fail if ALL fail.
+      const successful = settled
+        .filter((result): result is PromiseFulfilledResult<BlocklistFetchSourceResult> => result.status === 'fulfilled')
+        .map((result) => result.value)
+
+      if (successful.length === 0) {
+        // All sources failed — use the first rejection as the error.
+        const failure = settled.find((result) => result.status === 'rejected')
+        if (failure) {
+          throw failure.reason instanceof Error ? failure.reason : new Error(String(failure.reason))
+        }
+        throw new Error('All blocklist sources failed with no error detail')
       }
 
       const nextSources = BLOCKLIST_SOURCE_IDS.reduce(
@@ -618,17 +633,18 @@ async function runRefresh(manual: boolean) {
               lastFetchedAt: value.lastFetchedAt,
             }
           }
+          // If rejected, keep the old source metadata (etag/lastModified) so we retry with
+          // conditional headers on the next refresh.
           return acc
         },
         {} as BlocklistSnapshot['sources'],
       )
 
-      const writes = settled
-        .filter((result): result is PromiseFulfilledResult<BlocklistFetchSourceResult> => result.status === 'fulfilled')
-        .filter((result) => result.value.status !== 304 && typeof result.value.body === 'string')
-        .map((result) => writeBlocklistSourceFile(result.value.id, result.value.body || ''))
+      const writes = successful
+        .filter((result) => result.status !== 304 && typeof result.body === 'string')
+        .map((result) => writeBlocklistSourceFile(result.id, result.body || ''))
 
-      const sourceBodies = await getSourceBodiesFromRefreshResults(settled)
+      const sourceBodies = await getSourceBodiesFromRefreshResults(settled, nextSources)
       if (!sourceBodies) {
         throw new Error('Blocklist source files are missing or invalid')
       }

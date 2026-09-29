@@ -184,7 +184,7 @@ class NoraView: ExpoView, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHan
     installUserScripts(config.userContentController)
 
     config.allowsInlineMediaPlayback = true
-    config.preferences.javaScriptCanOpenWindowsAutomatically = true
+    config.preferences.javaScriptCanOpenWindowsAutomatically = false
     config.websiteDataStore = NoraView.dataStore(for: profile)
 
     return config
@@ -355,9 +355,11 @@ class NoraView: ExpoView, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHan
   }
 
   func setInspectable(_ inspectable: Bool) {
+    #if DEBUG
     if #available(iOS 16.4, *) {
-      webView.isInspectable = inspectable
+      webView?.isInspectable = inspectable
     }
+    #endif
   }
 
   func setScriptOnStart(_ script: String) {

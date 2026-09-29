@@ -67,6 +67,9 @@ const syncNativeSettings = () => {
     proxyType: value?.proxyType,
     proxyHost: value?.proxyHost,
     proxyPort: value?.proxyPort,
+    proxyUsername: value?.proxyUsername,
+    proxyPassword: value?.proxyPassword,
+    clipboardTrackingConsent: value?.clipboardTrackingConsent,
   })
 }
 

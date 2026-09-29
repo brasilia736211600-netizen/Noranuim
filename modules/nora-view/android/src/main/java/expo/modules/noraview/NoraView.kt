@@ -57,6 +57,8 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
 import expo.modules.kotlin.AppContext
+import expo.modules.interfaces.permissions.PermissionsResponseListener
+import expo.modules.interfaces.permissions.PermissionsStatus
 import expo.modules.kotlin.viewevent.EventDispatcher
 import expo.modules.kotlin.views.ExpoView
 import java.io.ByteArrayInputStream
@@ -176,7 +178,67 @@ fun shouldRedirectFacebookToMobile(currentUrl: String, targetUrl: String, deskto
 
 val INTERNAL_SCHEMES = setOf("about", "blob", "data", "file", "http", "https", "javascript", "nora")
 
+/** The WebView media resources a page's getUserMedia call can ask for. */
+enum class PermissionResource(val webViewResource: String) {
+  audioCapture("android.webkit.resource.RECORD_AUDIO"),
+  videoCapture("android.webkit.resource.VIDEO_CAPTURE");
+
+  companion object {
+    private val byWebViewResource = entries.associateBy { it.webViewResource }
+
+    fun fromWebViewResource(resource: String): PermissionResource? = byWebViewResource[resource]
+  }
+}
+
+/**
+ * Narrows what a page asked for down to what the user actually allowed.
+ *
+ * A getUserMedia request reaches `onPermissionRequest` before Android has
+ * resolved the runtime permission behind it, so the answer cannot be given
+ * there. It is given here once the permission result is known: the page keeps
+ // The page keeps only the resources whose permission was granted, in the order
+   * it asked for them. Anything it asked for that was refused is dropped rather
+   * than granted alongside, so a page asking for camera and microphone with only
+   * the microphone allowed gets the microphone alone.
+   */
+  fun resolveWebRtcPermissionGrant(
+    requested: Set<PermissionResource>,
+    granted: Set<PermissionResource>,
+  ): List<PermissionResource> = PermissionResource.entries
+    .filter { it in requested && it in granted }
+    .let { entries ->
+      // Reorder to match the page's requested order (which is the order in the
+      // `requested` set — it was built from a LinkedHashSet preserving insertion
+      // order from the page's getUserMedia constraints).
+      requested.toList().filter { it in entries }
+    }
+
+/**
+ * Whether `onShowFileChooser` may report the chooser as launched.
+ *
+ * Returning `true` tells the WebView the activity is up, so the page's file
+ * input stays pending until something reports a result. With no Activity there
+ * is nothing to report one from, so the honest answer is `false` and the page's
+ * input resolves empty instead of hanging.
+ */
+fun shouldReportFileChooserLaunched(activityAvailable: Boolean): Boolean = activityAvailable
+
 const val SAVED_FILE_CHANNEL_ID = "nora-saved-files"
+
+/** Request code the WebView's media permission prompts are settled under. */
+private const val PERMISSION_REQUEST_CODE = 8101
+
+/** The Android runtime permission backing each media resource, where there is one. */
+fun runtimePermissionFor(resource: PermissionResource): String? = when (resource) {
+  PermissionResource.audioCapture -> android.Manifest.permission.RECORD_AUDIO
+  PermissionResource.videoCapture -> android.Manifest.permission.CAMERA
+}
+
+fun hasRuntimePermission(activity: Activity, resource: PermissionResource): Boolean {
+  val permission = runtimePermissionFor(resource) ?: return false
+  return androidx.core.content.ContextCompat.checkSelfPermission(activity, permission) ==
+    android.content.pm.PackageManager.PERMISSION_GRANTED
+}
 
 // Sites serve real images under decoy extensions so browsers render them inline
 // instead of downloading them: Discord's .pnj is a PNG, .gifv a GIF. Imgur's
@@ -487,6 +549,54 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
   internal val currentActivity: Activity?
     get() = appContext.currentActivity
 
+  // A page's getUserMedia request, held between onPermissionRequest and the
+  // user's answer to the runtime permission behind it. Without it the page has
+  // to be told something before the user has been asked.
+  internal var pendingPermissionRequest: android.webkit.PermissionRequest? = null
+
+  /**
+   * Settles the held media request now that Android has reported the runtime
+   * permission result. Only the resources the user actually allowed are
+   * granted; anything refused is withheld so the page sees a denial for the
+   * stream rather than a grant it cannot use.
+   */
+  fun onRequestPermissionsResult(requestCode: Int, grantResults: IntArray) {
+    if (requestCode != PERMISSION_REQUEST_CODE) {
+      return
+    }
+    val request = pendingPermissionRequest ?: return
+    pendingPermissionRequest = null
+    if (grantResults.isEmpty()) {
+      request.deny()
+      return
+    }
+    // requestPermissions() is asked for in the page's requested order (the order
+      // of resources in the getUserMedia call), so the results line up with the
+      // requested set one for one. Each one is also re-checked against the Activity:
+      // a result can be a grant the user gave for a different resource, and the
+      // platform's own answer is the final word.
+      val activity = currentActivity
+      val allowed = if (activity == null) {
+        emptySet()
+      } else {
+        PermissionResource.entries
+          .filterIndexed { index, resource ->
+            grantResults.getOrNull(index) == android.content.pm.PackageManager.PERMISSION_GRANTED &&
+            hasRuntimePermission(activity, resource)
+          }
+          .toSet()
+      }
+    val toGrant = resolveWebRtcPermissionGrant(
+      requested = request.resources.mapNotNull { PermissionResource.fromWebViewResource(it) }.toSet(),
+      granted = allowed,
+    )
+    if (toGrant.isEmpty()) {
+      request.deny()
+    } else {
+      request.grant(toGrant.map { it.webViewResource }.toTypedArray())
+    }
+  }
+
   override fun onCreateContextMenu(menu: ContextMenu) {
     super.onCreateContextMenu(menu)
 
@@ -794,32 +904,60 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
         }
 
         override fun onPermissionRequest(request: PermissionRequest) {
-          val activity = currentActivity
-          if (activity == null) {
+          val requested = request.resources
+            .mapNotNull { PermissionResource.fromWebViewResource(it) }
+            .toSet()
+          // Anything this app has no runtime permission for (protected media,
+          // MIDI, …) is not something the user can be asked about, so it is
+          // answered the way the platform answers it: denied.
+          if (requested.isEmpty()) {
             request.deny()
             return
           }
-
-          val resources = request.resources
-          if (resources.isEmpty() || resources.any {
-              it != PermissionRequest.RESOURCE_AUDIO_CAPTURE &&
-                it != PermissionRequest.RESOURCE_VIDEO_CAPTURE
-            }) {
+          val activity = currentActivity ?: run {
             request.deny()
             return
           }
-
-          val permissionsToRequest = mutableListOf<String>()
-
-          if (resources.contains(PermissionRequest.RESOURCE_AUDIO_CAPTURE)) {
-            permissionsToRequest.add(android.Manifest.permission.RECORD_AUDIO)
+          if (requested.all { hasRuntimePermission(activity, it) }) {
+            request.grant(requested.map { it.webViewResource }.toTypedArray())
+            return
           }
-          if (resources.contains(PermissionRequest.RESOURCE_VIDEO_CAPTURE)) {
-            permissionsToRequest.add(android.Manifest.permission.CAMERA)
+          // A permission still has to be asked for, and the page cannot be told
+          // anything until the user has answered. Hold the request and settle
+          // it from the permissions listener below. The ask goes through expo's
+          // Permissions interface (backed by PermissionAwareActivity), which
+          // delivers the result to the listener itself — no ActivityEventListener
+          // registration exists in expo-modules-core sdk-56. The interface also
+          // answers synchronously (denied) when there is nothing to ask through,
+          // so the request always gets settled exactly once.
+          pendingPermissionRequest = request
+          val permissionsToAsk = requested.mapNotNull { runtimePermissionFor(it) }.toTypedArray()
+          appContext.permissions?.askForPermissions(
+            PermissionsResponseListener { response ->
+              val grantResults = requested.map { resource ->
+                val permission = runtimePermissionFor(resource)
+                if (permission != null && response[permission]?.status == PermissionsStatus.GRANTED) {
+                  android.content.pm.PackageManager.PERMISSION_GRANTED
+                } else {
+                  android.content.pm.PackageManager.PERMISSION_DENIED
+                }
+              }.toIntArray()
+              onRequestPermissionsResult(PERMISSION_REQUEST_CODE, grantResults)
+            },
+            *permissionsToAsk,
+          )
+          // If the permissions service is unavailable the ask never happened and
+          // no listener will fire, so settle it as a denial now.
+          if (appContext.permissions == null) {
+            pendingPermissionRequest = null
+            request.deny()
           }
+        }
 
-          activity.requestPermissions(permissionsToRequest.toTypedArray(), 101)
-          request.grant(resources)
+        override fun onPermissionRequestCanceled(request: PermissionRequest) {
+          if (pendingPermissionRequest === request) {
+            pendingPermissionRequest = null
+          }
         }
 
         override fun onJsBeforeUnload(view: WebView, url: String, message: String, result: JsResult): Boolean {
@@ -874,8 +1012,18 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
             }
           }
           val activity = currentActivity
-          activity?.startActivityForResult(intent, 0)
-          return true
+          if (activity == null) {
+            // Nothing can report a result back, so the page's input would wait
+            // forever. Do NOT invoke the callback here — just drop the stored
+            // reference and return false. Chromium will call onReceiveValue(null)
+            // on its own when onShowFileChooser returns false, which resolves
+            // the input empty instead of hanging. Invoking it ourselves + returning
+            // false causes a duplicate call and an IllegalStateException.
+            nouController.setFileChooserCallback(null)
+            return false
+          }
+          activity.startActivityForResult(intent, 0)
+          return shouldReportFileChooserLaunched(activityAvailable = true)
         }
 
         override fun onCreateWindow(

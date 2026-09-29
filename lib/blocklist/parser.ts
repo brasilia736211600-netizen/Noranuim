@@ -142,6 +142,15 @@ function extractCosmeticFilter(rawLine: string) {
   if (!selector || UNSUPPORTED_COSMETIC_SELECTOR_TOKENS.some((token) => selector.includes(token))) {
     return null
   }
+  // A cosmetic selector is emitted verbatim into `${selector}{display:none!important;}`.
+  // Braces and semicolons are declaration-block syntax, never selector syntax, so
+  // their presence means the line is trying to close our block and append its own
+  // declarations (UI spoofing, overlay, CSS-based exfiltration). A compromised
+  // filter list would otherwise be able to inject arbitrary CSS. Legitimate
+  // cosmetic selectors never contain them, so nothing real is lost.
+  if (selector.includes('{') || selector.includes('}') || selector.includes(';')) {
+    return null
+  }
 
   return `${domains}${separator}${selector}`
 }
