@@ -1,4 +1,4 @@
-import { ConfigPlugin, withGradleProperties, withMainActivity } from '@expo/config-plugins'
+import { ConfigPlugin, withAndroidManifest, withGradleProperties, withMainActivity } from '@expo/config-plugins'
 import { withAppBuildGradle } from '@expo/config-plugins/build/plugins/android-plugins.js'
 
 const googlePlayBuild = !!process.env.GOOGLE_PLAY_BUILD
@@ -143,8 +143,28 @@ const withSecondaryDisplayMetricsFix: ConfigPlugin = (config) =>
     return config
   })
 
+/**
+ * Play treats a permission's implied hardware feature as REQUIRED unless the
+ * manifest says otherwise, so declaring RECORD_AUDIO/CAMERA without these
+ * entries filters Nora off hardware that lacks them — even though browsing
+ * works perfectly well there. Both capabilities are optional and only ever
+ * activated by an explicit page/user request, hence required="false".
+ * Idempotent: prebuild re-runs must not stack duplicates.
+ */
+const withOptionalHardwareFeatures: ConfigPlugin = (config) =>
+  withAndroidManifest(config, (config) => {
+    const manifest = config.modResults.manifest
+    const existing: Array<{ $?: Record<string, string> }> = (manifest['uses-feature'] ??= [])
+    for (const name of ['android.hardware.camera', 'android.hardware.microphone']) {
+      const already = existing.some((feature) => feature.$?.['android:name'] === name)
+      if (!already) existing.push({ $: { 'android:name': name, 'android:required': 'false' } })
+    }
+    return config
+  })
+
 const withAndroidSigningConfig: ConfigPlugin = (config) => {
   config = withSecondaryDisplayMetricsFix(config)
+  config = withOptionalHardwareFeatures(config)
 
   config = withGradleProperties(config, (config) => {
     const existingIndex = config.modResults.findIndex(

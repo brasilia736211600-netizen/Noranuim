@@ -136,3 +136,56 @@ The subagent's claims that this file contained clipboard, shell, device-info, sc
 **Decision:** Do not add them.
 
 **Rationale:** YAGNI — fields that no iOS code path reads would imply proxy-auth support that does not exist, misleading future readers. iOS proxy auth remains a known functional gap (low priority: iOS HTTP proxy credential support would need `URLSession`-level auth handling), recorded here rather than papered over with unused fields.
+
+## D-009: Permission specialist adopted; CAMERA declared; contract moved to docs/
+
+**Context:** The owner's LatestNuraniumPrompt.md (§12-15) installs a permission
+specialist as a standing role ("a permission specialist [will be] responsible
+from now on", 2026-09-29). The first `/perm audit` run against this repository
+produced evidence-based findings:
+
+- `PERM-UNDECLARED-CAMERA` (HIGH): `NoraView.kt:964` builds `permissionsToAsk`
+  from `runtimePermissionFor(videoCapture)` → `android.Manifest.permission.CAMERA`
+  and calls `askForPermissions(...)`, and `NoraStandaloneActivity.kt:147` checks
+  the same constant, but `CAMERA` appears in no manifest and not in
+  `app.config.ts`. Android denies an undeclared permission without ever
+  prompting, so WebView video capture could never be granted. Intent that video
+  capture is *supposed* to work comes from SEC-01 (the deferred-grant fix that
+  deliberately handles "a page asking for camera and microphone").
+- `PERM-FEATURE-RECORD_AUDIO` (MEDIUM): declared hardware-backed permissions had
+  no `uses-feature required="false"`, so Play treats camera/microphone as
+  required and can filter Nora off hardware lacking them.
+- `PERM-UNUSED-MODIFY_AUDIO_SETTINGS` (LOW): referenced nowhere in app code.
+
+One candidate finding was *rejected after verification* (never fabricated into a
+finding): `lib/mention-notifications.ts:516` calls `ensureEnabledRuntime()` at
+module load, but that function reaches only channel creation + background-task
+registration gated on the user's existing setting — no permission request is
+reachable, so there is no "request without user intent" issue.
+
+**Decision:**
+1. Declare `CAMERA` in `app.config.ts` and document why `MODIFY_AUDIO_SETTINGS`
+   is kept by review (WebView WebRTC call audio routing cannot be validated
+   without device-side audio testing — removal is not safe to do blind).
+2. Add `withOptionalHardwareFeatures` to `plugins/withAndroidPlugin.ts`
+   declaring `android.hardware.camera` and `android.hardware.microphone` with
+   `android:required="false"` (idempotent).
+3. Pin the invariant with `lib/permission-declaration.test.ts`: every permission
+   the Kotlin checks/asks for must be declared. This is a relation between two
+   artifacts (not a snapshot), and the test also guards itself against finding
+   zero references (vacuous pass).
+4. The durable engineering contract (§5/§25) lands in
+   `docs/ENGINEERING_CONTRACT.md` instead of `AGENTS.md` — the `AGENTS.md` path
+   is a consent-gated agent-instruction file and the write was not approved
+   (silence ≠ consent); no attempt was made to route around it.
+
+**Rationale:** fix the whole class (undeclared-but-asked) rather than the one
+symptom, with a regression test so it cannot return (§26); keep the specialist's
+audit deterministic/offline/sub-second and its model selection dynamic (§14).
+
+**Verification limits:** no local JS toolchain exists on the device (no
+`bun`/`node`, `node_modules` absent), so the new test and the Expo config-plugin
+change are validated only by GitHub Actions CI (unit tests + FOSS/full Android
+validation), per the standing "builds only in CI" rule. The audit itself ran
+locally: 0.28 s, findings HIGH=1 MEDIUM=1 LOW=1, report at
+`~/.hermes/reports/perm-audit-*.json`.
