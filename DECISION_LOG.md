@@ -183,9 +183,11 @@ reachable, so there is no "request without user intent" issue.
 symptom, with a regression test so it cannot return (§26); keep the specialist's
 audit deterministic/offline/sub-second and its model selection dynamic (§14).
 
-**Verification limits:** no local JS toolchain exists on the device (no
-`bun`/`node`, `node_modules` absent), so the new test and the Expo config-plugin
-change are validated only by GitHub Actions CI (unit tests + FOSS/full Android
-validation), per the standing "builds only in CI" rule. The audit itself ran
+**Verification limits:** no `bun` binary and no `node_modules` on the device (node/npm
+exist under Hermes' tools dir, so logic-level checks can be replicated under node, but
+`bun test` cannot run locally), per the standing "builds only in CI" rule nothing was built
+locally. The audit itself ran
 locally: 0.28 s, findings HIGH=1 MEDIUM=1 LOW=1, report at
-`~/.hermes/reports/perm-audit-*.json`.
+`~/.hermes/reports/perm-audit-*.json`. Follow-up: the first CI push failed the new test
+with ENOENT because `repoRoot` resolved two levels above `<repo>/lib`; fixed in 1ab3bd4
+and verified locally with the exact logic replicated under node (positive + negative case).
