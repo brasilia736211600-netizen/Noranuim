@@ -5,16 +5,63 @@ import { describe, expect, test } from 'bun:test'
 const root = join(import.meta.dir, '..')
 const read = (path: string) => readFileSync(join(root, path), 'utf8')
 
-// Strip whitespace and line comments so an assertion describes STRUCTURE, not
+// Strip comments and whitespace so an assertion describes STRUCTURE, not
 // formatting. The literal-string assertions below stay as a readable summary,
 // but a regression that is merely re-indented or re-wrapped must still fail:
 // the fail-closed invariant is "no branch reachable from a non-default profile
 // ever yields the global CookieManager", and that holds regardless of layout.
-const code = (path: string) =>
-  read(path)
-    .replace(/\/\/[^\n]*/g, '')
-    .replace(/\/\*[\s\S]*?\*\//g, '')
-    .replace(/\s+/g, '')
+//
+// Comment stripping MUST be string-aware. A naive /\/\/[^\n]*/ eats the rest of
+// the line for any URL inside a literal ("https://..."), and a naive
+// /\/\*[\s\S]*?\*\// finds its opening '/*' inside `else "*/*"` in NoraView.kt
+// and then pairs it with a far later '*/', swallowing ~12KB of real code --
+// silently turning every assertion into a pass. NoraView.kt is the file that
+// carries the profileIsolation gate, so being blind there is the expensive
+// failure mode. This walks the source, skipping over literals untouched.
+const stripComments = (src: string): string => {
+  let out = ''
+  let i = 0
+  const n = src.length
+  while (i < n) {
+    const c = src[i]
+    // String / char literals: copy verbatim, escapes included, so that '//',
+    // '/*' and quotes inside a literal never look like comment delimiters.
+    if (c === '"' || c === "'") {
+      const triple = c.repeat(3)
+      if (src.startsWith(triple, i)) {
+        const end = src.indexOf(triple, i + 3)
+        const stop = end === -1 ? n : end + 3
+        out += src.slice(i, stop)
+        i = stop
+        continue
+      }
+      let j = i + 1
+      while (j < n) {
+        if (src[j] === '\\') { j += 2; continue }
+        if (src[j] === c) { j += 1; break }
+        j += 1
+      }
+      out += src.slice(i, Math.min(j, n))
+      i = Math.min(j, n)
+      continue
+    }
+    if (src.startsWith('//', i)) {
+      const nl = src.indexOf('\n', i)
+      i = nl === -1 ? n : nl
+      continue
+    }
+    if (src.startsWith('/*', i)) {
+      const end = src.indexOf('*/', i + 2)
+      i = end === -1 ? n : end + 2
+      continue
+    }
+    out += c
+    i += 1
+  }
+  return out
+}
+
+const code = (path: string) => stripComments(read(path)).replace(/\s+/g, '')
 
 describe('security boundary invariants', () => {
   test('never falls back from a non-default profile to the global cookie manager', () => {
@@ -50,6 +97,45 @@ describe('security boundary invariants', () => {
     const module = code('modules/nora-view/android/src/main/java/expo/modules/noraview/NoraViewModule.kt')
     expect(module).not.toContain('?:CookieManager.getInstance()')
     expect(module).not.toContain('else{CookieManager.getInstance()}')
+  })
+
+  test('profile isolation fails closed when MULTI_PROFILE is unavailable', () => {
+    // NoraView.kt is the file carrying the profile gate, and it is also the one
+    // whose `else "*/*"` literal breaks naive comment strippers -- so asserting
+    // against it is what proves stripComments is not going blind.
+    const view = code('modules/nora-view/android/src/main/java/expo/modules/noraview/NoraView.kt')
+
+    // The gate exists and is consulted before navigation is allowed through.
+    expect(view).toContain('privatevarprofileIsolationReady=true')
+    expect(view).toContain('if(profileName!="default"&&!profileIsolationReady)')
+
+    // Rejecting a profile must clear the flag, not leave it stale from a
+    // previously working profile: a failed setProfile for profile B must not
+    // let B navigate on the strength of A's success.
+    expect(view).toContain('profileIsolationReady=false')
+    // The assertion above alone is weak: `profileIsolationReady = false` also
+    // appears in the catch-path, so a regression that removed it from the
+    // unsupported-profile branch would still leave that substring on screen.
+    // Pin the assignment to the branch that must fail closed.
+    expect(view).toContain(
+      'if(!WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)){profileIsolationReady=false',
+    )
+    // ...and to the branch's ordering, so a reordering that clears the flag
+    // only after profileSet = true cannot slip through.
+    expect(view).toContain('profileIsolationReady=falseprofileSet=true')
+
+    // Both reject paths report and stop, rather than continuing on.
+    expect(view).toContain('MULTI_PROFILEunsupported;failingclosed')
+    expect(view).toContain('profile$profilerejected')
+    expect(view).toContain('blockednavigation:profileisolationunavailable')
+
+    // The deny is real: the global CookieManager is not reachable here.
+    expect(view).not.toContain('else{CookieManager.getInstance()}')
+    expect(view).not.toContain('?:CookieManager.getInstance()')
+
+    // And the string literal that defeats a naive stripper is still present --
+    // if this ever changes, the stripper's blind spot changes with it.
+    expect(view).toContain('else"*/*"')
   })
 
   test('standalone activities never reuse a WebView across profile changes', () => {

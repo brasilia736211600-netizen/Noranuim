@@ -391,7 +391,7 @@ class ProfileIsolationInstrumentedTest {
 
   private fun newPopupOpener(profile: String, popupOwner: MutableList<WebView>): Pair<WebView, TrackingClient> {
     var wv: WebView? = null
-    var client: PopupOpenerClient? = null
+    var client: TrackingClient? = null
     instrumentation.runOnMainSync {
       wv = WebView(context)
       wv!!.settings.javaScriptEnabled = true
@@ -399,8 +399,12 @@ class ProfileIsolationInstrumentedTest {
       wv!!.settings.setSupportMultipleWindows(true)
       wv!!.settings.javaScriptCanOpenWindowsAutomatically = true
       WebViewCompat.setProfile(wv!!, profile)
-      client = PopupOpenerClient(profile, popupOwner)
-      wv!!.webViewClient = client
+      // Window creation is a WebChromeClient callback, not a WebViewClient one:
+      // onCreateWindow lives on WebChromeClient only, so the popup-interception
+      // logic and the page-load tracking must be two separate objects.
+      client = TrackingClient()
+      wv!!.webViewClient = client!!
+      wv!!.webChromeClient = PopupOpenerClient(profile, popupOwner)
       created.add(wv!!)
     }
     return wv!! to client!!
@@ -409,7 +413,7 @@ class ProfileIsolationInstrumentedTest {
   private inner class PopupOpenerClient(
     private val profile: String,
     private val popupOwner: MutableList<WebView>,
-  ) : TrackingClient() {
+  ) : WebChromeClient() {
     override fun onCreateWindow(
       view: WebView,
       isDialog: Boolean,
