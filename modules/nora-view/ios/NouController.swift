@@ -23,6 +23,9 @@ struct NoraSettings: Record {
 
   @Field
   var proxyPort: String = ""
+
+  @Field
+  var clipboardTrackingConsent: Bool = false
 }
 
 struct NoraBlocklist: Record {

@@ -1,6 +1,7 @@
 # Decision Log — Nora Android Audit Mission
 
-Branch: `hermes/autopilot/2026-09-28-android-audit`
+Branch: `hermes/autopilot/2026-09-28-ios-parity` (current; created from `origin/main@82eb350`)
+Previous: `hermes/autopilot/2026-09-28-android-audit` (merged via PR #15)
 
 ---
 
@@ -87,3 +88,51 @@ This is a deliberate product decision (the app browses arbitrary sites, and bloc
 `NouJsInterface` exposes exactly two `@JavascriptInterface` methods, and neither one is attacker-controllable in a dangerous way: `onMessage` forwards a string to a JS event, `setScrolledRegions` parses rectangles for pull-to-refresh. The bridge is added under a namespaced name (`"NoraI"`) and the page's own content scripts are the only callers.
 
 The subagent's claims that this file contained clipboard, shell, device-info, screenshot, and share methods were entirely fabricated. Recorded here so a future reviewer does not have to re-derive it.
+
+---
+
+## D-005: Adopt `NoraniumPromptPlus.md` process rules before resuming repo work
+
+**Context:** The user supplied `~/NoraniumPromptPlus.md` (1215 lines) and asked whether its rules should be applied before continuing repository tasks, or whether deferring them was safer.
+
+**Decision:** Apply the process rules FIRST (ADOPT-NOMERGE-01, skills enrichment, model-catalog refresh, per-task reasoning effort, PR report format), then resume code work.
+
+**Rationale:** The rules change *how deliverables are produced and reported*. Applying them after more code work would require re-doing or re-reporting that work in the new format — exactly the rework the user wanted to avoid. Applying them first costs one short phase; applying them late could cost whole PRs.
+
+**What changed in practice:**
+- New rule ADOPT-NOMERGE-01: this agent opens PRs but never merges them; human review merges. (PRs 15-24 were self-merged before this rule existed — recorded, not judged retroactively.)
+- Reconciliation step (PromptPlus section 1) executed against GitHub: stale state entries for already-completed REM-SEC/PERF findings were corrected.
+- Model hierarchy: strongest free model available (`nemotron-3-ultra-free`, T5) holds supervisor/decision roles; `model_catalog.json` refresh dispatched as a background scout.
+
+**What did NOT change:** English-only output, CI-only builds, no local heavy tooling, 3-subagent concurrency ceiling, evidence-first verification, error-log learning loop — all standing constraints remain in force; PromptPlus is compatible with each of them.
+
+## D-006: iOS clipboard parity — consent gate + non-blocking banner
+
+**Context:** REM-SEC-HIGH-08 ("clipboard URL rewriting opt-in with notification") was merged for Android (PR #22: consent gate at `NoraViewModule.kt:117`, Toast at `:130`) but never landed on iOS. `modules/nora-view/ios/NoraViewModule.swift:onPasteboardChanged` rewrote the user's clipboard unconditionally, with no consent field, no Record entry, and no notification.
+
+**Decision:** Mirror the Android design on iOS with three minimal changes:
+1. `NouController.swift`: add `@Field var clipboardTrackingConsent: Bool = false` to `NoraSettings` (secure default: listener is a no-op until the user opts in; JS already sends this field from `app/index.tsx:72`).
+2. `NoraViewModule.swift`: early-return in `onPasteboardChanged` when consent is false, before any URL inspection.
+3. `NoraViewModule.swift`: show a self-dismissing banner after a rewrite, instead of the stashed WIP's modal `UIAlertController` (a modal on every copy would be hostile UX; Android uses a non-blocking Toast, so the banner is the parity choice).
+
+**Rejected alternative (stash@{0} / scratch diff):** the old-branch WIP re-added the gate but also flipped `javaScriptCanOpenWindowsAutomatically` back to `true`, reverting the merged PR #17 security fix. It was used as reference only; the regression line was verified absent from the final diff (`git diff | grep javaScriptCanOpenWindowsAutomatically` over Swift files → empty, exit 1).
+
+**Verification limits:** iOS is not built by any workflow in this repository (no `xcodebuild` job exists), so this diff cannot be compile-verified in CI. Mitigations applied: brace-balance check on all three files, symbol wiring grep (`setInspectable` defined + called, `clipboardTrackingConsent` declared + read), regression grep, and an independent reviewer subagent (required by PromptPlus section 32 before this can be called done).
+
+## D-007: iOS `inspectable` prop re-added behind `#if DEBUG`
+
+**Context:** Android gates `inspectable` behind `BuildConfig.DEBUG` (`NoraViewModule.kt:350`, introduced in PR #15 commit 9d706bf; PR #23 only added the empty `else` comment). iOS removed the prop entirely (PR #17). The JS side still passes `inspectable` to the native view at three call sites (`NoraTab.tsx:956,1085`, `DownloadVideoModal.tsx:201`), so on iOS the setting exists in the UI but does nothing.
+
+**Decision:** Re-add `Prop("inspectable")` on iOS with the implementation wrapped in `#if DEBUG`, plus an `#available(iOS 16.4, *)` check (`WKWebView.isInspectable` is 16.4+) in `NoraView.setInspectable`.
+
+**Rationale:** `#if DEBUG` is a *compile-time* gate — stronger than Android's runtime `BuildConfig.DEBUG` check, since release builds do not contain the code at all. This restores cross-platform behavior parity for a user-facing setting without widening the production attack surface.
+
+**Residual risk:** a debug build has a tappable inspectable setting — same posture as Android debug builds, accepted platform parity.
+
+## D-008: proxyUsername/proxyPassword NOT added to the iOS Record
+
+**Context:** The stashed WIP added `proxyUsername`/`proxyPassword` to the iOS `NoraSettings` Record "for parity". Evidence check: Android *consumes* them (`NoraViewModule.kt:59,68-70` builds proxy auth headers); iOS `applyProxy()` uses `ProxyConfiguration(httpCONNECTProxy:)` with no credential usage anywhere in `modules/nora-view/ios/`.
+
+**Decision:** Do not add them.
+
+**Rationale:** YAGNI — fields that no iOS code path reads would imply proxy-auth support that does not exist, misleading future readers. iOS proxy auth remains a known functional gap (low priority: iOS HTTP proxy credential support would need `URLSession`-level auth handling), recorded here rather than papered over with unused fields.
