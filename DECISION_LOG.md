@@ -121,7 +121,7 @@ The subagent's claims that this file contained clipboard, shell, device-info, sc
 
 ## D-007: iOS `inspectable` prop re-added behind `#if DEBUG`
 
-**Context:** Android gates `inspectable` behind `BuildConfig.DEBUG` (`NoraViewModule.kt:350`, PR #23). iOS removed the prop entirely (PR #17). The JS side still passes `inspectable` to the native view at three call sites (`NoraTab.tsx:956,1085`, `DownloadVideoModal.tsx:201`), so on iOS the setting exists in the UI but does nothing.
+**Context:** Android gates `inspectable` behind `BuildConfig.DEBUG` (`NoraViewModule.kt:350`, introduced in PR #15 commit 9d706bf; PR #23 only added the empty `else` comment). iOS removed the prop entirely (PR #17). The JS side still passes `inspectable` to the native view at three call sites (`NoraTab.tsx:956,1085`, `DownloadVideoModal.tsx:201`), so on iOS the setting exists in the UI but does nothing.
 
 **Decision:** Re-add `Prop("inspectable")` on iOS with the implementation wrapped in `#if DEBUG`, plus an `#available(iOS 16.4, *)` check (`WKWebView.isInspectable` is 16.4+) in `NoraView.setInspectable`.
 

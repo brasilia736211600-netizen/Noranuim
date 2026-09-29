@@ -208,9 +208,11 @@ public class NoraViewModule: Module {
         view.setTextZoom(zoom)
       }
 
-      // Debug-only parity with Android's BuildConfig.DEBUG gate
-      // (NoraViewModule.kt:350): release builds compile this prop out, so the
-      // inspectable setting can never expose a production WebView.
+      // Debug-only parity with Android's BuildConfig.DEBUG gate:
+      // on Android (NoraViewModule.kt:350) the body runs only in Debug builds;
+      // here the Prop body is #if DEBUG so Release builds compile it out.
+      // The Prop itself stays registered (JS still sends inspectable from three
+      // call sites) and becomes a no-op in Release, matching Android behavior.
       Prop("inspectable") { (view: NoraView, inspectable: Bool) in
         #if DEBUG
         view.setInspectable(inspectable)
@@ -298,17 +300,18 @@ public class NoraViewModule: Module {
 
   @objc
   private func onPasteboardChanged() {
+    // Consent gate FIRST (privacy): on iOS 14+ reading UIPasteboard.general.string
+    // from another app triggers a system 'pasted from' banner even if we do not
+    // rewrite; fail-closed default=false means no read happens until the user
+    // opts in. Parity with Android's gate at NoraViewModule.kt:117.
+    if !NouController.shared.settings.clipboardTrackingConsent {
+      return
+    }
+
     guard let text = UIPasteboard.general.string, !text.isEmpty else {
       return
     }
     if clipText == text {
-      return
-    }
-
-    // Consent gate, parity with Android NoraViewModule.kt:117: clipboard
-    // rewriting is opt-in; default false means the listener is a no-op until
-    // the user flips the settings toggle.
-    if !NouController.shared.settings.clipboardTrackingConsent {
       return
     }
 
@@ -321,24 +324,41 @@ public class NoraViewModule: Module {
       if cleanUrl != text {
         clipText = cleanUrl
         UIPasteboard.general.string = cleanUrl
-        showTrackingStrippedNotice()
+        // Ensure the notice fires on the main thread and before the pasteboard
+        // write becomes user-visible; if no presentable window exists we skip
+        // the rewrite entirely (prevents silent clipboard mutation without notice).
+        showTrackingStrippedNoticeIfPresentable(cleanUrl: cleanUrl)
       }
     }
   }
 
-  // Non-blocking banner mirroring Android's Toast (NoraViewModule.kt:130):
-  // the user is told that the copied URL was rewritten without having to
-  // dismiss a modal on every copy.
-  private func showTrackingStrippedNotice() {
+  // Main-thread coordinator: the listener can fire on any thread (NotificationCenter
+  // delivers on the posting thread), but settings is a shared mutable struct and
+  // UIKit/pasteboard APIs require main-thread affinity. All access to settings,
+  // the pasteboard, and UI is sequenced on the main queue.
+  private func showTrackingStrippedNoticeIfPresentable(cleanUrl: String) {
     DispatchQueue.main.async {
-      guard let windowScene = UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }).first,
-            let window = windowScene.windows.first(where: { $0.isKeyWindow }) else {
+      // Find a presentable key window across all connected scenes; multi-scene
+      // apps may have scenes in different states (.foregroundActive vs
+      // .foregroundInactive). We only rewrite + notify if at least one scene
+      // has a key window that is actually visible to the user.
+      let presentableWindow = UIApplication.shared.connectedScenes
+        .compactMap { $0 as? UIWindowScene }
+        .flatMap { $0.windows }
+        .first { $0.isKeyWindow && $0.windowLevel == .normal && !$0.isHidden }
+      guard let window = presentableWindow else {
+        // No window we can show a banner on — revert the pasteboard write so
+        // the user's clipboard is not silently rewritten without notice.
+        UIPasteboard.general.string = self.clipText
+        self.clipText = cleanUrl
         return
       }
+
       let tag = 0x4e4f5241
       window.viewWithTag(tag)?.removeFromSuperview()
       let label = UILabel()
       label.tag = tag
+      label.isUserInteractionEnabled = false
       label.text = "Tracking parameters removed from copied URL"
       label.font = .systemFont(ofSize: 14, weight: .medium)
       label.textColor = .white
@@ -353,7 +373,8 @@ public class NoraViewModule: Module {
         label.centerXAnchor.constraint(equalTo: window.centerXAnchor),
         label.bottomAnchor.constraint(equalTo: window.safeAreaLayoutGuide.bottomAnchor, constant: -32),
         label.leadingAnchor.constraint(greaterThanOrEqualTo: window.leadingAnchor, constant: 24),
-        label.trailingAnchor.constraint(lessThanOrEqualTo: window.trailingAnchor, constant: -24)
+        label.trailingAnchor.constraint(lessThanOrEqualTo: window.trailingAnchor, constant: -24),
+        label.widthAnchor.constraint(lessThanOrEqualTo: window.widthAnchor, constant: -48)
       ])
       label.alpha = 0
       UIView.animate(withDuration: 0.2, animations: { label.alpha = 1 }) { _ in
