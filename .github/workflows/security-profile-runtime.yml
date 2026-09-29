@@ -92,5 +92,18 @@ jobs:
           working-directory: ./android
           script: |
             set -eu
-            adb shell cmd package wait-for-ready
+            # `cmd package wait-for-ready` does not exist on API 34 (the shell
+            # exits 255, which `set -eu` turns into an instant step failure).
+            # Poll `pm path android` instead: it returns once the package
+            # manager answers, and the loop is bounded so a wedged emulator
+            # fails fast with a clear message rather than hanging the job.
+            tries=0
+            until adb shell pm path android >/dev/null 2>&1; do
+              tries=$((tries + 1))
+              if [ "$tries" -ge 60 ]; then
+                echo "package manager not ready after ${tries} attempts" >&2
+                exit 1
+              fi
+              sleep 1
+            done
             ./gradlew connectedFullDebugAndroidTest --stacktrace --no-daemon -PreactNativeArchitectures=x86_64
