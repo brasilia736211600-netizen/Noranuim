@@ -92,18 +92,18 @@ jobs:
           working-directory: ./android
           script: |
             set -eu
-            # `cmd package wait-for-ready` does not exist on API 34 (the shell
-            # exits 255, which `set -eu` turns into an instant step failure).
-            # Poll `pm path android` instead: it returns once the package
-            # manager answers, and the loop is bounded so a wedged emulator
-            # fails fast with a clear message rather than hanging the job.
-            tries=0
-            until adb shell pm path android >/dev/null 2>&1; do
-              tries=$((tries + 1))
-              if [ "$tries" -ge 60 ]; then
-                echo "package manager not ready after ${tries} attempts" >&2
-                exit 1
-              fi
-              sleep 1
-            done
+            # This action feeds each line of `script:` to `sh -c` as a SEPARATE
+            # command, so multi-line control flow is impossible here: a `do`
+            # whose `done` lands on a later line dies with "Syntax error: end of
+            # file unexpected (expecting \"done\")". Every line below must
+            # therefore be self-contained.
+            #
+            # `cmd package wait-for-ready` is not a subcommand of `cmd package`
+            # on the API 34 google_apis image: the shell prints "Unknown command"
+            # and exits 255, which `set -eu` turns into an instant step failure
+            # (run 35164270463). `pm path android` answers as soon as the
+            # package manager is up, and the action has already waited for a
+            # completed boot, so no shell-level retry loop is needed or wanted.
+            adb wait-for-device
+            adb shell pm path android
             ./gradlew connectedFullDebugAndroidTest --stacktrace --no-daemon -PreactNativeArchitectures=x86_64
