@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'bun:test'
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join, relative } from 'node:path'
 
 /**
@@ -19,7 +19,13 @@ import { join, relative } from 'node:path'
  * snapshot of either list, so normal permission work does not churn it.
  */
 
-const repoRoot = join(import.meta.dir, '..', '..')
+// import.meta.dir is this file's own directory (<repo>/lib), so the repo root
+// is ONE level up. Going two levels up lands outside the repository and every
+// readFileSync below throws ENOENT — this exact bug failed CI on first push.
+const repoRoot = join(import.meta.dir, '..')
+if (!existsSync(join(repoRoot, 'app.config.ts'))) {
+  throw new Error(`permission-declaration.test.ts: repo root unresolved at ${repoRoot}`)
+}
 
 function ktSources(dir: string, out: string[] = []): string[] {
   for (const entry of readdirSync(dir)) {
