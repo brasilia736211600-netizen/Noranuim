@@ -4,9 +4,11 @@ import android.Manifest
 import android.os.Message
 import android.os.SystemClock
 import android.webkit.PermissionRequest
+import android.webkit.ServiceWorkerClient
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -248,6 +250,13 @@ class ProfileIsolationInstrumentedTest {
     val a = "security-sw-a"
     val b = "security-sw-b"
     try {
+      // WebView only resolves service-worker registration when the profile's
+      // controller has a ServiceWorkerClient installed; without one the
+      // registration promise never settles. Installing it per profile is also the
+      // thing that makes the registration store profile-scoped.
+      installServiceWorkerClient(a)
+      installServiceWorkerClient(b)
+
       val wvA = newProfileWebView(a)
       val wvB = newProfileWebView(b)
       loadPage(wvA, server!!.url("/sw-page"))
@@ -337,8 +346,8 @@ class ProfileIsolationInstrumentedTest {
         store.getOrCreateProfile(b).cookieManager.flush()
       }
 
-      val popupA = mutableListOf<WebView>()
-      val popupB = mutableListOf<WebView>()
+      val popupA = mutableListOf<Pair<WebView, TrackingClient>>()
+      val popupB = mutableListOf<Pair<WebView, TrackingClient>>()
       val (wvA, clientA) = newPopupOpener(a, popupA)
       val (wvB, clientB) = newPopupOpener(b, popupB)
       loadPage(wvA, server!!.url("/popup-opener"), clientA)
@@ -427,6 +436,23 @@ class ProfileIsolationInstrumentedTest {
     return out as T
   }
 
+  /**
+   * WebView only resolves a service-worker registration when the profile's
+   * controller has a ServiceWorkerClient installed; without one the registration
+   * promise never settles. Installing it per profile is also what makes the
+   * registration store profile-scoped, which is the property under test.
+   */
+  private fun installServiceWorkerClient(profile: String) {
+    onMain {
+      ProfileStore.getInstance()
+        .getOrCreateProfile(profile)
+        .serviceWorkerController
+        .setServiceWorkerClient(object : ServiceWorkerClient() {
+          override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? = null
+        })
+    }
+  }
+
   private fun newProfileWebView(profile: String, chrome: WebChromeClient? = null): WebView =
     onMain {
       WebView(context).also { wv ->
@@ -442,7 +468,7 @@ class ProfileIsolationInstrumentedTest {
 
   private fun newPopupOpener(
     profile: String,
-    popupOwner: MutableList<WebView>,
+    popupOwner: MutableList<Pair<WebView, TrackingClient>>,
   ): Pair<WebView, TrackingClient> =
     onMain {
       val wv = WebView(context)
@@ -463,7 +489,7 @@ class ProfileIsolationInstrumentedTest {
 
   private inner class PopupOpenerClient(
     private val profile: String,
-    private val popupOwner: MutableList<WebView>,
+    private val popupOwner: MutableList<Pair<WebView, TrackingClient>>,
   ) : WebChromeClient() {
     override fun onCreateWindow(
       view: WebView,
@@ -481,10 +507,11 @@ class ProfileIsolationInstrumentedTest {
       popup.settings.javaScriptEnabled = true
       popup.settings.domStorageEnabled = true
       popup.settings.setSupportMultipleWindows(false)
-      popup.webViewClient = TrackingClient()
+      val tracking = TrackingClient()
+      popup.webViewClient = tracking
       (resultMsg.obj as WebView.WebViewTransport).webView = popup
       resultMsg.sendToTarget()
-      popupOwner.add(popup)
+      popupOwner.add(popup to tracking)
       created.add(popup)
       return true
     }
@@ -556,14 +583,15 @@ class ProfileIsolationInstrumentedTest {
     assertEquals("__$function(${args.joinToString(",")})", expected, actual)
   }
 
-  private fun assertPopupVerdict(popup: WebView, expected: String) {
-    val popupClient = popup.webViewClient as? TrackingClient
-      ?: throw AssertionError("the popup must be tracked so a load failure is reported")
-    val failure = popupClient.waitForLoad()
+  private fun assertPopupVerdict(popup: Pair<WebView, TrackingClient>, expected: String) {
+    // The client is carried alongside the popup rather than read back off the
+    // WebView: WebView.getWebViewClient() is a WebView method and must be called
+    // on the UI thread, which the instrumentation thread is not.
+    val failure = popup.second.waitForLoad()
     if (failure != null) {
       fail("popup failed to load: $failure")
     }
-    val actual = waitForResult(popup, "readVerdict")
+    val actual = waitForResult(popup.first, "readVerdict")
     assertEquals("popup must see only its opener profile's cookie", expected, actual)
   }
 
@@ -710,7 +738,7 @@ class ProfileIsolationInstrumentedTest {
     // out of the evaluateJavascript callback.
     const val PAGE_HTML = """
       <!doctype html><html><head><meta charset="utf-8"></head><body><script>
-        window.__idbOp = function (write, key, value) {
+        window.__idbOp = function (op, key, value) {
           return new Promise(function (resolve) {
             var req = indexedDB.open('probe', 1);
             req.onupgradeneeded = function () {
@@ -719,7 +747,7 @@ class ProfileIsolationInstrumentedTest {
             req.onerror = function () { resolve('ERR:idb-open'); };
             req.onsuccess = function () {
               var db = req.result;
-              if (write) {
+              if (op === 'write') {
                 var tx = db.transaction('kv', 'readwrite');
                 tx.objectStore('kv').put(value, key);
                 tx.oncomplete = function () { db.close(); resolve('ok'); };
@@ -736,18 +764,22 @@ class ProfileIsolationInstrumentedTest {
             };
           });
         };
-        window.__cacheOp = function (write, key, value) {
+        window.__cacheOp = function (op, key, value) {
           if (typeof caches === 'undefined') { return Promise.resolve('ERR:no-caches'); }
           return caches.open('probe').then(function (c) {
-            if (write) {
+            if (op === 'write') {
               return c.put(key, new Response(String(value))).then(function () { return 'ok'; });
             }
             return c.match(key).then(function (r) { return r ? r.text() : 'null'; });
           }).catch(function () { return 'ERR:cache'; });
         };
-        window.__storageOp = function (write, key, value) {
+        // The first argument is the string 'write' or 'read'. It must be compared
+        // explicitly: `if (op)` would be true for 'read' too, because any non-empty
+        // JavaScript string is truthy, which silently ran the write branch for every
+        // read probe and made reads report the write verdict ('ok').
+        window.__storageOp = function (op, key, value) {
           try {
-            if (write) { localStorage.setItem(key, value); return Promise.resolve('ok'); }
+            if (op === 'write') { localStorage.setItem(key, value); return Promise.resolve('ok'); }
             return Promise.resolve(String(localStorage.getItem(key)));
           } catch (e) { return Promise.resolve('ERR:' + e.name); }
         };
