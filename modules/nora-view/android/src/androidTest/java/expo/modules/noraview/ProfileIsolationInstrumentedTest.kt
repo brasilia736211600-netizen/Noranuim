@@ -17,9 +17,6 @@ import androidx.test.rule.GrantPermissionRule
 import androidx.webkit.ProfileStore
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withContext
 import java.net.InetAddress
 import java.net.ServerSocket
 import java.net.Socket
@@ -446,13 +443,13 @@ class ProfileIsolationInstrumentedTest {
     val controller = onMain {
       ProfileStore.getInstance().getOrCreateProfile(profile).serviceWorkerController
     }
-    runBlocking {
-      withContext(Dispatchers.IO) {
-        controller.setServiceWorkerClient(object : ServiceWorkerClient() {
-          override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? = null
-        })
-      }
-    }
+    // Use a dedicated thread to avoid kotlinx.coroutines threading issues in
+    // Android instrumentation context. The controller object is thread-safe.
+    Thread {
+      controller.setServiceWorkerClient(object : ServiceWorkerClient() {
+        override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? = null
+      })
+    }.start().join()
   }
 
   private fun newProfileWebView(profile: String, chrome: WebChromeClient? = null): WebView =
