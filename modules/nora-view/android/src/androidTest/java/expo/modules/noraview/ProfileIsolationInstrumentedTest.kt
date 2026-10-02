@@ -17,6 +17,9 @@ import androidx.test.rule.GrantPermissionRule
 import androidx.webkit.ProfileStore
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.net.InetAddress
 import java.net.ServerSocket
 import java.net.Socket
@@ -436,16 +439,19 @@ class ProfileIsolationInstrumentedTest {
    * controller has a ServiceWorkerClient installed; without one the registration
    * promise never settles. Installing it per profile is also what makes the
    * registration store profile-scoped, which is the property under test.
-   * Must be called from the UI thread.
+   * ProfileStore access is on UI thread; setServiceWorkerClient must be on
+   * background thread.
    */
   private fun installServiceWorkerClient(profile: String) {
-    onMain {
-      ProfileStore.getInstance()
-        .getOrCreateProfile(profile)
-        .serviceWorkerController
-        .setServiceWorkerClient(object : ServiceWorkerClient() {
+    val controller = onMain {
+      ProfileStore.getInstance().getOrCreateProfile(profile).serviceWorkerController
+    }
+    runBlocking {
+      withContext(Dispatchers.IO) {
+        controller.setServiceWorkerClient(object : ServiceWorkerClient() {
           override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? = null
         })
+      }
     }
   }
 
