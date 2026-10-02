@@ -81,6 +81,35 @@ class ProfileIsolationInstrumentedTest {
   }
 
   // ---------------------------------------------------------------------------
+  // Non-vacuity guard.
+  //
+  // Every isolation test below begins with
+  // `assumeTrue(WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE))`,
+  // which reports a SKIP when the feature is absent — and a class of six
+  // skipped tests is a green Gradle task carrying zero isolation evidence.
+  // That is exactly the "gate is green but nothing ran" failure mode this
+  // suite exists to rule out, so the precondition is asserted explicitly here.
+  // On an environment that cannot do multi-profile WebViews the gate now fails
+  // loudly instead of passing vacuously.
+  // ---------------------------------------------------------------------------
+
+  @Test
+  fun gateRequiresMultiProfileSupport() {
+    var webViewVersion = "<unresolved>"
+    instrumentation.runOnMainSync {
+      // Force the WebView provider to load so the version is resolvable.
+      runCatching { WebView(context).destroy() }
+      webViewVersion = WebView.getCurrentWebViewPackage()?.versionName ?: "<unresolved>"
+    }
+    assertTrue(
+      "this gate requires WebView MULTI_PROFILE support, but the WebView on this device is " +
+        "$webViewVersion. Without it every profile-isolation test would SKIP and the gate " +
+        "would report success with no isolation evidence at all.",
+      WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE),
+    )
+  }
+
+  // ---------------------------------------------------------------------------
   // Runtime evidence: cookies and DOM storage stay profile-scoped.
   // ---------------------------------------------------------------------------
 
