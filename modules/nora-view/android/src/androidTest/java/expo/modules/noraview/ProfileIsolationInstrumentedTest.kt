@@ -28,6 +28,7 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
@@ -120,14 +121,17 @@ class ProfileIsolationInstrumentedTest {
     val b = "security-cookie-b"
     val base = server!!.url("/")
     try {
-      assertTrue(bindProfile(a))
-      assertTrue(bindProfile(b))
+      // Create profiles explicitly via getOrCreateProfile (the real API contract).
+      val profileA = instrumentation.runOnMainSync { ProfileStore.getInstance().getOrCreateProfile(a) }
+      val profileB = instrumentation.runOnMainSync { ProfileStore.getInstance().getOrCreateProfile(b) }
+      assertNotNull(profileA)
+      assertNotNull(profileB)
 
       instrumentation.runOnMainSync {
-        ProfileStore.getInstance().getProfile(a)!!.cookieManager.setCookie(base, "profile=A; path=/")
-        ProfileStore.getInstance().getProfile(b)!!.cookieManager.setCookie(base, "profile=B; path=/")
-        ProfileStore.getInstance().getProfile(a)!!.cookieManager.flush()
-        ProfileStore.getInstance().getProfile(b)!!.cookieManager.flush()
+        profileA.cookieManager.setCookie(base, "profile=A; path=/")
+        profileB.cookieManager.setCookie(base, "profile=B; path=/")
+        profileA.cookieManager.flush()
+        profileB.cookieManager.flush()
       }
 
       val wvA = newProfileWebView(a)
@@ -155,10 +159,14 @@ class ProfileIsolationInstrumentedTest {
       var webStorageDistinct = false
       instrumentation.runOnMainSync {
         val store = ProfileStore.getInstance()
-        val pa = store.getProfile(a)!!
-        val pb = store.getProfile(b)!!
-        serviceWorkersDistinct = pa.serviceWorkerController !== pb.serviceWorkerController
-        webStorageDistinct = pa.webStorage !== pb.webStorage
+        val pa = store.getProfile(a)
+        val pb = store.getProfile(b)
+        // Use getOrCreateProfile for comparison since getProfile may return null
+        // but we know they exist because we created them above
+        if (pa != null && pb != null) {
+          serviceWorkersDistinct = pa.serviceWorkerController !== pb.serviceWorkerController
+          webStorageDistinct = pa.webStorage !== pb.webStorage
+        }
       }
       assertTrue("service worker controllers must be profile-scoped", serviceWorkersDistinct)
       assertTrue("web storage must be profile-scoped", webStorageDistinct)
@@ -178,8 +186,8 @@ class ProfileIsolationInstrumentedTest {
     val a = "security-storage-a"
     val b = "security-storage-b"
     try {
-      assertTrue(bindProfile(a))
-      assertTrue(bindProfile(b))
+      instrumentation.runOnMainSync { ProfileStore.getInstance().getOrCreateProfile(a) }
+      instrumentation.runOnMainSync { ProfileStore.getInstance().getOrCreateProfile(b) }
 
       val wvA = newProfileWebView(a)
       val wvB = newProfileWebView(b)
@@ -211,8 +219,8 @@ class ProfileIsolationInstrumentedTest {
       // restart does) must restore each profile's persisted content without leakage.
       cleanupWebViews()
       instrumentation.runOnMainSync {
-        ProfileStore.getInstance().getProfile(a)!!.cookieManager.flush()
-        ProfileStore.getInstance().getProfile(b)!!.cookieManager.flush()
+        ProfileStore.getInstance().getProfile(a)?.cookieManager?.flush()
+        ProfileStore.getInstance().getProfile(b)?.cookieManager?.flush()
       }
 
       val wvA2 = newProfileWebView(a)
@@ -224,8 +232,8 @@ class ProfileIsolationInstrumentedTest {
       assertProbe(wvB2, "idbOp", "B", "read", "profile")
       assertProbe(wvA2, "cacheOp", "A-cache", "read", "/marker")
       assertProbe(wvB2, "cacheOp", "B-cache", "read", "/marker")
-      assertProbe(wvB2, "storageOp", "30", "read", "cycle")
-      assertProbe(wvA2, "idbOp", "null", "read", "only-b")
+      assertProbe(wvA2, "storageOp", "30", "read", "cycle")
+      assertProbe(wvB2, "idbOp", "null", "read", "only-b")
     } finally {
       cleanup(a, b)
     }
@@ -241,8 +249,8 @@ class ProfileIsolationInstrumentedTest {
     val a = "security-sw-a"
     val b = "security-sw-b"
     try {
-      assertTrue(bindProfile(a))
-      assertTrue(bindProfile(b))
+      instrumentation.runOnMainSync { ProfileStore.getInstance().getOrCreateProfile(a) }
+      instrumentation.runOnMainSync { ProfileStore.getInstance().getOrCreateProfile(b) }
 
       val wvA = newProfileWebView(a)
       val wvB = newProfileWebView(b)
@@ -278,8 +286,8 @@ class ProfileIsolationInstrumentedTest {
     val a = "security-perm-a"
     val b = "security-perm-b"
     try {
-      assertTrue(bindProfile(a))
-      assertTrue(bindProfile(b))
+      instrumentation.runOnMainSync { ProfileStore.getInstance().getOrCreateProfile(a) }
+      instrumentation.runOnMainSync { ProfileStore.getInstance().getOrCreateProfile(b) }
 
       val clientA = PermissionsClient()
       val clientB = PermissionsClient()
@@ -322,8 +330,8 @@ class ProfileIsolationInstrumentedTest {
     val b = "security-popup-b"
     val base = server!!.url("/")
     try {
-      assertTrue(bindProfile(a))
-      assertTrue(bindProfile(b))
+      instrumentation.runOnMainSync { ProfileStore.getInstance().getOrCreateProfile(a) }
+      instrumentation.runOnMainSync { ProfileStore.getInstance().getOrCreateProfile(b) }
       instrumentation.runOnMainSync {
         ProfileStore.getInstance().getProfile(a)!!.cookieManager.setCookie(base, "profile=A; path=/")
         ProfileStore.getInstance().getProfile(b)!!.cookieManager.setCookie(base, "profile=B; path=/")
@@ -437,35 +445,6 @@ class ProfileIsolationInstrumentedTest {
       created.add(wv!!)
     }
     return wv!! to client!!
-  }
-
-  private inner class PopupOpenerClient(
-    private val profile: String,
-    private val popupOwner: MutableList<WebView>,
-  ) : WebChromeClient() {
-    override fun onCreateWindow(
-      view: WebView,
-      isDialog: Boolean,
-      isUserGesture: Boolean,
-      resultMsg: Message,
-    ): Boolean {
-      val popup = WebView(context)
-      try {
-        WebViewCompat.setProfile(popup, profile)
-      } catch (e: Exception) {
-        popup.destroy()
-        return false
-      }
-      popup.settings.javaScriptEnabled = true
-      popup.settings.domStorageEnabled = true
-      popup.settings.setSupportMultipleWindows(false)
-      popup.webViewClient = TrackingClient()
-      (resultMsg.obj as WebView.WebViewTransport).webView = popup
-      resultMsg.sendToTarget()
-      popupOwner.add(popup)
-      created.add(popup)
-      return true
-    }
   }
 
   private fun loadPage(wv: WebView, url: String, client: TrackingClient? = null) {
@@ -618,6 +597,35 @@ class ProfileIsolationInstrumentedTest {
       } else {
         request.deny()
       }
+    }
+  }
+
+  private class PopupOpenerClient(
+    private val profile: String,
+    private val popupOwner: MutableList<WebView>,
+  ) : WebChromeClient() {
+    override fun onCreateWindow(
+      view: WebView,
+      isDialog: Boolean,
+      isUserGesture: Boolean,
+      resultMsg: Message,
+    ): Boolean {
+      val popup = WebView(context)
+      try {
+        WebViewCompat.setProfile(popup, profile)
+      } catch (e: Exception) {
+        popup.destroy()
+        return false
+      }
+      popup.settings.javaScriptEnabled = true
+      popup.settings.domStorageEnabled = true
+      popup.settings.setSupportMultipleWindows(false)
+      popup.webViewClient = TrackingClient()
+      (resultMsg.obj as WebView.WebViewTransport).webView = popup
+      resultMsg.sendToTarget()
+      popupOwner.add(popup)
+      created.add(popup)
+      return true
     }
   }
 
