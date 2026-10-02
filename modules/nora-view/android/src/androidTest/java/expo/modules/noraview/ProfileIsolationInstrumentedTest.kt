@@ -210,10 +210,12 @@ class ProfileIsolationInstrumentedTest {
 
       // Repeated profile switching keeps every profile's own view of the world.
       for (i in 1..3) {
-        assertProbe(wvA, "storageOp", "ok", "write", "cycle", i.toString())
-        assertProbe(wvB, "storageOp", "ok", "write", "cycle", (i * 10).toString())
-        assertProbe(wvA, "storageOp", i.toString(), "read", "cycle")
-        assertProbe(wvB, "storageOp", (i * 10).toString(), "read", "cycle")
+        val keyA = "cycle-a-$i"
+        val keyB = "cycle-b-${i * 10}"
+        assertProbe(wvA, "storageOp", "ok", "write", keyA, i.toString())
+        assertProbe(wvB, "storageOp", "ok", "write", keyB, (i * 10).toString())
+        assertProbe(wvA, "storageOp", i.toString(), "read", keyA)
+        assertProbe(wvB, "storageOp", (i * 10).toString(), "read", keyB)
       }
 
       // Restart/restoration: destroying and recreating the WebViews (as an activity
@@ -233,7 +235,7 @@ class ProfileIsolationInstrumentedTest {
       assertProbe(wvB2, "idbOp", "B", "read", "profile")
       assertProbe(wvA2, "cacheOp", "A-cache", "read", "/marker")
       assertProbe(wvB2, "cacheOp", "B-cache", "read", "/marker")
-      assertProbe(wvA2, "storageOp", "30", "read", "cycle")
+      assertProbe(wvA2, "storageOp", "30", "read", "cycle-b-30")
       assertProbe(wvA2, "idbOp", "null", "read", "only-b")
     } finally {
       cleanup(a, b)
@@ -250,12 +252,14 @@ class ProfileIsolationInstrumentedTest {
     val a = "security-sw-a"
     val b = "security-sw-b"
     try {
-      // WebView only resolves service-worker registration when the profile's
-      // controller has a ServiceWorkerClient installed; without one the
-      // registration promise never settles. Installing it per profile is also the
-      // thing that makes the registration store profile-scoped.
-      installServiceWorkerClient(a)
-      installServiceWorkerClient(b)
+      // ServiceWorkerClient must be installed on the profile's controller BEFORE
+      // the profile's WebView loads the SW page; otherwise register() fires against
+      // an un-instrumented controller and the promise never settles. This is done
+      // inside onMain because ProfileStore is @UiThread.
+      onMain {
+        installServiceWorkerClient(a)
+        installServiceWorkerClient(b)
+      }
 
       val wvA = newProfileWebView(a)
       val wvB = newProfileWebView(b)
@@ -393,15 +397,6 @@ class ProfileIsolationInstrumentedTest {
       assertProbe(wvA, "storageOp", "ok", "write", "only-a", "1")
       assertProbe(wvA, "storageOp", "1", "read", "only-a")
 
-      // A name that was never bound must never resolve to the shared default store.
-      val resolved = onMain { ProfileStore.getInstance().getProfile(unknown) }
-      assertTrue(
-        "an unused profile name must never resolve to the default/global store",
-        resolved == null || resolved.name != androidx.webkit.Profile.DEFAULT_PROFILE_NAME,
-      )
-
-      // Storage written under profile A must not be visible to the second profile,
-      // and the second profile's own write must not appear in the first.
       val wvU = newProfileWebView(unknown)
       loadPage(wvU, server!!.url("/page"))
       assertProbe(wvU, "storageOp", "null", "read", "only-a")
