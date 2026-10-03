@@ -445,13 +445,17 @@ class ProfileIsolationInstrumentedTest {
     }
     // Use a dedicated thread to avoid kotlinx.coroutines threading issues in
     // Android instrumentation context. The controller object is thread-safe.
-    val t = Thread {
-      controller.setServiceWorkerClient(object : ServiceWorkerClient() {
-        override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? = null
-      })
+    val executor = Executors.newSingleThreadExecutor()
+    try {
+      val future = executor.submit {
+        controller.setServiceWorkerClient(object : ServiceWorkerClient() {
+          override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? = null
+        })
+      }
+      future.get()
+    } finally {
+      executor.shutdown()
     }
-    t.start()
-    t.join()
   }
 
   private fun newProfileWebView(profile: String, chrome: WebChromeClient? = null): WebView =
