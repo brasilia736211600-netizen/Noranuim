@@ -449,7 +449,9 @@ class ProfileIsolationInstrumentedTest {
     var error: Throwable? = null
     val thread = Thread {
       try {
-        controller.setServiceWorkerClient(object : ServiceWorkerClient() {
+        // Get the controller on this background thread too, not just set it
+        val ctrl = ProfileStore.getInstance().getOrCreateProfile(profile).serviceWorkerController
+        ctrl.setServiceWorkerClient(object : ServiceWorkerClient() {
           override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? = null
         })
       } catch (e: Throwable) {
