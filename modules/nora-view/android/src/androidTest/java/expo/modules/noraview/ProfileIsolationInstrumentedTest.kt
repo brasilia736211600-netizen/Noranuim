@@ -1,9 +1,6 @@
 package expo.modules.noraview
 
 import android.Manifest
-import android.os.Handler
-import android.os.HandlerThread
-import android.os.Looper
 import android.os.Message
 import android.os.SystemClock
 import android.webkit.PermissionRequest
@@ -446,31 +443,24 @@ class ProfileIsolationInstrumentedTest {
     val controller = onMain {
       ProfileStore.getInstance().getOrCreateProfile(profile).serviceWorkerController
     }
-    // Use a dedicated HandlerThread to ensure we run on a true background
-    // Looper thread, avoiding the UI thread entirely. This is the Android-native
-    // way to execute code off the main thread.
-    val thread = HandlerThread("sw-client-installer")
-    thread.start()
-    try {
-      val handler = Handler(thread.looper)
-      val latch = CountDownLatch(1)
-      var error: Throwable? = null
-      handler.post {
-        try {
-          controller.setServiceWorkerClient(object : ServiceWorkerClient() {
-            override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? = null
-          })
-        } catch (e: Throwable) {
-          error = e
-        } finally {
-          latch.countDown()
-        }
+    // Use a plain Java Thread with its own execution context to guarantee
+    // we are off the UI thread. The controller object is thread-safe.
+    val latch = CountDownLatch(1)
+    var error: Throwable? = null
+    val thread = Thread {
+      try {
+        controller.setServiceWorkerClient(object : ServiceWorkerClient() {
+          override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? = null
+        })
+      } catch (e: Throwable) {
+        error = e
+      } finally {
+        latch.countDown()
       }
-      latch.await()
-      error?.let { throw it }
-    } finally {
-      thread.quitSafely()
     }
+    thread.start()
+    latch.await()
+    error?.let { throw it }
   }
 
   private fun newProfileWebView(profile: String, chrome: WebChromeClient? = null): WebView =
