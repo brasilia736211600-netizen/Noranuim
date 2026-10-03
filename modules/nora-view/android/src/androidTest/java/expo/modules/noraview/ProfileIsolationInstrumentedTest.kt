@@ -269,11 +269,14 @@ class ProfileIsolationInstrumentedTest {
 
       // Both profiles register the SAME scope (/sw.js). If the registration store
       // leaked across profiles, the second registration would replace the first and
-      // profile A's instance would lose its state.
-      assertProbe(wvA, "swOp", "ok", "init", "A")
-      assertProbe(wvA, "swOp", "ping:A", "ping")
+      // profile A's instance would lose its state. `init` resolves with the key the
+      // worker echoes back, and `ping` resolves with the key the live worker instance
+      // still holds — so a leaked or replaced registration shows up as profile A
+      // reading B's key or 'unset', which is the isolation property under test.
+      assertProbe(wvA, "swOp", "A", "init", "A")
+      assertProbe(wvB, "swOp", "B", "init", "B")
 
-      assertProbe(wvB, "swOp", "ok", "init", "B")
+      assertProbe(wvA, "swOp", "ping:A", "ping")
       assertProbe(wvB, "swOp", "ping:B", "ping")
 
       // Profile A's registration and instance state must be intact after B reused
@@ -810,26 +813,45 @@ class ProfileIsolationInstrumentedTest {
 
     const val SW_PAGE_HTML = """
       <!doctype html><html><head><meta charset="utf-8"></head><body><script>
+        function __err(where, e) {
+          return 'ERR:' + where + ':' + ((e && e.message) || e);
+        }
         window.__swOp = function (op, key) {
+          if (!navigator.serviceWorker) {
+            return Promise.resolve('ERR:no-serviceWorker');
+          }
           if (op === 'init') {
             return navigator.serviceWorker.register('/sw.js').then(function (reg) {
-              return reg.ready.then(function () {
+              if (!reg) { return 'ERR:register-resolved-undefined'; }
+              // `navigator.serviceWorker.ready` is the spec's own readiness
+              // promise. `reg.ready` is not reliably present on every WebView
+              // build, and reading .then off it is what previously surfaced as
+              // the opaque "Cannot read properties of undefined (reading 'then')".
+              var ready = (navigator.serviceWorker.ready) || reg.ready;
+              if (!ready) { return 'ERR:no-ready-promise'; }
+              return ready.then(function () {
+                var sw = reg.active || reg.waiting || reg.installing;
+                if (!sw) { return 'ERR:no-worker-instance'; }
                 return new Promise(function (resolve) {
                   var mc = new MessageChannel();
-                  mc.port1.onmessage = function () { resolve('ok'); };
-                  reg.active.postMessage({ type: 'init', key: key }, [ mc.port2 ]);
+                  mc.port1.onmessage = function (e) { resolve(String(e.data.value)); };
+                  mc.port1.onmessageerror = function () { resolve('ERR:messagechannel'); };
+                  sw.postMessage({ type: 'init', key: key }, [ mc.port2 ]);
                 });
               });
-            }).catch(function (e) { return 'ERR:' + (e && e.message || e); });
+            }).catch(function (e) { return __err('init', e); });
           }
           return navigator.serviceWorker.getRegistration().then(function (reg) {
-            if (!reg || !reg.active) { return 'ERR:no-registration'; }
+            if (!reg) { return 'ERR:no-registration'; }
+            var sw = reg.active || reg.waiting || reg.installing;
+            if (!sw) { return 'ERR:no-worker-instance'; }
             return new Promise(function (resolve) {
               var mc = new MessageChannel();
               mc.port1.onmessage = function (e) { resolve('ping:' + e.data.value); };
-              reg.active.postMessage({ type: 'ping' }, [ mc.port2 ]);
+              mc.port1.onmessageerror = function () { resolve('ERR:messagechannel'); };
+              sw.postMessage({ type: 'ping' }, [ mc.port2 ]);
             });
-          }).catch(function (e) { return 'ERR:' + (e && e.message || e); });
+          }).catch(function (e) { return __err('ping', e); });
         };
       </script></body></html>
     """

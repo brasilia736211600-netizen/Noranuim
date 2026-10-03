@@ -108,4 +108,12 @@ jobs:
             # completed boot, so no shell-level retry loop is needed or wanted.
             adb wait-for-device
             adb shell pm path android
-            ./gradlew connectedFullDebugAndroidTest --stacktrace --no-daemon -PreactNativeArchitectures=x86_64
+            # Without this the app-side log lines (test diagnostics tagged NORA_*)
+            # never reach the job log: the Gradle console output only carries the
+            # JUnit summary, so a probe that fails inside JS reports an opaque
+            # ERR: string with no way to see the accompanying platform logs.
+            adb logcat -c
+            ( adb logcat -v brief NORA_SW:V chromium:V '*:S' > nora_logcat.txt 2>&1 & )
+            ./gradlew connectedFullDebugAndroidTest --stacktrace --no-daemon -PreactNativeArchitectures=x86_64 || { echo '--- nora logcat tail ---'; tail -n 400 nora_logcat.txt || true; exit 1; }
+            echo '--- nora logcat tail ---'
+            tail -n 400 nora_logcat.txt || true
