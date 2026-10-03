@@ -454,10 +454,13 @@ class ProfileIsolationInstrumentedTest {
     var error: Throwable? = null
     val thread = Thread {
       try {
+        android.util.Log.d("NORA_SW", "installServiceWorkerClient: calling setServiceWorkerClient on background thread for $profile")
         controller.setServiceWorkerClient(object : ServiceWorkerClient() {
           override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? = null
         })
+        android.util.Log.d("NORA_SW", "installServiceWorkerClient: setServiceWorkerClient returned for $profile")
       } catch (e: Throwable) {
+        android.util.Log.e("NORA_SW", "installServiceWorkerClient: exception for $profile", e)
         error = e
       } finally {
         latch.countDown()
