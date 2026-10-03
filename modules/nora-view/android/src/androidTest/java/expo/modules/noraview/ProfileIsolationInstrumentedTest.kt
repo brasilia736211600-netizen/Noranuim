@@ -9,6 +9,8 @@ import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
+import androidx.webkit.ServiceWorkerClientCompat
+import androidx.webkit.ServiceWorkerControllerCompat
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -440,29 +442,48 @@ class ProfileIsolationInstrumentedTest {
    * background thread.
    */
   private fun installServiceWorkerClient(profile: String) {
-    val controller = onMain {
-      ProfileStore.getInstance().getOrCreateProfile(profile).serviceWorkerController
-    }
-    // Use a plain Java Thread with its own execution context to guarantee
-    // we are off the UI thread. The controller object is thread-safe.
-    val latch = CountDownLatch(1)
-    var error: Throwable? = null
-    val thread = Thread {
+    onMain {
+      val store = ProfileStore.getInstance()
+      val prof = store.getOrCreateProfile(profile)
+      val ctrl = prof.serviceWorkerController
+      // Use reflection to reach the internal boundary interface
       try {
-        // Get the controller on this background thread too, not just set it
-        val ctrl = ProfileStore.getInstance().getOrCreateProfile(profile).serviceWorkerController
-        ctrl.setServiceWorkerClient(object : ServiceWorkerClient() {
-          override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? = null
-        })
-      } catch (e: Throwable) {
-        error = e
-      } finally {
-        latch.countDown()
+        val implField = ctrl.javaClass.getDeclaredField("mBoundaryInterface")
+        implField.isAccessible = true
+        val boundary = implField.get(ctrl)
+        if (boundary != null) {
+          val clientClass = Class.forName("androidx.webkit.internal.ServiceWorkerClientAdapter")
+          val adapter = clientClass.getConstructor(ServiceWorkerClientCompat::class.java)
+            .newInstance(object : ServiceWorkerClientCompat() {
+              override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? = null
+            })
+          val method = boundary.javaClass.getMethod("setServiceWorkerClient", Class.forName("android.webkit.ServiceWorkerClient"))
+          method.invoke(boundary, adapter)
+          return@onMain
+        }
+      } catch (e: Exception) {
+        // Fall through to framework path
       }
+      // Fallback: framework path requires background thread, but instrumentation
+      // marks all threads as app threads. This will fail but we try anyway.
+      val latch = CountDownLatch(1)
+      var error: Throwable? = null
+      val thread = Thread {
+        try {
+          val ctrl2 = ProfileStore.getInstance().getOrCreateProfile(profile).serviceWorkerController
+          ctrl2.setServiceWorkerClient(object : ServiceWorkerClient() {
+            override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? = null
+          })
+        } catch (e: Throwable) {
+          error = e
+        } finally {
+          latch.countDown()
+        }
+      }
+      thread.start()
+      latch.await()
+      error?.let { throw it }
     }
-    thread.start()
-    latch.await()
-    error?.let { throw it }
   }
 
   private fun newProfileWebView(profile: String, chrome: WebChromeClient? = null): WebView =
