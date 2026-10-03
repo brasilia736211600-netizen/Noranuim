@@ -478,6 +478,7 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
   internal var userAgent: String? = null
   private var profileSet = false
   private var profileName = "default"
+  private var profileIsolationReady = true
 
   private var popupContainer: FrameLayout? = null
   private var popupWebView: WebView? = null
@@ -1070,12 +1071,18 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
           isUserGesture: Boolean,
           resultMsg: android.os.Message
         ): Boolean {
+          if (profileName != "default" && !WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) {
+            log("blocked popup: multi-profile isolation unsupported")
+            return false
+          }
           val newWebView = NouWebView(view.getContext())
-          if (profileName != "default" && WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) {
+          if (profileName != "default") {
             try {
               WebViewCompat.setProfile(newWebView, profileName)
             } catch (e: Exception) {
-              log("set popup profile failed: ${e.message}")
+              log("blocked popup: profile setup failed: ${e.message}")
+              newWebView.destroy()
+              return false
             }
           }
           installGoogleOAuthShim(newWebView)
@@ -1284,6 +1291,10 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
 
   fun load(url: String) {
     if (url == "" || url == "about:blank") return
+    if (profileName != "default" && !profileIsolationReady) {
+      log("blocked navigation: profile isolation unavailable for $profileName")
+      return
+    }
     if (handleExternalAppUrl(context, url)) {
       return
     }
@@ -1331,13 +1342,23 @@ class NoraView(context: Context, appContext: AppContext) : ExpoView(context, app
   fun setProfile(profile: String) {
     profileName = profile
     if (profileSet) return
-    if (profile == "default") return
+    if (profile == "default") {
+      profileIsolationReady = true
+      profileSet = true
+      return
+    }
+    if (!WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) {
+      profileIsolationReady = false
+      profileSet = true
+      log("profile $profile rejected: MULTI_PROFILE unsupported; failing closed")
+      return
+    }
     try {
-      if (WebViewFeature.isFeatureSupported(WebViewFeature.MULTI_PROFILE)) {
-        WebViewCompat.setProfile(webView, profile)
-      }
+      WebViewCompat.setProfile(webView, profile)
+      profileIsolationReady = true
     } catch (e: Exception) {
-      log("setProfile failed: ${e.message}")
+      profileIsolationReady = false
+      log("profile $profile rejected: ${e.message}")
     }
     profileSet = true
   }
