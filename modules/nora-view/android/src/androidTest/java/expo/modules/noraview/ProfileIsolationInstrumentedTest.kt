@@ -9,8 +9,6 @@ import android.webkit.WebChromeClient
 import android.webkit.WebResourceError
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
-import androidx.webkit.ServiceWorkerClientCompat
-import androidx.webkit.ServiceWorkerControllerCompat
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -256,12 +254,13 @@ class ProfileIsolationInstrumentedTest {
     try {
       // ServiceWorkerClient must be installed on the profile's controller BEFORE
       // the profile's WebView loads the SW page; otherwise register() fires against
-      // an un-instrumented controller and the promise never settles. This is done
-      // inside onMain because ProfileStore is @UiThread.
-      onMain {
-        installServiceWorkerClient(a)
-        installServiceWorkerClient(b)
-      }
+      // an un-instrumented controller and the promise never settles.
+      // installServiceWorkerClient already marshals to the UI thread itself;
+      // wrapping it in another onMain would nest runOnMainSync, and
+      // Instrumentation.runOnMainSync calls validateNotAppThread, which throws
+      // "This method can not be called from the main application thread".
+      installServiceWorkerClient(a)
+      installServiceWorkerClient(b)
 
       val wvA = newProfileWebView(a)
       val wvB = newProfileWebView(b)
@@ -438,52 +437,35 @@ class ProfileIsolationInstrumentedTest {
    * controller has a ServiceWorkerClient installed; without one the registration
    * promise never settles. Installing it per profile is also what makes the
    * registration store profile-scoped, which is the property under test.
-   * ProfileStore access is on UI thread; setServiceWorkerClient must be on
-   * background thread.
+   *
+   * Threading: [ProfileStore] is @UiThread, so the Profile is resolved in a
+   * single hop onto the main thread. The controller's setServiceWorkerClient is
+   * @AnyThread but the underlying framework ServiceWorkerController rejects
+   * main-thread callers via Instrumentation.validateNotAppThread, so the install
+   * itself runs on a dedicated background thread. The Profile object is handed
+   * across the thread boundary rather than being re-fetched there, which keeps
+   * ProfileStore access off the background thread.
    */
   private fun installServiceWorkerClient(profile: String) {
-    onMain {
-      val store = ProfileStore.getInstance()
-      val prof = store.getOrCreateProfile(profile)
-      val ctrl = prof.serviceWorkerController
-      // Use reflection to reach the internal boundary interface
-      try {
-        val implField = ctrl.javaClass.getDeclaredField("mBoundaryInterface")
-        implField.isAccessible = true
-        val boundary = implField.get(ctrl)
-        if (boundary != null) {
-          val clientClass = Class.forName("androidx.webkit.internal.ServiceWorkerClientAdapter")
-          val adapter = clientClass.getConstructor(ServiceWorkerClientCompat::class.java)
-            .newInstance(object : ServiceWorkerClientCompat() {
-              override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? = null
-            })
-          val method = boundary.javaClass.getMethod("setServiceWorkerClient", Class.forName("android.webkit.ServiceWorkerClient"))
-          method.invoke(boundary, adapter)
-          return@onMain
-        }
-      } catch (e: Exception) {
-        // Fall through to framework path
-      }
-      // Fallback: framework path requires background thread, but instrumentation
-      // marks all threads as app threads. This will fail but we try anyway.
-      val latch = CountDownLatch(1)
-      var error: Throwable? = null
-      val thread = Thread {
-        try {
-          val ctrl2 = ProfileStore.getInstance().getOrCreateProfile(profile).serviceWorkerController
-          ctrl2.setServiceWorkerClient(object : ServiceWorkerClient() {
-            override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? = null
-          })
-        } catch (e: Throwable) {
-          error = e
-        } finally {
-          latch.countDown()
-        }
-      }
-      thread.start()
-      latch.await()
-      error?.let { throw it }
+    val controller = onMain {
+      ProfileStore.getInstance().getOrCreateProfile(profile).serviceWorkerController
     }
+    val latch = CountDownLatch(1)
+    var error: Throwable? = null
+    val thread = Thread {
+      try {
+        controller.setServiceWorkerClient(object : ServiceWorkerClient() {
+          override fun shouldInterceptRequest(request: WebResourceRequest): WebResourceResponse? = null
+        })
+      } catch (e: Throwable) {
+        error = e
+      } finally {
+        latch.countDown()
+      }
+    }
+    thread.start()
+    latch.await()
+    error?.let { throw it }
   }
 
   private fun newProfileWebView(profile: String, chrome: WebChromeClient? = null): WebView =
