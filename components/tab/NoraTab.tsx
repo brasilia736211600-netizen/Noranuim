@@ -178,7 +178,12 @@ import { getCspNonce } from '@/modules/nora-view/src/NoraView.web'
 
 const getTabLabel = (tab?: Pick<Tab, 'title' | 'url'> | null) => tab?.title || tab?.url || t('tabs.new')
 
-const buildUserScriptRunner = (host: string, nonce?: string) => {
+const buildUserScriptRunner = (host: string, profileId: string, nonce?: string) => {
+  const settings = settings$.get()
+  const profile = settings.profiles.find((p) => p.id === profileId)
+  if (!profile?.userScriptExecutionConsent) {
+    return ''
+  }
   const scripts = getEnabledUserScripts(host, getUserStylesSnapshot())
   if (!scripts.length) {
     return ''
@@ -371,7 +376,7 @@ export const NoraTab: React.FC<{
       void executeWebviewJavaScriptQuietly(webview, settingsScript)
       void executeWebviewJavaScriptQuietly(webview, userStylesScript)
       const nonce = isWeb ? getCspNonce() : undefined
-      const userScriptRunner = buildUserScriptRunner(currentHost, nonce)
+      const userScriptRunner = buildUserScriptRunner(currentHost, tab.profile || 'default', nonce)
       if (userScriptRunner) {
         void executeWebviewJavaScriptQuietly(webview, userScriptRunner)
       }

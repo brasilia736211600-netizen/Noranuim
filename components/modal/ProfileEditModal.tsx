@@ -42,6 +42,9 @@ export const ProfileEditModal = () => {
   const [timezone, setTimezone] = useState('')
   const [timezoneOffset, setTimezoneOffset] = useState('')
 
+  // User Scripts
+  const [userScriptExecutionConsent, setUserScriptExecutionConsent] = useState(false)
+
   const savingRef = useRef(false)
 
   useEffect(() => {
@@ -61,6 +64,7 @@ export const ProfileEditModal = () => {
           setTimeMode(profile.timeMode || 'default')
           setTimezone(profile.timezone || '')
           setTimezoneOffset(profile.timezoneOffset !== undefined ? profile.timezoneOffset.toString() : '0')
+          setUserScriptExecutionConsent(profile.userScriptExecutionConsent || false)
         }
       } else {
         setName('')
@@ -75,6 +79,7 @@ export const ProfileEditModal = () => {
         setTimeMode('default')
         setTimezone('')
         setTimezoneOffset('0')
+        setUserScriptExecutionConsent(false)
         ui$.createdProfileId.set(null)
       }
     }
@@ -100,7 +105,8 @@ export const ProfileEditModal = () => {
           uaBuilderState,
           timeMode,
           timezone,
-          timezoneOffset: parseInt(timezoneOffset, 10) || 0
+          timezoneOffset: parseInt(timezoneOffset, 10) || 0,
+          userScriptExecutionConsent,
         })
       }
     } else {
@@ -118,7 +124,8 @@ export const ProfileEditModal = () => {
             uaBuilderState,
             timeMode,
             timezone,
-            timezoneOffset: parseInt(timezoneOffset, 10) || 0
+            timezoneOffset: parseInt(timezoneOffset, 10) || 0,
+            userScriptExecutionConsent,
           })
         }
         ui$.createdProfileId.set(createdId)
@@ -266,6 +273,19 @@ export const ProfileEditModal = () => {
               />
             </>
           )}
+
+          <View className="my-2 h-px bg-zinc-200 dark:bg-zinc-800" />
+          <NouText className="font-semibold mb-2">User Scripts</NouText>
+          <View className="flex-row items-center mb-2">
+            <Pressable
+              onPress={() => setUserScriptExecutionConsent(!userScriptExecutionConsent)}
+              className={clsx("w-12 h-6 rounded-full justify-center px-1", userScriptExecutionConsent ? "bg-indigo-500" : "bg-zinc-300 dark:bg-zinc-700")}
+            >
+              <View className={clsx("w-4 h-4 rounded-full bg-white transition-all", userScriptExecutionConsent ? "ml-auto" : "")} />
+            </Pressable>
+            <NouText className="ml-2">{t('settings.userScriptExecutionConsent')}</NouText>
+          </View>
+
         </ScrollView>
         <View className="p-4 border-t border-zinc-200 dark:border-zinc-800 flex-row gap-4">
           <NouButton className="flex-1" variant="outline" onPress={onClose}>

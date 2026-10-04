@@ -43,6 +43,8 @@ export interface Profile {
   timeMode?: TimeMode
   timezone?: string
   timezoneOffset?: number
+  // User consent for custom user script execution per profile
+  userScriptExecutionConsent?: boolean
 }
 
 const DEFAULT_PROFILE_ID = 'default'
@@ -64,6 +66,7 @@ const DEFAULT_PROFILE: Profile = {
   timeMode: 'default',
   timezone: '',
   timezoneOffset: 0,
+  userScriptExecutionConsent: false,
 }
 
 const ensureProfiles = (profiles?: (Profile | null | undefined)[]) => {
@@ -130,6 +133,8 @@ export interface Settings {
 
   // User consent for clipboard tracking parameter stripping
   clipboardTrackingConsent: boolean
+  // User consent for custom user script execution
+  userScriptExecutionConsent: boolean
 }
 
 interface Store extends Settings {
@@ -169,6 +174,7 @@ const sanitizeProfiles = (profiles?: (Partial<Profile> | null | undefined)[]) =>
         timeMode: (profile!.timeMode === 'manual' || profile!.timeMode === 'proxy') ? profile!.timeMode : 'default',
         timezone: typeof profile!.timezone === 'string' ? profile!.timezone : '',
         timezoneOffset: typeof profile!.timezoneOffset === 'number' ? profile!.timezoneOffset : 0,
+        userScriptExecutionConsent: typeof profile!.userScriptExecutionConsent === 'boolean' ? profile!.userScriptExecutionConsent : false,
       })),
   )
 
@@ -334,6 +340,9 @@ export const normalizeSettings = <T extends Partial<Settings> | undefined>(data:
   if (typeof data.clipboardTrackingConsent !== 'boolean') {
     data.clipboardTrackingConsent = false
   }
+  if (typeof data.userScriptExecutionConsent !== 'boolean') {
+    data.userScriptExecutionConsent = false
+  }
   if (typeof data.defaultZoom !== 'number') {
     data.defaultZoom = 100
   }
@@ -371,6 +380,9 @@ export const settings$: Observable<Store> = observable<Store>({
 
   // User consent for clipboard tracking parameter stripping (default false = off)
   clipboardTrackingConsent: false,
+
+  // User consent for custom user script execution (default false = off)
+  userScriptExecutionConsent: false,
 
   showNewTabButtonInHeader: true,
   showBackButtonInHeader: false,
@@ -510,6 +522,7 @@ export const settings$: Observable<Store> = observable<Store>({
       timezone: '',
       timezoneOffset: 0,
       clipboardTrackingConsent: false,
+      userScriptExecutionConsent: false,
     })
     return id
   },

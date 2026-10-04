@@ -271,6 +271,13 @@ export const SettingsBrowsingContent: React.FC<{ onFocusInput?: () => void }> = 
                 onPress={() => settings$.clipboardTrackingConsent.toggle()}
               />
             </View>
+            <View className={rowCls}>
+              <NouSwitch
+                label={<NouText>{t('settings.userScriptExecutionConsent')}</NouText>}
+                value={settings.userScriptExecutionConsent}
+                onPress={() => settings$.userScriptExecutionConsent.toggle()}
+              />
+            </View>
           </View>
         </View>
       ) : null}

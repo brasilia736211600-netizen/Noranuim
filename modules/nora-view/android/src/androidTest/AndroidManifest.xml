@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Test-APK-only manifest for the profile-isolation instrumentation gate.
+
+  A library-module androidTest APK is SELF-INSTRUMENTING: AGP gives it the
+  application id `<module namespace>.test` (here `expo.modules.noraview.test`)
+  and there is no separate "app under test" (see AGP StaticTestData:
+  `testedApplicationId` is null for android-test in a library module). Anything
+  the instrumentation needs must therefore be declared HERE. Nothing in this
+  file reaches the shipped app: the production manifest is generated from
+  app.config.ts and is not part of this run.
+
+  Entries, and why each is required by ProfileIsolationInstrumentedTest:
+
+  * INTERNET — the harness serves its probe pages from an in-process
+    `ServerSocket` bound to 127.0.0.1 and the WebView loads them over
+    `http://127.0.0.1:<port>`. Android's paranoid-networking check denies
+    AF_INET sockets — loopback included — to a UID that does not hold
+    INTERNET.
+
+  * RECORD_AUDIO — `GrantPermissionRule` grants it through
+    `UiAutomation.grantRuntimePermissionAsUser`, and PackageManagerService
+    refuses that with `SecurityException: Error granting runtime permission`
+    unless the target package actually REQUESTS the permission. Without this
+    declaration the rule throws during evaluation and EVERY test in the class
+    fails before its body runs (run 36638413537: 6/6 failures, 0 assertions
+    executed).
+
+  `android:usesCleartextTraffic` is scoped to this test APK. The probe origin
+  is plain HTTP on loopback, and the platform's implicit localhost cleartext
+  exemption only exists from API 37 — on the API 34 gate image WebView would
+  otherwise refuse the load with ERR_CLEARTEXT_NOT_PERMITTED. This does NOT
+  weaken the product: production cleartext to arbitrary hosts stays disabled
+  (app.config.ts `usesCleartextTraffic: false`), which the static guard in
+  security/profile-isolation.test.ts still pins.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <uses-permission android:name="android.permission.INTERNET" />
+  <uses-permission android:name="android.permission.RECORD_AUDIO" />
+  <application android:usesCleartextTraffic="true" />
+</manifest>
