@@ -158,6 +158,7 @@
     "allowHttpWebsite": "Allow HTTP websites",
     "inspectable": "Make webview inspectable",
     "clipboardTrackingConsent": "Strip tracking parameters from copied URLs",
+    "userScriptExecutionConsent": "Allow custom user scripts to execute on pages",
     "webrtc": {
       "label": "WebRTC",
       "protectIp": "Prevent WebRTC IP leaks",
